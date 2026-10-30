@@ -120,6 +120,14 @@ class Trainer:
             self.net.load_state_dict(data["net"])
             self.opt.load_state_dict(data["opt"])
             self.state = data["state"]
+            # Games played after the last checkpoint are already in log.csv; keep numbering after them so a restart
+            # never reuses a game number (which would overwrite that game's replay).
+            log = OUT / "log.csv"
+            if log.exists():
+                with open(log, newline="") as f:
+                    logged = [int(r["game"]) for r in csv.DictReader(f) if r.get("game", "").isdigit()]
+                if logged and max(logged) > self.state["games"]:
+                    self.state["games"] = max(logged)
             print(f"resumed: {self.state['games']} games, {self.state['updates']} updates, "
                   f"map {LADDER[self.state['rung']][0]} at {int(DIFFICULTY[self.state['level']] * 100)}%")
         else:
