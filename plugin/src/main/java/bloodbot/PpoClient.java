@@ -147,6 +147,7 @@ public class PpoClient implements Agent.Policy{
         String outcome = plugin.winner == null ? "timeout" : won ? "win" : "loss";
         float coreHealth = player.core() == null ? 0f : player.core().health / player.core().maxHealth;
         float capTicks = CAP_SECONDS * 60;
+        agent.penalizeUnused();
         float fitness = agent.fitness(won, plugin.ticks, capTicks) + agent.rulePointsTotal;
         float reward = stepReward() + (won ? (agent.fitness(true, plugin.ticks, capTicks) - agent.potential(plugin.ticks, capTicks)) / 100f : 0f);
 

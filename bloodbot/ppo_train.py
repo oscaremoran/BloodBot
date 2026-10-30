@@ -159,7 +159,11 @@ class Trainer:
         if new_best:
             self.best_wave[result["map"]] = result["wave"]
             print(f"new best wave on {result['map']}: {result['wave']} (game {game}, recorded)", flush=True)
-        if scheduled(game) or first_win or new_best or self.args.record_all:
+        # The user's rule (2026-10-30): also record the first game finished in each round (learning update).
+        first_of_round = s.get("roundRecorded", -1) != s["updates"]
+        if first_of_round:
+            s["roundRecorded"] = s["updates"]
+        if scheduled(game) or first_win or new_best or first_of_round or self.args.record_all:
             save = str(OUT / result["map"] / f"game_{game:05d}")
             if first_win:
                 s["firstWin"].append(result["map"])
@@ -302,7 +306,7 @@ def main():
     p.add_argument("--steps", type=int, default=2048, help="decisions per learning update")
     p.add_argument("--epochs", type=int, default=4)
     p.add_argument("--lr", type=float, default=3e-4)
-    p.add_argument("--ent-coef", type=float, default=0.03, help="exploration bonus (higher = stays random longer)")
+    p.add_argument("--ent-coef", type=float, default=0.01, help="exploration bonus (higher = stays random longer)")
     p.add_argument("--gamma", type=float, default=0.995)
     p.add_argument("--lam", type=float, default=0.95)
     p.add_argument("--bonuses", action=argparse.BooleanOptionalAction, default=True,

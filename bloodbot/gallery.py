@@ -135,7 +135,7 @@ def write_scoreboard(games):
     rows = []
     for g in sorted(games, key=lambda g: (g["run"], g["game"])):
         link = f'<a href="viewer.html?game={g["replay"]}">watch</a>' if g["replay"] else ""
-        rows.append(f"""<tr data-map="{g['map']}" data-gen="{'' if g['generation'] is None else f"{g['run']}:{g['generation']}"}">
+        rows.append(f"""<tr data-map="{g['map']}" data-run="{html.escape(g['run'])}" data-gen="{'' if g['generation'] is None else g['generation']}">
           <td>{html.escape(g['run'])}</td><td>{g['game']}</td><td>{g['generation'] if g['generation'] is not None else ''}</td>
           <td>{html.escape(g['who'])}</td><td>{nice_map(g['map'])}</td><td>{int(g['difficulty'] * 100)}%</td>
           <td class="{g['outcome']}">{g['outcome']}</td><td data-v="{g['wave']}">{wave_text(g)}</td>
@@ -150,8 +150,8 @@ def write_scoreboard(games):
                   f'<span class="muted">1 = random start · 1,000 = beats Ground Zero at 30% · 1,000,000 = beats Bloodshed Bastion</span></div>'
                   if cur is not None else "")
     options = "".join(f'<option value="{m}">{nice_map(m)}</option>' for m in maps)
-    gens = sorted({(g["run"], g["generation"]) for g in games if g["generation"] is not None})
-    gen_options = "".join(f'<option value="{run}:{gen}">{run} · generation {gen}</option>' for run, gen in gens)
+    run_options = "".join(f'<option value="{html.escape(r)}"{" selected" if r == latest else ""}>{html.escape(r)}</option>'
+                          for r in sorted({g["run"] for g in games}))
     (RUNS / "scoreboard.html").write_text(f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>BloodBot scoreboard</title><style>{STYLE}</style></head><body>
 <nav><a href="index.html">Recordings</a> · <b>Scoreboard</b></nav>
@@ -162,7 +162,8 @@ def write_scoreboard(games):
 <div class="grid">{''.join(best_cards) or '<p class="muted">No games yet.</p>'}</div>
 <h2>All games <span class="muted" style="font-size:14px">({len(games)})</span></h2>
 <p>Map: <select id="filter"><option value="">all maps</option>{options}</select>
-Generation: <select id="genFilter"><option value="">all generations</option>{gen_options}</select>
+Run: <select id="runFilter"><option value="">all runs</option>{run_options}</select>
+Generation: <input id="genFilter" size="8" placeholder="e.g. 40 or 30-40" title="a number, or a range like 30-40; blank = all">
 <span class="muted">Click a column to sort.</span></p>
 <table id="games"><thead><tr>
 <th>run</th><th>game</th><th>generation</th><th>player</th><th>map</th><th>enemy strength</th><th>result</th><th>wave</th>
@@ -170,12 +171,20 @@ Generation: <select id="genFilter"><option value="">all generations</option>{gen
 </tr></thead><tbody>{''.join(rows)}</tbody></table>
 <script>
 const table = document.getElementById("games"), body = table.tBodies[0];
-const mapSel = document.getElementById("filter"), genSel = document.getElementById("genFilter");
+const mapSel = document.getElementById("filter"), runSel = document.getElementById("runFilter"), genBox = document.getElementById("genFilter");
 const applyFilters = () => {{
-  for (const r of body.rows)
-    r.style.display = (!mapSel.value || r.dataset.map === mapSel.value) && (!genSel.value || r.dataset.gen === genSel.value) ? "" : "none";
+  // Generation box: blank = all, "40" = just that one, "30-40" = a range.
+  const m = genBox.value.trim().match(/^(\\d+)\\s*(?:-\\s*(\\d+))?$/);
+  const lo = m ? +m[1] : null, hi = m ? +(m[2] ?? m[1]) : null;
+  for (const r of body.rows) {{
+    const gen = r.dataset.gen === "" ? null : +r.dataset.gen;
+    const genOk = lo === null || (gen !== null && gen >= lo && gen <= hi);
+    r.style.display = (!mapSel.value || r.dataset.map === mapSel.value) && (!runSel.value || r.dataset.run === runSel.value) && genOk ? "" : "none";
+  }}
 }};
-mapSel.onchange = genSel.onchange = applyFilters;
+mapSel.onchange = runSel.onchange = applyFilters;
+genBox.oninput = applyFilters;
+applyFilters();
 let sortCol = -1, asc = true;
 table.tHead.rows[0].querySelectorAll("th").forEach((th, i) => th.onclick = () => {{
   asc = sortCol === i ? !asc : false; sortCol = i;

@@ -21,6 +21,7 @@ import mindustry.type.Item;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
+import mindustry.world.blocks.distribution.Junction;
 import mindustry.world.blocks.distribution.ItemBridge;
 import mindustry.world.blocks.liquid.LiquidBlock;
 import mindustry.world.blocks.power.PowerNode;
@@ -110,8 +111,8 @@ public class Agent{
     final int enemyCoresStart;
     int lastType, kills;
     /**
-     * Action rules (the user's, 2026-10-29): -5 points per remove, +5 for acting right after a wait;
-     * (2026-10-30) -2.5 per wait.
+     * Action rules (the user's): -5 points per remove (2026-10-29); -2.5 per wait (2026-10-30).
+     * The +5-for-acting-after-a-wait rule was removed on 2026-10-30 (it paid for wait/act alternation).
      * pending = not yet handed out as reward; total = for the game's final score.
      */
     float rulePointsPending, rulePointsTotal;
@@ -119,11 +120,8 @@ public class Agent{
     final IntSet fedTurrets = new IntSet();
     /** Copper only until a bot has beaten Ground Zero at 30%; then any ammo counts (the user's rule). */
     boolean anyAmmo;
-    /** The +5-for-acting-after-a-wait rule pays at most this much per game (the user's cap). */
-    static final float AFTER_WAIT_CAP = 50f;
-    float afterWaitPoints;
-    /** The -2.5-per-wait rule costs at most this much per game (the user's cap, 2026-10-30). */
-    static final float WAIT_PENALTY_CAP = 50f;
+    /** The -2.5-per-wait rule costs at most this much per game (the user's cap, 2026-10-30; raised from 50). */
+    static final float WAIT_PENALTY_CAP = 500f;
     float waitPenaltyPoints;
 
     void addPoints(float points){
@@ -134,6 +132,41 @@ public class Agent{
     /** +5 per hit landed by one of the bot's turrets on an enemy (the user's rule); called from game events. */
     void turretHit(){
         addPoints(5f);
+    }
+
+    /** Blocks the bot built that have ever carried items or ammo (the user's unused-block rule, 2026-10-30). */
+    final IntSet usedBlocks = new IntSet();
+    static final float UNUSED_PENALTY = 2.5f;
+
+    /** Only blocks whose job is moving or holding items can be judged; walls, power, sorters etc. are exempt. */
+    static boolean judged(Building b){
+        return b instanceof ItemTurret.ItemTurretBuild || b instanceof Junction.JunctionBuild
+            || (b.block.hasItems && !b.block.instantTransfer && b.items != null);
+    }
+
+    static boolean inUse(Building b){
+        if(b instanceof ItemTurret.ItemTurretBuild t) return t.totalAmmo > 0;
+        if(b instanceof Junction.JunctionBuild j){
+            for(int n : j.buffer.indexes) if(n > 0) return true;
+            return false;
+        }
+        return b.items != null && b.items.total() > 0;
+    }
+
+    void checkUsed(){
+        for(Building b : ownBuildings()){
+            if(!usedBlocks.contains(b.pos()) && judged(b) && inUse(b)) usedBlocks.add(b.pos());
+        }
+    }
+
+    /** End of game: -2.5 for each judged block the bot built that never carried anything. Returns how many. */
+    int penalizeUnused(){
+        int unused = 0;
+        for(Building b : ownBuildings()){
+            if(builder.builtPos.contains(b.pos()) && judged(b) && !usedBlocks.contains(b.pos())) unused++;
+        }
+        addPoints(-UNUSED_PENALTY * unused);
+        return unused;
     }
 
     void checkTurretAmmo(){
@@ -171,6 +204,7 @@ public class Agent{
     void update(){
         builder.update();
         if(Vars.state.updateId % 60 == 30 && builder.core() != null) checkTurretAmmo();
+        if(Vars.state.updateId % 10 == 5 && builder.core() != null) checkUsed();
         if(Vars.state.updateId % 10 == 0 && builder.core() != null){
             int copper = builder.core().items.get(Items.copper);
             if(copper > lastCopper) copperIn += copper - lastCopper;
@@ -376,11 +410,9 @@ public class Agent{
         Seq<Block> cat = catalog();
         int type = a[0], blockIndex = a[1], cx = a[2] % Vision.G, cy = a[2] / Vision.G, fx = a[3], fy = a[4], rotation = a[5], arg = a[6];
         if(type < 0 || type >= TYPES) return;
-        float afterWait = lastType == WAIT && type != WAIT ? Math.min(5f, AFTER_WAIT_CAP - afterWaitPoints) : 0f;
-        afterWaitPoints += afterWait;
         float waitPenalty = type == WAIT ? Math.min(2.5f, WAIT_PENALTY_CAP - waitPenaltyPoints) : 0f;
         waitPenaltyPoints += waitPenalty;
-        addPoints((type == REMOVE ? -5f : 0f) + afterWait - waitPenalty);
+        addPoints((type == REMOVE ? -5f : 0f) - waitPenalty);
         lastType = type;
         actionCounts[type]++;
 

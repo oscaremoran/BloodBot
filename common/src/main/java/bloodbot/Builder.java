@@ -1,5 +1,6 @@
 package bloodbot;
 
+import arc.struct.IntSet;
 import arc.struct.ObjectMap;
 import arc.struct.Queue;
 import mindustry.Vars;
@@ -37,6 +38,8 @@ public class Builder{
     final ObjectMap<Plan, BuildPlan> issued = new ObjectMap<>();
     int built, removed;
     Building lastBuilt;
+    /** Positions of every block this builder finished this game (for the unused-block rule). */
+    final IntSet builtPos = new IntSet();
     Unit ship;
     int respawn;
 
@@ -79,6 +82,7 @@ public class Builder{
                 }else{
                     built++;
                     lastBuilt = tile.build;
+                    if(tile.build != null) builtPos.add(tile.build.pos());
                     if(p.then != null) p.then.run(tile.build);
                 }
             }else if(!possible(p, tile)){
