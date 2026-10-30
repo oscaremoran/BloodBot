@@ -17,12 +17,35 @@ import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
  * with build plans queued it flies within building range and the game constructs them for real
  * (gradual cost, interruptible by enemies). Otherwise it does its current task: guard the core,
  * mine an ore and carry it home, fight around a spot, or ferry items from the core to a building.
- * It shoots whatever enemy is in range the whole time, as players do.
+ * It shoots whatever enemy is in range the whole time, as players do, unless the gun is switched off.
  */
 public class ShipAI extends AIController{
     enum Task{ GUARD, MINE, FIGHT, DELIVER }
 
     static final float GUARD_LEASH = 22 * Vars.tilesize;
+
+    /**
+     * The ship's gun. Training turns it off with -Dbloodbot.shipGun=false (the user's choice, 2026-10-30), so turrets
+     * are the only defense; the mod never sets the property, so in the game the ship keeps its gun.
+     */
+    static final boolean GUN = !"false".equals(System.getProperty("bloodbot.shipGun"));
+
+    /**
+     * Enemies neither target nor hit the ship. Training turns this on with -Dbloodbot.shipUntouchable=true
+     * (the user's choice, 2026-10-30); the mod never sets it.
+     */
+    static final boolean UNTOUCHABLE = Boolean.getBoolean("bloodbot.shipUntouchable");
+
+    @Override
+    public void updateWeapons(){
+        if(GUN){
+            super.updateWeapons();
+            return;
+        }
+        target = null;
+        unit.isShooting = false;
+        for(var mount : unit.mounts) mount.shoot = false;
+    }
 
     /** A new order only replaces the current one after it has run this long (about how fast a person re-tasks a ship). */
     static final float COMMIT_TICKS = 600;
@@ -168,7 +191,13 @@ public class ShipAI extends AIController{
     static Unit spawn(mindustry.game.Team team){
         CoreBuild core = team.core();
         if(core == null) return null;
-        Unit unit = ((CoreBlock)core.block).unitType.spawn(team, core.x, core.y);
+        var type = ((CoreBlock)core.block).unitType;
+        if(UNTOUCHABLE){
+            // Applies to the whole unit type, which is fine on the training server: only the bot flies core ships there.
+            type.targetable = false;
+            type.hittable = false;
+        }
+        Unit unit = type.spawn(team, core.x, core.y);
         unit.controller(new ShipAI());
         return unit;
     }

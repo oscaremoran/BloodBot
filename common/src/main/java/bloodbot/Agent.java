@@ -22,6 +22,7 @@ import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.distribution.Junction;
+import mindustry.world.blocks.distribution.Conveyor;
 import mindustry.world.blocks.distribution.ItemBridge;
 import mindustry.world.blocks.liquid.LiquidBlock;
 import mindustry.world.blocks.power.PowerNode;
@@ -153,9 +154,42 @@ public class Agent{
         return b.items != null && b.items.total() > 0;
     }
 
+    /**
+     * Copper-chain milestones (the user's rule, 2026-10-30): +50 once per game each, the first time
+     * a drill puts copper on a conveyor, a conveyor carries copper into the core, and a conveyor carries copper into a turret.
+     * Only blocks this bot built count.
+     */
+    boolean drillToConveyor, conveyorToCore, conveyorToTurret;
+    static final float CHAIN_BONUS = 50f;
+
     void checkUsed(){
         for(Building b : ownBuildings()){
             if(!usedBlocks.contains(b.pos()) && judged(b) && inUse(b)) usedBlocks.add(b.pos());
+            if(b instanceof Conveyor.ConveyorBuild c && builder.builtPos.contains(c.pos()) && c.items.has(Items.copper)) checkChain(c);
+        }
+    }
+
+    void checkChain(Conveyor.ConveyorBuild c){
+        if(!drillToConveyor){
+            for(Building o : c.proximity){
+                if(o instanceof Drill.DrillBuild d && d.team == team && builder.builtPos.contains(d.pos())
+                    && d.dominantItem == Items.copper){
+                    drillToConveyor = true;
+                    addPoints(CHAIN_BONUS);
+                    break;
+                }
+            }
+        }
+        Building next = c.next();
+        if(next == null || next.team != team) return;
+        if(!conveyorToCore && next instanceof CoreBuild){
+            conveyorToCore = true;
+            addPoints(CHAIN_BONUS);
+        }
+        if(!conveyorToTurret && next instanceof ItemTurret.ItemTurretBuild t && builder.builtPos.contains(t.pos())
+            && t.ammo.contains(e -> e instanceof ItemTurret.ItemEntry ie && ie.item == Items.copper)){
+            conveyorToTurret = true;
+            addPoints(CHAIN_BONUS);
         }
     }
 

@@ -147,7 +147,7 @@ public class PpoClient implements Agent.Policy{
         String outcome = plugin.winner == null ? "timeout" : won ? "win" : "loss";
         float coreHealth = player.core() == null ? 0f : player.core().health / player.core().maxHealth;
         float capTicks = CAP_SECONDS * 60;
-        agent.penalizeUnused();
+        int unused = agent.penalizeUnused();
         float fitness = agent.fitness(won, plugin.ticks, capTicks) + agent.rulePointsTotal;
         float reward = stepReward() + (won ? (agent.fitness(true, plugin.ticks, capTicks) - agent.potential(plugin.ticks, capTicks)) / 100f : 0f);
 
@@ -159,9 +159,11 @@ public class PpoClient implements Agent.Policy{
         }
         lastResult = String.format(
             "{\"map\":\"%s\",\"outcome\":\"%s\",\"gameSeconds\":%d,\"realSeconds\":%.1f,\"wave\":%d,\"winWave\":%d,\"coreHealth\":%.3f," +
-            "\"fitness\":%.2f,\"blocksBuilt\":%d,\"difficulty\":%.2f,\"actions\":\"%s\",\"worker\":%d}",
+            "\"fitness\":%.2f,\"blocksBuilt\":%d,\"difficulty\":%.2f,\"actions\":\"%s\",\"worker\":%d," +
+            "\"drillToConveyor\":%b,\"conveyorToCore\":%b,\"conveyorToTurret\":%b,\"fedTurrets\":%d,\"unused\":%d}",
             mapName, outcome, plugin.ticks / 60, (Time.nanos() - realStart) / 1e9, Vars.state.wave, Vars.state.rules.winWave,
-            coreHealth, fitness, agent.builder.built, difficulty, actions, worker);
+            coreHealth, fitness, agent.builder.built, difficulty, actions, worker,
+            agent.drillToConveyor, agent.conveyorToCore, agent.conveyorToTurret, agent.fedTurrets.size, unused);
         lastRecorder = recorder;
         lastBuilder = agent.builder;
         lastTicks = plugin.ticks;

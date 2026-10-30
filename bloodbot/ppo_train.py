@@ -179,7 +179,10 @@ class Trainer:
                     s["level"] = 0
         self.games_this_run += 1
         print(f"game {game}: {result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
-              f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)", flush=True)
+              f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
+              + (f" | chain drill>conv {'Y' if result['drillToConveyor'] else 'n'} conv>core {'Y' if result['conveyorToCore'] else 'n'}"
+                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} | fed turrets {result['fedTurrets']} unused {result['unused']}"
+                 if 'drillToConveyor' in result else ""), flush=True)
         if self.args.games and self.games_this_run >= self.args.games:
             self.stop = True
         if self.args.minutes and time.time() - self.started > self.args.minutes * 60:
