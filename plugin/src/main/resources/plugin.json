@@ -1,0 +1,10 @@
+{
+  "name": "bloodbot",
+  "displayName": "BloodBot",
+  "author": "BloodBot",
+  "description": "RL training bridge for Mindustry",
+  "version": "0.1",
+  "main": "bloodbot.BloodBotPlugin",
+  "minGameVersion": "146",
+  "hidden": true
+}

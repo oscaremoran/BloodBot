@@ -1,0 +1,9 @@
+name: "bloodbot"
+displayName: "BloodBot AI"
+author: "BloodBot"
+description: "A self-taught bot that learned Mindustry by playing thousands of games. Let it play any team at Easy, Normal, Hard or Insane: use the BloodBot button in game (bottom left), or the 'bloodbot' server command."
+version: "0.1"
+minGameVersion: "154"
+main: "bloodbot.BloodBotMod"
+java: true
+hidden: true
