@@ -78,7 +78,10 @@ public class BloodBotPlugin extends Plugin{
 
         Events.on(UnitDestroyEvent.class, e -> {
             if(trainer != null && trainer.agent != null && !trainer.loading && e.unit.team != trainer.agent.team) trainer.agent.kills++;
-            if(ppo != null && ppo.agent != null && !ppo.loading && e.unit.team != ppo.agent.team) ppo.agent.kills++;
+            if(ppo != null && ppo.agent != null && !ppo.loading && e.unit.team != ppo.agent.team){
+                ppo.agent.kills++;
+                if(e.unit.type == mindustry.content.UnitTypes.mace) ppo.agent.maceKilled();
+            }
         });
 
         // +5 per turret hit on an enemy, +50 for each turret's first hit (the user's rules), for the PPO bot.

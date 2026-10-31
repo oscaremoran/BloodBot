@@ -111,7 +111,14 @@ public class Agent{
     final IntSet supplied = new IntSet();
     final float enemyHealthStart;
     final int enemyCoresStart;
-    int lastType, kills;
+    int lastType, kills, maceKills;
+    /** +100 per enemy mace killed (the user's rule, 2026-10-31): maces on waves 9-10 are what beat it at 80%. */
+    static final float MACE_BONUS = 100f;
+
+    void maceKilled(){
+        maceKills++;
+        addPoints(MACE_BONUS);
+    }
     /**
      * Action rules (the user's): -5 points per remove (2026-10-29); -2.5 per wait (2026-10-30).
      * The +5-for-acting-after-a-wait rule was removed on 2026-10-30 (it paid for wait/act alternation).
