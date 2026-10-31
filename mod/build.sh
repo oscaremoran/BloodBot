@@ -9,8 +9,9 @@ JAR=../server/server-release.jar
 [ -f "$STEAM_JAR" ] && JAR="$STEAM_JAR"
 rm -rf build && mkdir -p build/classes/brains
 javac --release 17 -nowarn -cp "$JAR" -d build/classes $(find src/main/java ../common/src/main/java -name '*.java')
-cp src/main/resources/mod.hjson build/classes/
+cp ../mod.hjson build/classes/  # kept at the repo root so the in-game mod browser can find it
 cp brains/*.bin build/classes/brains/ 2>/dev/null || echo "warning: no brains in mod/brains/ yet (run: python3 -m bloodbot.pick_brains)"
 rm -f build/BloodBot.zip
 (cd build/classes && zip -qr ../BloodBot.zip .)
-echo "built build/BloodBot.zip"
+cp build/BloodBot.zip build/BloodBot.jar  # the mod browser installs Java mods from a release's .jar
+echo "built build/BloodBot.zip and build/BloodBot.jar"
