@@ -10,7 +10,7 @@ Where we are (end of 2026-10-30):
 - **Mod:** `mod/` builds `BloodBot.zip` and syncs to Steam's mods folder. It still uses the old evolution brains, because the **PPO → mod brain export isn't built yet**.
 
 How to run things:
-- Train: `.venv/bin/python -m bloodbot.ppo_train --servers 3 --minutes 60 --nice 0 --steps 1024` (updates every 1,024 decisions since 2026-10-31; never more than 3 servers) in the background, plus a backup-stop timer whose pkill pattern is split (`"server-rel""ease.jar"`, `"bloodbot.ppo""_train"`) so it can't kill itself. Never run `plugin/build.sh` while servers are running.
+- Train: `.venv/bin/python -m bloodbot.ppo_train --servers 3 --minutes 60 --nice 0 --steps 1024 --ent-coef 0.005` (updates every 1,024 decisions and half the exploration bonus since 2026-10-31; never more than 3 servers) in the background, plus a backup-stop timer whose pkill pattern is split (`"server-rel""ease.jar"`, `"bloodbot.ppo""_train"`) so it can't kill itself. Never run `plugin/build.sh` while servers are running.
 - Pages: `python3 -m bloodbot.gallery` → `runs/index.html` (replay viewer) and `runs/scoreboard.html`.
 - Stop everything: `pkill -TERM -f bloodbot.ppo_train; pkill -f "java .*server-release.jar"`.
 
