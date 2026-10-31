@@ -172,9 +172,14 @@ def evo_bar(e):
         (evo_win(m, lv), f'{int(EVO_LEVELS[lv] * 100)}% enemy strength', small(evo_num(evo_win(m, lv))), True)
         for lv in range(len(EVO_LEVELS)) if evo_win(m, lv) > lo]
     zoom = _bar(lo, hi, lg, zticks, 30)
+    # Zoom on the human skill levels: Noob through Nobody yet.
+    hticks = [(v, gold(name), small(evo_num(v)), True) for v, name in HUMAN_LEVELS]
+    levels = _bar(HUMAN_LEVELS[0][0], HUMAN_LEVELS[-1][0], lg, hticks, 30)
     name = EVO_MARKS[m + 1][1]
     return (f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:1100px;margin:70px 0 100px">{whole}</div>'
             f'</div>'
+            f'<div class="muted" style="font-size:13px;margin:0 0 30px">Zoom: levels</div>'
+            f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:900px;margin:50px 0 80px">{levels}</div></div>'
             f'<div class="muted" style="font-size:13px;margin:0 0 30px">Zoom: {name}</div>'
             f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:700px;margin:50px 0 90px">{zoom}</div></div>')
 
