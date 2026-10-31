@@ -105,8 +105,9 @@ def current_evolution(games, run):
     return recent[int(0.75 * (len(recent) - 1))] if recent else None
 
 
-EVO_MARKS = [(0, "Random"), (3.0, "Ground Zero"), (EVO_END[0], "Frozen Forest"), (EVO_END[1], "Craters"),
-             (EVO_END[2], "Fungal Pass"), (EVO_END[3], "USS Iowa"), (EVO_END[4], "Bloodshed Bastion")]
+# Each map's mark is where it's beaten (won at 100% enemy strength).
+EVO_MARKS = [(0, "Random")] + list(zip(EVO_END, ["Ground Zero", "Frozen Forest", "Craters", "Fungal Pass", "USS Iowa",
+                                                 "Bloodshed Bastion"]))
 # Human skill levels on the same scale (log10), roughly what a human player at that level can beat.
 # Nobody has ever beaten Bloodshed Bastion, so the top of the scale is beyond every human; Oscar is past USS Iowa,
 # halfway to it.
@@ -162,7 +163,7 @@ def evo_bar(e):
         (evo_win(m, lv), f'{int(EVO_LEVELS[lv] * 100)}% enemy strength', small(evo_num(evo_win(m, lv))), True)
         for lv in range(len(EVO_LEVELS)) if evo_win(m, lv) > lo]
     zoom = _bar(lo, hi, lg, zticks, 30)
-    name = dict(EVO_MARKS[1:])[3.0 if m == 0 else EVO_END[m - 1]]
+    name = EVO_MARKS[m + 1][1]
     return (f'<div style="margin:44px 8px 64px">{whole}</div>'
             f'<div class="muted" style="font-size:13px;margin:0 0 30px">Zoom: {name}</div>'
             f'<div style="margin:0 8px 40px">{zoom}</div>')
