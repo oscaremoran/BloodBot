@@ -75,8 +75,8 @@ async function showPost(i) {
     document.getElementById('back').innerHTML = '&larr; All posts';
     const res = await fetch('blog/' + e.file);
     if (!res.ok) throw new Error(res.status);
-    // entries are newest first, so the newer post is i-1
-    const newer = entries[i - 1], older = entries[i + 1];
+    // entries are oldest first, so the newer post is i+1
+    const older = entries[i - 1], newer = entries[i + 1];
     view.innerHTML = `<article>${marked.parse(await res.text())}</article>
         <div class="post-nav">
             <span>${older ? `<a href="#${older.id}">&larr; ${esc(older.title)}</a>` : ''}</span>
@@ -100,6 +100,7 @@ async function load() {
         const readme = await (await fetch('blog/README.md')).text();
         entries = [...readme.matchAll(/^\|\s*([\d-]+)\s*\|\s*\[([^\]]+)\]\(([^)]+\.md)\)/gm)]
             .map(m => ({ date: m[1], title: m[2], file: m[3], id: m[3].replace(/\.md$/, '') }));
+        entries.reverse();  // README lists newest first; show oldest first
     } catch (err) {
         document.getElementById('view').innerHTML = '<p class="error">Couldn\'t load the posts.</p>';
         return;
