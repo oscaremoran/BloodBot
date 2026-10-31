@@ -142,7 +142,7 @@ public class Agent{
 
     /** Blocks the bot built that have ever carried items or ammo (the user's unused-block rule, 2026-10-30). */
     final IntSet usedBlocks = new IntSet();
-    static final float UNUSED_PENALTY = 10f; // raised from 2.5 (the user, 2026-10-30)
+    static final float UNUSED_PENALTY = 5f; // the user, 2026-10-30: 2.5 -> 10 (bot stopped building) -> 5
 
     /** Only blocks whose job is moving or holding items can be judged; walls, power, sorters etc. are exempt. */
     static boolean judged(Building b){
