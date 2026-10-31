@@ -186,7 +186,7 @@ def evo_bar(e):
             f'<div class="muted" style="font-size:13px;margin:0 0 30px">Zoom: levels</div>'
             f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:1000px;margin:90px 0 100px">{levels}</div></div>'
             f'<div class="muted" style="font-size:13px;margin:0 0 30px">Zoom: {name}</div>'
-            f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:700px;margin:50px 0 90px">{zoom}</div></div>')
+            f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:700px;margin:80px 0 90px">{zoom}</div></div>')
 
 
 # ---- Elo: each level (map at an enemy strength) is an opponent rated 400 x its winning evolution (log10), so
