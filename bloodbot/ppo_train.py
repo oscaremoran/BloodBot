@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from bloodbot.ppo import Dims, Net, act, gae, ppo_update
+from bloodbot.ppo import Dims, Net, act, gae, ppo_update, widen
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "runs" / "ppo"
@@ -117,8 +117,13 @@ class Trainer:
             data = torch.load(ckpt)
             if data["dims"] != dims.as_list():
                 raise SystemExit("checkpoint was trained with different game sizes; start a new runs/ppo")
-            self.net.load_state_dict(data["net"])
-            self.opt.load_state_dict(data["opt"])
+            if data["net"]["d1.weight"].shape != self.net.d1.weight.shape:
+                # The brain got wider (64 -> 256, 2026-10-31): keep what it learned, start a fresh optimizer.
+                self.net.load_state_dict(widen(data["net"], self.net))
+                print(f"widened the brain: {data['net']['d1.weight'].shape[0]} -> {self.net.d1.weight.shape[0]} neurons per layer")
+            else:
+                self.net.load_state_dict(data["net"])
+                self.opt.load_state_dict(data["opt"])
             self.state = data["state"]
             # Games played after the last checkpoint are already in log.csv; keep numbering after them so a restart
             # never reuses a game number (which would overwrite that game's replay).

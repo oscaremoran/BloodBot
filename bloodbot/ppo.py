@@ -34,7 +34,7 @@ class Dims:
 class Net(nn.Module):
     """Brain.java's layout (conv 3x3 stride 2 x3, tanh; dense x2, tanh; linear outputs) plus a value output."""
 
-    def __init__(self, d: Dims, hidden=64):
+    def __init__(self, d: Dims, hidden=256):  # 64 until 2026-10-31
         super().__init__()
         self.d = d
         self.c1 = nn.Conv2d(d.C, 12, 3, 2, 1)
@@ -55,6 +55,26 @@ class Net(nn.Module):
         h = torch.tanh(self.d1(torch.cat([x, scalars], 1)))
         h = torch.tanh(self.d2(h))
         return self.out(h), self.value(h).squeeze(1)
+
+
+@torch.no_grad()
+def widen(old: dict, new: Net) -> dict:
+    """Copy a narrower brain's weights into the first neurons of a wider one. The extra neurons start with random
+    inputs but zero outputs, so the wider brain plays exactly like the old one and grows into the new room."""
+    sd = {k: v.clone() for k, v in new.state_dict().items()}
+    h = old["d1.weight"].shape[0]
+    for k in ("c1.weight", "c1.bias", "c2.weight", "c2.bias", "c3.weight", "c3.bias"):
+        sd[k] = old[k].clone()
+    sd["d1.weight"][:h] = old["d1.weight"]
+    sd["d1.bias"][:h] = old["d1.bias"]
+    sd["d2.weight"][:h, :h] = old["d2.weight"]
+    sd["d2.weight"][:h, h:] = 0
+    sd["d2.bias"][:h] = old["d2.bias"]
+    for k in ("out", "value"):
+        sd[f"{k}.weight"].zero_()
+        sd[f"{k}.weight"][:, :h] = old[f"{k}.weight"]
+        sd[f"{k}.bias"] = old[f"{k}.bias"].clone()
+    return sd
 
 
 def split(d: Dims, logits, masks):
