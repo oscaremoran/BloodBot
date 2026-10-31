@@ -80,13 +80,16 @@ public class BloodBotPlugin extends Plugin{
             if(trainer != null && trainer.agent != null && !trainer.loading && e.unit.team != trainer.agent.team) trainer.agent.kills++;
             if(ppo != null && ppo.agent != null && !ppo.loading && e.unit.team != ppo.agent.team){
                 ppo.agent.kills++;
-                if(e.unit.type == mindustry.content.UnitTypes.mace) ppo.agent.maceKilled();
+                if(e.unit.type == mindustry.content.UnitTypes.mace) ppo.agent.maceKilled(e.unit.x, e.unit.y);
             }
         });
 
         // +5 per turret hit on an enemy, +50 for each turret's first hit (the user's rules), for the PPO bot.
-        Events.on(UnitDamageEvent.class, e -> turretHit(e.bullet, e.unit.team));
-        Events.on(BuildDamageEvent.class, e -> turretHit(e.source, e.build.team));
+        Events.on(UnitDamageEvent.class, e -> turretHit(e.bullet, e.unit.team, e.unit.x, e.unit.y));
+        Events.on(BuildDamageEvent.class, e -> {
+            turretHit(e.source, e.build.team, e.build.x, e.build.y);
+            wallHit(e.build, e.source);
+        });
 
         Events.on(GameOverEvent.class, e -> {
             winner = e.winner;
@@ -154,12 +157,21 @@ public class BloodBotPlugin extends Plugin{
         });
     }
 
-    void turretHit(mindustry.gen.Bullet bullet, Team victim){
+    /** Enemy fire landing on one of the bot's walls (the wall-soak reward). */
+    void wallHit(mindustry.gen.Building build, mindustry.gen.Bullet bullet){
+        if(ppo == null || ppo.agent == null || ppo.loading || bullet == null) return;
+        Team us = ppo.agent.team;
+        if(build.team == us && bullet.team != us && build.block.category == mindustry.type.Category.defense){
+            ppo.agent.wallSoaked(build, bullet.damage * bullet.type.buildingDamageMultiplier);
+        }
+    }
+
+    void turretHit(mindustry.gen.Bullet bullet, Team victim, float x, float y){
         if(ppo == null || ppo.agent == null || ppo.loading || bullet == null) return;
         Team us = ppo.agent.team;
         if(bullet.team == us && victim != us && bullet.owner instanceof mindustry.gen.Building b
             && b.block instanceof mindustry.world.blocks.defense.turrets.Turret){
-            ppo.agent.turretHit(b);
+            ppo.agent.turretHit(b, x, y);
         }
     }
 

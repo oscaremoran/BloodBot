@@ -115,9 +115,34 @@ public class Agent{
     /** +100 per enemy mace killed (the user's rule, 2026-10-31): maces on waves 9-10 are what beat it at 80%. */
     static final float MACE_BONUS = 100f;
 
-    void maceKilled(){
+    void maceKilled(float x, float y){
         maceKills++;
-        addPoints(MACE_BONUS);
+        addPoints(MACE_BONUS * forward(x, y));
+    }
+
+    /**
+     * Forward-defense multiplier (the user's rule, 2026-10-31): turret hits and mace kills pay more the farther from the
+     * core they happen, x1 at the core, x2 at 20 tiles, x3 from 40 tiles on, so stopping enemies early beats a ring of
+     * turrets around the core.
+     */
+    float forward(float x, float y){
+        CoreBuild core = builder.core();
+        if(core == null) return 1f;
+        return 1f + Math.min(2f, core.dst(x, y) / Vars.tilesize / 20f);
+    }
+
+    /**
+     * Wall rule (the user's, 2026-10-31): +1 point per 20 HP of enemy damage a bot-built wall soaks, at most 300 per game.
+     * Only walls on the enemies' path get hit, so this pays for well-placed walls, not for wall spam.
+     */
+    static final float WALL_SOAK_CAP = 300f;
+    float wallSoakPoints;
+
+    void wallSoaked(Building wall, float damage){
+        if(!builder.builtPos.contains(wall.pos()) || wallSoakPoints >= WALL_SOAK_CAP) return;
+        float points = Math.min(WALL_SOAK_CAP - wallSoakPoints, damage / 20f);
+        wallSoakPoints += points;
+        addPoints(points);
     }
     /**
      * Action rules (the user's): -5 points per remove (2026-10-29); -2.5 per wait (2026-10-30).
@@ -142,8 +167,8 @@ public class Agent{
 
     /** +5 per hit landed by one of the bot's turrets on an enemy, +50 more for a bot-built turret's first hit
      * (the user's rules); called from game events. A turret where enemies never go earns nothing. */
-    void turretHit(Building turret){
-        addPoints(5f);
+    void turretHit(Building turret, float x, float y){
+        addPoints(5f * forward(x, y));
         if(builder.builtPos.contains(turret.pos()) && hitTurrets.add(turret.pos())) addPoints(50f);
     }
 
