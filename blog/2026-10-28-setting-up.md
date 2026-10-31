@@ -1,4 +1,4 @@
-# 2026-10-28: Setting up
+# 2026-10-28: Initial Training
 
 I wanted to make a bot to beat the Mindustry map Bloodshed Bastion because I'm interested in AI. I had just recently watched the documentary The Thinking Game, about DeepMind's initial AI training and the part about how they trained their StarCraft 2 bot was really cool. I thought of making a bot to play Mindustry, a game that I play. So, I tried just starting, and the bot did pretty well. Then, I realized that it wasn't learning, it was just copying human strategies!
 
