@@ -50,10 +50,10 @@ a { color: #0a4a8a; }
 async function load() {
     const posts = document.getElementById('posts');
     try {
-        const readme = await (await fetch('README.md')).text();
+        const readme = await (await fetch('blog/README.md')).text();
         const entries = [...readme.matchAll(/^\|\s*([\d-]+)\s*\|\s*\[([^\]]+)\]\(([^)]+\.md)\)/gm)]
             .map(m => ({ date: m[1], title: m[2], file: m[3] }));
-        const texts = await Promise.all(entries.map(e => fetch(e.file).then(r => r.ok ? r.text() : '')));
+        const texts = await Promise.all(entries.map(e => fetch('blog/' + e.file).then(r => r.ok ? r.text() : '')));
 
         posts.innerHTML = '';
         const toc = document.getElementById('toc-list');
