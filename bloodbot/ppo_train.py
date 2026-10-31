@@ -168,7 +168,7 @@ class Trainer:
         first_win = won and result["map"] not in s["firstWin"]
         if won and result["map"] == "groundZero" and abs(result["difficulty"] - 0.3) < 1e-6 and not self.any_ammo:
             self.any_ammo = True
-            print("Ground Zero beaten at 30%: turrets now earn +50 for any ammo", flush=True)
+            print("Ground Zero beaten at 30%: any ammo now counts as fed", flush=True)
         new_best = result["wave"] > self.best_wave.get(result["map"], 0)
         if new_best:
             self.best_wave[result["map"]] = result["wave"]
@@ -195,7 +195,7 @@ class Trainer:
         print(f"game {game}: {result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
               f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
               + (f" | chain drill>conv {'Y' if result['drillToConveyor'] else 'n'} conv>core {'Y' if result['conveyorToCore'] else 'n'}"
-                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} unused {result['unused']}"
+                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} unused {result['unused']}"
                  if 'drillToConveyor' in result else ""), flush=True)
         if self.args.games and self.games_this_run >= self.args.games:
             self.stop = True

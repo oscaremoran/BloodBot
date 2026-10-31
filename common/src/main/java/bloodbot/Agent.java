@@ -118,8 +118,10 @@ public class Agent{
      * pending = not yet handed out as reward; total = for the game's final score.
      */
     float rulePointsPending, rulePointsTotal;
-    /** Turrets already credited for their first ammo (+50 each, the user's rule). */
+    /** Turrets that have had ammo (tracked for the log; the +50 moved to the first hit on 2026-10-30). */
     final IntSet fedTurrets = new IntSet();
+    /** Bot-built turrets credited for their first hit on an enemy: +50 each (the user's rule, 2026-10-30). */
+    final IntSet hitTurrets = new IntSet();
     /** Copper only until a bot has beaten Ground Zero at 30%; then any ammo counts (the user's rule). */
     boolean anyAmmo;
     /** The -2.5-per-wait rule costs at most this much per game (the user's cap, 2026-10-30; raised from 50). */
@@ -131,14 +133,16 @@ public class Agent{
         rulePointsTotal += points;
     }
 
-    /** +5 per hit landed by one of the bot's turrets on an enemy (the user's rule); called from game events. */
-    void turretHit(){
+    /** +5 per hit landed by one of the bot's turrets on an enemy, +50 more for a bot-built turret's first hit
+     * (the user's rules); called from game events. A turret where enemies never go earns nothing. */
+    void turretHit(Building turret){
         addPoints(5f);
+        if(builder.builtPos.contains(turret.pos()) && hitTurrets.add(turret.pos())) addPoints(50f);
     }
 
     /** Blocks the bot built that have ever carried items or ammo (the user's unused-block rule, 2026-10-30). */
     final IntSet usedBlocks = new IntSet();
-    static final float UNUSED_PENALTY = 2.5f;
+    static final float UNUSED_PENALTY = 10f; // raised from 2.5 (the user, 2026-10-30)
 
     /** Only blocks whose job is moving or holding items can be judged; walls, power, sorters etc. are exempt. */
     static boolean judged(Building b){
@@ -223,7 +227,6 @@ public class Agent{
             if(b instanceof ItemTurret.ItemTurretBuild t && !fedTurrets.contains(b.pos())
                 && t.ammo.contains(e -> e instanceof ItemTurret.ItemEntry ie && (anyAmmo || ie.item == Items.copper))){
                 fedTurrets.add(b.pos());
-                addPoints(50f);
             }
         }
     }

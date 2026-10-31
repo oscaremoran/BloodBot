@@ -81,7 +81,7 @@ public class BloodBotPlugin extends Plugin{
             if(ppo != null && ppo.agent != null && !ppo.loading && e.unit.team != ppo.agent.team) ppo.agent.kills++;
         });
 
-        // +5 per turret hit on an enemy (the user's rule), for the PPO bot.
+        // +5 per turret hit on an enemy, +50 for each turret's first hit (the user's rules), for the PPO bot.
         Events.on(UnitDamageEvent.class, e -> turretHit(e.bullet, e.unit.team));
         Events.on(BuildDamageEvent.class, e -> turretHit(e.source, e.build.team));
 
@@ -156,7 +156,7 @@ public class BloodBotPlugin extends Plugin{
         Team us = ppo.agent.team;
         if(bullet.team == us && victim != us && bullet.owner instanceof mindustry.gen.Building b
             && b.block instanceof mindustry.world.blocks.defense.turrets.Turret){
-            ppo.agent.turretHit();
+            ppo.agent.turretHit(b);
         }
     }
 

@@ -107,24 +107,64 @@ def current_evolution(games, run):
 
 EVO_MARKS = [(0, "Random"), (3.0, "Ground Zero"), (EVO_END[0], "Frozen Forest"), (EVO_END[1], "Craters"),
              (EVO_END[2], "Fungal Pass"), (EVO_END[3], "USS Iowa"), (EVO_END[4], "Bloodshed Bastion")]
+# Human skill levels on the same scale (log10), roughly what a human player at that level can beat.
+# Nobody has ever beaten Bloodshed Bastion, so the top of the scale is beyond every human.
+HUMAN_LEVELS = [(3.0, "Noob"), (EVO_END[0], "Bad"), (4.0, "Fine"), (EVO_END[2], "Good"), (5.0, "Veteran"),
+                (EVO_END[4], "Oscar"), (6.0, "Nobody yet")]
+
+
+def evo_num(v):
+    """A log10 position as its real evolution number: 1,000 / 14,678 / 1,000,000."""
+    return f"{10 ** v:,.0f}"
+
+
+def _bar(lo, hi, lg, ticks, height):
+    """One bar from log10 lo to hi, filled up to lg. ticks: (v, label above or None, label below or None, strong)."""
+    pos = lambda v: f"{(v - lo) / (hi - lo) * 100:.2f}%"
+    shift = lambda v: "0" if v <= lo else "-100%" if v >= hi else "-50%"
+    fill = max(0.0, min(1.0, (lg - lo) / (hi - lo))) * 100
+    parts = []
+    for v, above, below, strong in ticks:
+        parts.append(f'<div style="position:absolute;left:{pos(v)};top:0;height:{height}px;'
+                     f'border-left:{2 if strong else 1}px solid {"#fffa" if strong else "#fff5"}"></div>')
+        if above:
+            parts.append(f'<div style="position:absolute;left:{pos(v)};bottom:{height + 6}px;transform:translateX({shift(v)});'
+                         f'text-align:center;white-space:nowrap;line-height:15px">{above}</div>')
+        if below:
+            parts.append(f'<div style="position:absolute;left:{pos(v)};top:{height + 6}px;transform:translateX({shift(v)});'
+                         f'text-align:center;white-space:nowrap;line-height:15px">{below}</div>')
+    return (f'<div style="position:relative;height:{height}px;border-radius:{height // 2}px;background:#8884">'
+            f'<div style="height:100%;width:{fill:.2f}%;border-radius:{height // 2}px;'
+            f'background:linear-gradient(90deg,#c0392b,#ffd37f)"></div>{"".join(parts)}'
+            f'<div style="position:absolute;left:{fill:.2f}%;top:-6px;height:{height + 12}px;border-left:3px solid #fff"></div></div>')
 
 
 def evo_bar(e):
-    """Progress bar on the log scale, 1 -> 1,000,000, with a tick where each map on the ladder starts."""
-    pct = max(0.0, min(1.0, math.log10(max(e, 1)) / 6)) * 100
-    ticks = "".join(
-        f'<div style="position:absolute;left:{v / 6 * 100:.2f}%;top:0;height:36px;border-left:2px solid #fff8"></div>'
-        f'<div class="muted" style="position:absolute;left:{v / 6 * 100:.2f}%;top:40px;font-size:12px;white-space:nowrap;'
-        f'transform:translateX({"0" if v == 0 else "-50%"})">{name}</div>' for v, name in EVO_MARKS)
-    # Each map's enemy-strength levels: a thin tick inside the bar, the percentage above it.
-    ticks += "".join(
-        f'<div style="position:absolute;left:{evo_win(m, lv) / 6 * 100:.2f}%;top:6px;height:24px;border-left:1px solid #fff5"></div>'
-        f'<div class="muted" style="position:absolute;left:{evo_win(m, lv) / 6 * 100:.2f}%;top:-15px;font-size:9px;'
-        f'transform:translateX(-50%)">{int(EVO_LEVELS[lv] * 100)}</div>'
-        for m in range(len(EVO_LADDER)) for lv in range(len(EVO_LEVELS)))
-    return (f'<div style="position:relative;margin:22px 0 34px;height:36px;border-radius:18px;background:#8884">'
-            f'<div style="height:100%;width:{pct:.2f}%;border-radius:18px;background:linear-gradient(90deg,#c0392b,#ffd37f)"></div>'
-            f'{ticks}<div style="position:absolute;right:12px;top:7px;font-size:16px;font-weight:700">{pct:.1f}%</div></div>')
+    """Two log-scale bars: the whole ladder (1 -> 1,000,000) with human skill levels and maps, then a zoom on the
+    bot's current map with each enemy-strength level and its evolution number."""
+    lg = math.log10(max(e, 1))
+    gold = lambda t: f'<b style="color:#ffd37f;font-size:14px">{t}</b>'
+    small = lambda t: f'<span class="muted" style="font-size:12px">{t}</span>'
+    human = {v: name for v, name in HUMAN_LEVELS}
+    maps = {v: name for v, name in EVO_MARKS}
+    ticks = [(v, gold(human[v]) if v in human else None,
+              f'{maps[v]}<br>{small(evo_num(v))}' if v in maps else small(evo_num(v)) if v in (1, 2) else None, v in maps)
+             for v in sorted(set(human) | set(maps) | {1, 2})]
+    whole = _bar(0, 6, lg, ticks, 56)
+    # Zoom on the current map: from where it starts to where it ends, one tick per enemy-strength level.
+    m = next((k for k in range(len(EVO_LADDER)) if lg < EVO_END[k] - 1e-9), len(EVO_LADDER) - 1)
+    lo = (3.0 if m == 0 else EVO_END[m - 1])
+    if lg < lo:
+        lo = 2.0
+    hi = EVO_END[m]
+    zticks = [(lo, None, small(evo_num(lo)), True)] + [
+        (evo_win(m, lv), f'{int(EVO_LEVELS[lv] * 100)}% enemy strength', small(evo_num(evo_win(m, lv))), True)
+        for lv in range(len(EVO_LEVELS)) if evo_win(m, lv) > lo]
+    zoom = _bar(lo, hi, lg, zticks, 30)
+    name = dict(EVO_MARKS[1:])[3.0 if m == 0 else EVO_END[m - 1]]
+    return (f'<div style="margin:44px 8px 64px">{whole}</div>'
+            f'<div class="muted" style="font-size:13px;margin:0 0 30px">Zoom: {name}</div>'
+            f'<div style="margin:0 8px 40px">{zoom}</div>')
 
 
 def rank(g):
@@ -171,7 +211,9 @@ def write_scoreboard(games):
     evo_banner = (f'<div style="margin:-24px -24px 24px;padding:16px 24px 6px;background:#161b22;border-bottom:1px solid #30363d">'
                   f'<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">'
                   f'<span><span class="muted">Current evolution ({latest})</span> '
-                  f'<span style="font-size:28px;font-weight:700;margin-left:8px">{fmt_evo(cur)}</span></span>'
+                  f'<span style="font-size:28px;font-weight:700;margin-left:8px">{fmt_evo(cur)}</span>'
+                  f'<span style="font-size:28px;font-weight:700;margin-left:16px;color:#ffd37f">'
+                  f'{max(0.0, min(1.0, math.log10(max(cur, 1)) / 6)) * 100:.1f}%</span></span>'
                   f'<span class="muted">Logarithmic scale (each step = ×10) · 1 = random start · 1,000 = beats Ground Zero at 30% · 1,000,000 = beats Bloodshed Bastion</span></div>'
                   f'{evo_bar(cur)}</div>'
                   if cur is not None else "")
