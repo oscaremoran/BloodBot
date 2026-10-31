@@ -109,10 +109,10 @@ def current_evolution(games, run):
 EVO_MARKS = [(0, "Random")] + list(zip(EVO_END, ["Ground Zero", "Frozen Forest", "Craters", "Fungal Pass", "USS Iowa",
                                                  "Bloodshed Bastion"]))
 # Human skill levels on the same scale (log10), roughly what a human player at that level can beat.
-# Nobody has ever beaten Bloodshed Bastion, so the top of the scale is beyond every human; Oscar is halfway between
-# Veteran and Nobody yet.
+# Nobody has ever beaten Bloodshed Bastion, so the top of the scale is beyond every human; Oscar is a quarter of the
+# way from beating USS Iowa to beating it.
 HUMAN_LEVELS = [(3.0, "Noob"), (EVO_END[0], "Bad"), (4.0, "Fine"), (EVO_END[2], "Good"), (5.0, "Veteran"),
-                ((EVO_END[3] + EVO_END[5]) / 2, "Oscar"), (6.0, "Nobody yet")]
+                (EVO_END[4] + (EVO_END[5] - EVO_END[4]) / 4, "Oscar"), (6.0, "Nobody yet")]
 
 
 def evo_num(v):
