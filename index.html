@@ -37,6 +37,7 @@ blockquote { margin: 12px 0; padding: 8px 16px; border-left: 4px solid #ffe700; 
 code { background: #eef2f7; padding: 1px 5px; border-radius: 4px; }
 pre { background: #061627; color: #e2e8f0; padding: 14px; border-radius: 10px; overflow-x: auto; }
 pre code { background: none; }
+article img { max-width: 100%; height: auto; border-radius: 12px; display: block; margin: 16px 0; }
 a { color: #0a4a8a; }
 .error { background: #fff; padding: 20px; border-radius: 12px; }
 </style>
@@ -77,7 +78,9 @@ async function showPost(i) {
     if (!res.ok) throw new Error(res.status);
     // entries are oldest first, so the newer post is i+1
     const older = entries[i - 1], newer = entries[i + 1];
-    view.innerHTML = `<article>${marked.parse(await res.text())}</article>
+    // posts link images relative to blog/, but this page sits at the repo root
+    const md = (await res.text()).replace(/\]\((?!https?:|\/|#)([^)]+\.(?:png|jpe?g|gif|webp))\)/gi, '](blog/$1)');
+    view.innerHTML = `<article>${marked.parse(md)}</article>
         <div class="post-nav">
             <span>${older ? `<a href="#${older.id}">&larr; ${esc(older.title)}</a>` : ''}</span>
             <span>${newer ? `<a href="#${newer.id}">${esc(newer.title)} &rarr;</a>` : ''}</span>

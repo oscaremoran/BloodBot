@@ -2,6 +2,8 @@
 
 > ✍️ *Intro: the session where it finally climbed.*
 
+![The bot's base on Ground Zero: conveyors feeding ammo up to the Duo turrets](images/ground-zero-base.png)
+
 ## The session (games 963–994, at 30%)
 
 | | |
