@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>BloodBot replay</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0d1117; color: #e6edf3; font: 13px -apple-system, sans-serif; display: flex; height: 100vh; overflow: hidden; }
+  #main { flex: 1; position: relative; display: flex; flex-direction: column; min-width: 0; }
+  #canvas { flex: 1; width: 100%; cursor: crosshair; display: block; background: #1a1712; }
+  #controls { display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: #161b22; border-top: 1px solid #30363d; }
+  #timeline { flex: 1; }
+  button, select { background: #21262d; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px; padding: 4px 10px; font: inherit; cursor: pointer; }
+  #side { width: 300px; background: #161b22; border-left: 1px solid #30363d; padding: 14px; overflow-y: auto; }
+  #side h1 { font-size: 16px; margin: 0 0 4px; }
+  #side h2 { font-size: 12px; text-transform: uppercase; color: #8b949e; margin: 16px 0 6px; letter-spacing: .05em; }
+  .row { display: flex; justify-content: space-between; padding: 2px 0; }
+  .muted { color: #8b949e; }
+  .queue div { padding: 2px 0; }
+  .queue .now { color: #3fb950; font-weight: 600; }
+  #tip { position: absolute; pointer-events: none; background: rgba(13,17,23,.95); border: 1px solid #30363d; border-radius: 6px; padding: 8px 10px; display: none; max-width: 280px; line-height: 1.5; }
+  #tip b { color: #fff; }
+  a { color: #58a6ff; }
+  .bar { height: 6px; background: #30363d; border-radius: 3px; overflow: hidden; margin-top: 2px; }
+  .bar div { height: 100%; background: #3fb950; }
+</style></head>
+<body>
+<div id="main">
+  <canvas id="canvas"></canvas>
+  <div id="tip"></div>
+  <div id="controls">
+    <button id="play">▶ Play</button>
+    <input type="range" id="timeline" min="0" value="0">
+    <span id="clock" class="muted">00:00</span>
+    <select id="speed">
+      <option value="1">10× game speed</option>
+      <option value="2.5" selected>25×</option>
+      <option value="5">50×</option>
+      <option value="10">100×</option>
+      <option value="0.5">5×</option>
+    </select>
+    <button id="fit">Fit map</button>
+  </div>
+</div>
+<div id="side">
+  <a href="index.html">← all recordings</a>
+  <h1 id="title">Loading…</h1>
+  <div id="result" class="muted"></div>
+  <h2>Now</h2>
+  <div id="now"></div>
+  <h2>Bot is building</h2>
+  <div id="queue" class="queue"></div>
+  <h2>Core items</h2>
+  <div id="items"></div>
+  <h2>How to use</h2>
+  <div class="muted">Scroll to zoom, drag to pan, hover any tile to see its block. Space = play/pause, ←/→ = step.
+  Dashed outlines are the bot's build orders: green = in progress, white = queued, red = being removed.</div>
+</div>
+<script>
+const game = new URLSearchParams(location.search).get("game");
+const script = document.createElement("script");
+script.src = game + "/replay.js";
+script.onload = () => start(window.REPLAY);
+script.onerror = () => document.getElementById("title").textContent = "Could not load " + game + "/replay.js";
+document.head.appendChild(script);
+
+function start(R) {
+  // The headless server has no language files, so names arrive as ids like "mechanical-drill".
+  const pretty = s => s.split("-").map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+  R.blocks.forEach(b => b.name = pretty(b.id));
+  R.units = R.units.map(pretty);
+  R.blocks.forEach(b => b.category = b.category.toLowerCase());
+  const canvas = document.getElementById("canvas"), ctx = canvas.getContext("2d");
+  const tip = document.getElementById("tip"), timeline = document.getElementById("timeline");
+  const W = R.width, H = R.height;
+  const terrain = new Image();
+  terrain.src = game + "/terrain.png";
+  terrain.onload = () => {
+    fit();
+    if (params.get("zoom")) {
+      const z = +params.get("zoom") * devicePixelRatio, x = +params.get("x"), y = +params.get("y");
+      scale = z; ox = canvas.width / 2 - x * z; oy = canvas.height / 2 - (H - 1 - y) * z;
+    }
+    draw();
+  };
+
+  document.title = `${R.map} · BloodBot replay`;
+  document.getElementById("title").textContent = `${R.map} · ${game.split("/").pop().replace("_", " ")}`;
+  const r = R.result;
+  const colour = { win: "#3fb950", loss: "#f85149" }[r.outcome] || "#d29922";
+  document.getElementById("result").innerHTML =
+    `<b style="color:${colour}">${r.outcome.toUpperCase()}</b> at wave ${r.wave}${r.winWave ? "/" + r.winWave : ""} after ${Math.floor(r.gameSeconds / 60)} min`;
+
+  timeline.max = R.frames.length - 1;
+  const params = new URLSearchParams(location.search);
+
+  // ---- building state, rebuilt from the initial layout + events up to the current tick ----
+  let grid, buildings, applied, stateTick;
+  function reset() {
+    grid = new Int32Array(W * H).fill(-1);
+    buildings = [];
+    applied = 0;
+    for (const b of R.initial) place(b);
+    stateTick = -1;
+  }
+  function place([x, y, block, team, rot]) {
+    const B = R.blocks[block], o = B.offset;
+    const b = { x, y, block, team, rot, alive: true };
+    const id = buildings.push(b) - 1;
+    for (let dx = 0; dx < B.size; dx++) for (let dy = 0; dy < B.size; dy++) {
+      const tx = x + o + dx, ty = y + o + dy;
+      if (tx >= 0 && ty >= 0 && tx < W && ty < H) { removeAt(tx, ty); grid[ty * W + tx] = id; }
+    }
+  }
+  function removeAt(x, y) {
+    const id = grid[y * W + x];
+    if (id < 0) return;
+    const b = buildings[id], B = R.blocks[b.block];
+    b.alive = false;
+    for (let dx = 0; dx < B.size; dx++) for (let dy = 0; dy < B.size; dy++) {
+      const tx = b.x + B.offset + dx, ty = b.y + B.offset + dy;
+      if (tx >= 0 && ty >= 0 && tx < W && ty < H && grid[ty * W + tx] === id) grid[ty * W + tx] = -1;
+    }
+  }
+  function advanceTo(tick) {
+    if (tick < stateTick) reset();
+    while (applied < R.events.length && R.events[applied][0] <= tick) {
+      const e = R.events[applied++];
+      if (e[3] === -1) removeAt(e[1], e[2]); else place([e[1], e[2], e[3], e[4], e[5]]);
+    }
+    stateTick = tick;
+  }
+  reset();
+
+  // ---- view ----
+  let scale = 3, ox = 0, oy = 0, frame = Math.min(+params.get("frame") || 0, R.frames.length - 1), playing = false, hover = null;
+  function resize() {
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+  }
+  function fit() {
+    resize();
+    scale = Math.min(canvas.width / W, canvas.height / H) * 0.96;
+    ox = (canvas.width - W * scale) / 2;
+    oy = (canvas.height - H * scale) / 2;
+  }
+  const sx = x => ox + x * scale;                 // tile x -> screen
+  const sy = y => oy + (H - 1 - y) * scale;       // tile y (up) -> screen (down)
+  const shade = (hex, f) => {
+    const n = parseInt(hex.slice(1), 16);
+    const c = v => Math.max(0, Math.min(255, Math.round(v * f)));
+    return `rgb(${c(n >> 16)},${c((n >> 8) & 255)},${c(n & 255)})`;
+  };
+  const CATEGORY_SHADE = { turret: 1.15, defense: 0.75, distribution: 0.6, production: 0.9, crafting: 0.85, power: 0.8, units: 1.0, effect: 1.0, liquid: 0.7, logic: 0.7 };
+
+  function draw() {
+    const F = R.frames[frame];
+    advanceTo(F.t);
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = "#1a1712";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(terrain, ox, oy, W * scale, H * scale);
+
+    const dmg = new Map(F.dmg.map(([x, y, hp]) => [x + "," + y, hp]));
+    for (const b of buildings) {
+      if (!b.alive) continue;
+      const B = R.blocks[b.block], team = R.teams[b.team] || { color: "#aaaaaa" };
+      const x0 = sx(b.x + B.offset), y0 = sy(b.y + B.offset + B.size - 1), s = B.size * scale;
+      ctx.fillStyle = shade(team.color, CATEGORY_SHADE[B.category] ?? 0.9);
+      ctx.fillRect(x0 + 0.5, y0 + 0.5, s - 1, s - 1);
+      const hp = dmg.get(b.x + "," + b.y);
+      if (hp !== undefined) { ctx.fillStyle = `rgba(200,0,0,${(1 - hp / 100) * 0.7})`; ctx.fillRect(x0, y0, s, s); }
+      if (scale >= 6) decorate(B, b, x0, y0, s);
+    }
+
+    // queued plans: dashed outlines, the first is being built now
+    ctx.setLineDash([Math.max(2, scale / 3), Math.max(2, scale / 3)]);
+    F.queue.forEach(([block, x, y, rot, breaking], i) => {
+      const B = R.blocks[block];
+      ctx.strokeStyle = breaking ? "#f85149" : i === 0 ? "#3fb950" : "rgba(255,255,255,.7)";
+      ctx.lineWidth = i === 0 ? 2 : 1;
+      ctx.strokeRect(sx(x + B.offset), sy(y + B.offset + B.size - 1), B.size * scale, B.size * scale);
+    });
+    ctx.setLineDash([]);
+
+    for (const [x, y, type, team] of F.units) {
+      ctx.fillStyle = (R.teams[team] || { color: "#fff" }).color;
+      ctx.beginPath();
+      ctx.arc(ox + (x + 0.5) * scale, oy + (H - 0.5 - y) * scale, Math.max(2, scale * 0.6), 0, 7);
+      ctx.fill();
+      ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
+    }
+
+    if (hover) {
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 1;
+      ctx.strokeRect(sx(hover.x), sy(hover.y), scale, scale);
+    }
+    updatePanel(F);
+  }
+
+  function decorate(B, b, x0, y0, s) {
+    ctx.strokeStyle = "rgba(0,0,0,.55)"; ctx.lineWidth = 1;
+    ctx.strokeRect(x0 + 0.5, y0 + 0.5, s - 1, s - 1);
+    const cx = x0 + s / 2, cy = y0 + s / 2;
+    if (B.category === "turret") {
+      ctx.fillStyle = "rgba(0,0,0,.5)"; ctx.beginPath(); ctx.arc(cx, cy, s * 0.28, 0, 7); ctx.fill();
+    } else if (B.rotate) { // arrow in the block's direction (0 right, 1 up, 2 left, 3 down)
+      const a = [0, -Math.PI / 2, Math.PI, Math.PI / 2][b.rot & 3];
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(a);
+      ctx.fillStyle = "rgba(0,0,0,.6)";
+      ctx.beginPath(); ctx.moveTo(s * 0.3, 0); ctx.lineTo(-s * 0.2, -s * 0.22); ctx.lineTo(-s * 0.2, s * 0.22); ctx.fill();
+      ctx.restore();
+    }
+    if (s >= 28) {
+      ctx.fillStyle = "rgba(0,0,0,.8)"; ctx.font = `${Math.min(12, s / 4)}px sans-serif`; ctx.textAlign = "center";
+      ctx.fillText(B.name.split(" ")[0].slice(0, 8), cx, y0 + s - 4);
+    }
+  }
+
+  const fmtTime = t => { const s = Math.floor(t / 60); return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; };
+
+  function updatePanel(F) {
+    timeline.value = frame;
+    document.getElementById("clock").textContent = fmtTime(F.t);
+    document.getElementById("now").innerHTML = `
+      <div class="row"><span>Game time</span><b>${fmtTime(F.t)}</b></div>
+      <div class="row"><span>Wave</span><b>${F.wave}${r.winWave ? " / " + r.winWave : ""}</b></div>
+      <div class="row"><span>Enemies alive</span><b>${F.enemies}</b></div>
+      <div class="row"><span>Units on map</span><b>${F.units.length}</b></div>
+      <div class="row"><span>Core health</span><b>${Math.round(F.core * 100)}%</b></div>
+      <div class="bar"><div style="width:${F.core * 100}%;background:${F.core > .5 ? "#3fb950" : F.core > .2 ? "#d29922" : "#f85149"}"></div></div>`;
+    document.getElementById("queue").innerHTML = F.queue.length
+      ? F.queue.map(([block, x, y, rot, breaking], i) => `<div class="${i === 0 ? "now" : ""}">${i === 0 ? "▶ " : (i + 1) + ". "}${breaking ? "remove " : ""}${R.blocks[block].name} <span class="muted">(${x}, ${y})</span></div>`).join("")
+      : `<div class="muted">nothing queued</div>`;
+    const items = Object.entries(F.items).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]);
+    document.getElementById("items").innerHTML = items.length
+      ? items.map(([k, n]) => `<div class="row"><span>${k}</span><b>${n}</b></div>`).join("")
+      : `<div class="muted">empty</div>`;
+  }
+
+  // ---- hover tooltip ----
+  function tileAt(e) {
+    const rect = canvas.getBoundingClientRect();
+    const px = (e.clientX - rect.left) * devicePixelRatio, py = (e.clientY - rect.top) * devicePixelRatio;
+    const x = Math.floor((px - ox) / scale), y = H - 1 - Math.floor((py - oy) / scale);
+    return x >= 0 && y >= 0 && x < W && y < H ? { x, y } : null;
+  }
+  function showTip(e) {
+    hover = tileAt(e);
+    if (!hover) { tip.style.display = "none"; draw(); return; }
+    const F = R.frames[frame], lines = [`<span class="muted">tile (${hover.x}, ${hover.y})</span>`];
+    const id = grid[hover.y * W + hover.x];
+    if (id >= 0) {
+      const b = buildings[id], B = R.blocks[b.block], team = R.teams[b.team] || { name: "?", color: "#fff" };
+      const hp = F.dmg.find(([x, y]) => x === b.x && y === b.y);
+      lines.push(`<b>${B.name}</b> <span class="muted">${B.category}</span>`);
+      lines.push(`team <span style="color:${team.color}">${team.name}</span>${b.team === 1 ? " (bot)" : ""}`);
+      lines.push(`health ${hp ? hp[2] : 100}%`);
+      if (B.rotate && B.category !== "turret") lines.push(`facing ${["right", "up", "left", "down"][b.rot & 3]}`);
+    } else {
+      lines.push(`<span class="muted">empty</span>`);
+    }
+    F.queue.forEach(([block, x, y], i) => {
+      const B = R.blocks[block];
+      if (hover.x >= x + B.offset && hover.x < x + B.offset + B.size && hover.y >= y + B.offset && hover.y < y + B.offset + B.size)
+        lines.push(`<span style="color:${F.queue[i][4] ? "#f85149" : "#3fb950"}">${i === 0 ? "in progress" : "queued #" + (i + 1)}: <b>${F.queue[i][4] ? "remove " : ""}${B.name}</b></span>`);
+    });
+    for (const [x, y, type, team, hp] of F.units) {
+      if (Math.abs(x - hover.x) <= 1 && Math.abs(y - hover.y) <= 1)
+        lines.push(`unit <b>${R.units[type]}</b> <span style="color:${(R.teams[team] || {}).color}">${(R.teams[team] || {}).name}</span> ${hp}% hp`);
+    }
+    tip.innerHTML = lines.join("<br>");
+    tip.style.display = "block";
+    const rect = canvas.getBoundingClientRect();
+    tip.style.left = Math.min(e.clientX - rect.left + 16, rect.width - 290) + "px";
+    tip.style.top = (e.clientY - rect.top + 16) + "px";
+    draw();
+  }
+
+  // ---- interaction ----
+  let drag = null;
+  canvas.addEventListener("mousedown", e => drag = { x: e.clientX, y: e.clientY, ox, oy });
+  addEventListener("mouseup", () => drag = null);
+  canvas.addEventListener("mousemove", e => {
+    if (drag) { ox = drag.ox + (e.clientX - drag.x) * devicePixelRatio; oy = drag.oy + (e.clientY - drag.y) * devicePixelRatio; }
+    showTip(e);
+  });
+  canvas.addEventListener("mouseleave", () => { hover = null; tip.style.display = "none"; draw(); });
+  canvas.addEventListener("wheel", e => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const px = (e.clientX - rect.left) * devicePixelRatio, py = (e.clientY - rect.top) * devicePixelRatio;
+    const f = Math.exp(-e.deltaY * 0.0015), ns = Math.max(0.5, Math.min(60, scale * f));
+    ox = px - (px - ox) * ns / scale; oy = py - (py - oy) * ns / scale; scale = ns;
+    showTip(e);
+  }, { passive: false });
+  timeline.addEventListener("input", () => { frame = +timeline.value; draw(); });
+  document.getElementById("fit").onclick = () => { fit(); draw(); };
+  const playBtn = document.getElementById("play");
+  const setPlaying = p => { playing = p; playBtn.textContent = p ? "❚❚ Pause" : "▶ Play"; };
+  playBtn.onclick = () => { if (frame >= R.frames.length - 1) frame = 0; setPlaying(!playing); };
+  addEventListener("keydown", e => {
+    if (e.code === "Space") { e.preventDefault(); playBtn.click(); }
+    if (e.code === "ArrowRight") { frame = Math.min(R.frames.length - 1, frame + 1); draw(); }
+    if (e.code === "ArrowLeft") { frame = Math.max(0, frame - 1); draw(); }
+  });
+  addEventListener("resize", () => { resize(); draw(); });
+
+  // 1 frame = 2 game seconds; at speed 1 we show 5 frames/s = 10x game speed.
+  let last = performance.now(), acc = 0;
+  (function loop(now) {
+    const dt = (now - last) / 1000; last = now;
+    if (playing) {
+      acc += dt * 5 * +document.getElementById("speed").value;
+      if (acc >= 1) {
+        frame = Math.min(R.frames.length - 1, frame + Math.floor(acc)); acc %= 1;
+        if (frame === R.frames.length - 1) setPlaying(false);
+        draw();
+      }
+    }
+    requestAnimationFrame(loop);
+  })(last);
+}
+</script>
+</body></html>

@@ -3,7 +3,12 @@ __pycache__/
 *.pyc
 .venv/
 build/
-runs/
+# runs/ is published (replays, scoreboard), minus noise:
+runs/**/*.log
+runs/**/*.err
+runs/**/*.tmp
+runs/**/checkpoint.pt
+runs/train_test/
 server/server-release.jar
 server/config/*
 !server/config/rules.hjson

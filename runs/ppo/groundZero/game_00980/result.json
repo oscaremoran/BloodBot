@@ -1,0 +1,1 @@
+{"map":"groundZero","outcome":"win","gameSeconds":1249,"realSeconds":58.5,"wave":10,"winWave":10,"coreHealth":0.371,"fitness":1439.33,"blocksBuilt":661,"difficulty":0.30,"actions":"wait=2;build=465;rebuild=9;supply items=764;ship guard=2;ship mine=2;ship deliver=6","worker":0,"drillToConveyor":true,"conveyorToCore":false,"conveyorToTurret":false,"fedTurrets":14,"unused":243}
