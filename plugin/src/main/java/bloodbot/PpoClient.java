@@ -60,7 +60,7 @@ public class PpoClient implements Agent.Policy{
                 out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 1 << 20));
                 out.writeInt(worker);
                 // Sizes, so the trainer's network always matches this game's.
-                for(int v : new int[]{Vision.C, Vision.G, Agent.scalars(), Agent.catalog().size, Agent.TYPES,
+                for(int v : new int[]{Vision.CHANNELS, Vision.G, Agent.scalars(), Agent.catalog().size, Agent.TYPES,
                     Agent.FINE, Agent.ROTATIONS, Agent.ARGS}) out.writeInt(v);
                 out.flush();
                 Log.info("[bloodbot] PPO worker @ connected to trainer on port @", worker, port);

@@ -96,7 +96,7 @@ public class Agent{
 
     static int outputs(){ return TYPES + catalog().size + 2 * Vision.G + 2 * FINE + ROTATIONS + ARGS; }
 
-    static int[] shape(){ return new int[]{Vision.C, Vision.G, 12, 16, 16, scalars(), HIDDEN, outputs()}; }
+    static int[] shape(){ return new int[]{Vision.CHANNELS, Vision.G, 12, 16, 16, scalars(), HIDDEN, outputs()}; }
 
     // ---- state ----
     final Brain brain;

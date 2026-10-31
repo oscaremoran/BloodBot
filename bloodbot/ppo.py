@@ -77,6 +77,16 @@ def widen(old: dict, new: Net) -> dict:
     return sd
 
 
+@torch.no_grad()
+def add_closeup(old: dict) -> dict:
+    """A minimap-only brain -> the two-view brain (2026-10-31): the close-up layers get zero weights, so the brain
+    plays exactly as before and learns to use them."""
+    sd = {k: v.clone() for k, v in old.items()}
+    w = old["c1.weight"]
+    sd["c1.weight"] = torch.cat([w, torch.zeros_like(w)], 1)
+    return sd
+
+
 def split(d: Dims, logits, masks):
     """Masked logits per head. masks: dict of bool tensors type, block, cell, mine, deliver."""
     o = 0
