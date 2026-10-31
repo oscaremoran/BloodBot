@@ -4,6 +4,7 @@ Usage: python -m bloodbot.gallery
 """
 import csv
 import html
+import math
 import json
 from pathlib import Path
 
@@ -104,6 +105,28 @@ def current_evolution(games, run):
     return recent[int(0.75 * (len(recent) - 1))] if recent else None
 
 
+EVO_MARKS = [(0, "Random"), (3.0, "Ground Zero"), (EVO_END[0], "Frozen Forest"), (EVO_END[1], "Craters"),
+             (EVO_END[2], "Fungal Pass"), (EVO_END[3], "USS Iowa"), (EVO_END[4], "Bloodshed Bastion")]
+
+
+def evo_bar(e):
+    """Progress bar on the log scale, 1 -> 1,000,000, with a tick where each map on the ladder starts."""
+    pct = max(0.0, min(1.0, math.log10(max(e, 1)) / 6)) * 100
+    ticks = "".join(
+        f'<div style="position:absolute;left:{v / 6 * 100:.2f}%;top:0;height:36px;border-left:2px solid #fff8"></div>'
+        f'<div class="muted" style="position:absolute;left:{v / 6 * 100:.2f}%;top:40px;font-size:12px;white-space:nowrap;'
+        f'transform:translateX({"0" if v == 0 else "-50%"})">{name}</div>' for v, name in EVO_MARKS)
+    # Each map's enemy-strength levels: a thin tick inside the bar, the percentage above it.
+    ticks += "".join(
+        f'<div style="position:absolute;left:{evo_win(m, lv) / 6 * 100:.2f}%;top:6px;height:24px;border-left:1px solid #fff5"></div>'
+        f'<div class="muted" style="position:absolute;left:{evo_win(m, lv) / 6 * 100:.2f}%;top:-15px;font-size:9px;'
+        f'transform:translateX(-50%)">{int(EVO_LEVELS[lv] * 100)}</div>'
+        for m in range(len(EVO_LADDER)) for lv in range(len(EVO_LEVELS)))
+    return (f'<div style="position:relative;margin:22px 0 34px;height:36px;border-radius:18px;background:#8884">'
+            f'<div style="height:100%;width:{pct:.2f}%;border-radius:18px;background:linear-gradient(90deg,#c0392b,#ffd37f)"></div>'
+            f'{ticks}<div style="position:absolute;right:12px;top:7px;font-size:16px;font-weight:700">{pct:.1f}%</div></div>')
+
+
 def rank(g):
     """Best = won, then at higher enemy strength, then higher score (or further wave for the scripted bot)."""
     return (g["outcome"] == "win", g["difficulty"], g["fitness"] if g["fitness"] is not None else -1, g["wave"], g["core"])
@@ -145,18 +168,21 @@ def write_scoreboard(games):
     runs = sorted({g["run"] for g in games if g["bot"] == "learning"}, key=lambda r: max(x["game"] for x in games if x["run"] == r))
     latest = max(runs, key=lambda r: (RUNS / r / "log.csv").stat().st_mtime) if runs else None
     cur = current_evolution(games, latest) if latest else None
-    evo_banner = (f'<div class="card" style="width:auto;display:inline-block"><span class="muted">Current evolution ({latest})</span>'
-                  f'<div style="font-size:32px;font-weight:700">{fmt_evo(cur)}</div>'
-                  f'<span class="muted">1 = random start · 1,000 = beats Ground Zero at 30% · 1,000,000 = beats Bloodshed Bastion</span></div>'
+    evo_banner = (f'<div style="margin:-24px -24px 24px;padding:16px 24px 6px;background:#161b22;border-bottom:1px solid #30363d">'
+                  f'<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">'
+                  f'<span><span class="muted">Current evolution ({latest})</span> '
+                  f'<span style="font-size:28px;font-weight:700;margin-left:8px">{fmt_evo(cur)}</span></span>'
+                  f'<span class="muted">Logarithmic scale (each step = ×10) · 1 = random start · 1,000 = beats Ground Zero at 30% · 1,000,000 = beats Bloodshed Bastion</span></div>'
+                  f'{evo_bar(cur)}</div>'
                   if cur is not None else "")
     options = "".join(f'<option value="{m}">{nice_map(m)}</option>' for m in maps)
     run_options = "".join(f'<option value="{html.escape(r)}"{" selected" if r == latest else ""}>{html.escape(r)}</option>'
                           for r in sorted({g["run"] for g in games}))
     (RUNS / "scoreboard.html").write_text(f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>BloodBot scoreboard</title><style>{STYLE}</style></head><body>
+{evo_banner}
 <nav><a href="index.html">Recordings</a> · <b>Scoreboard</b></nav>
 <h1>Scoreboard</h1>
-{evo_banner}
 <h2>Best on each map</h2>
 <p class="muted">Best = a win beats a loss, then higher enemy strength, then higher score.</p>
 <div class="grid">{''.join(best_cards) or '<p class="muted">No games yet.</p>'}</div>

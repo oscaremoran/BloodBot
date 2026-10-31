@@ -128,6 +128,12 @@ class Trainer:
                     logged = [int(r["game"]) for r in csv.DictReader(f) if r.get("game", "").isdigit()]
                 if logged and max(logged) > self.state["games"]:
                     self.state["games"] = max(logged)
+                # Re-count the climb from the log, so a change to what counts takes effect at once.
+                with open(log, newline="") as f:
+                    here = [r["outcome"] == "win" for r in csv.DictReader(f)
+                            if r["map"] == LADDER[self.state["rung"]][0]
+                            and abs(float(r["difficulty"]) - DIFFICULTY[self.state["level"]]) < 1e-6]
+                self.state["recent"] = here[-10:]
             print(f"resumed: {self.state['games']} games, {self.state['updates']} updates, "
                   f"map {LADDER[self.state['rung']][0]} at {int(DIFFICULTY[self.state['level']] * 100)}%")
         else:
@@ -152,7 +158,7 @@ class Trainer:
         s["games"] += 1
         game = s["games"]
         won = result["outcome"] == "win"
-        beaten = won and (result["winWave"] <= 0 or result["coreHealth"] >= 0.5)
+        beaten = won  # the user's rule (2026-10-30): any win counts toward the climb, whatever core is left
         with open(OUT / "log.csv", "a", newline="") as f:
             csv.writer(f).writerow([game, s["updates"], result["worker"] + 1, result["map"], result["difficulty"],
                                     result["outcome"], result["wave"], result["winWave"], result["coreHealth"],
@@ -189,7 +195,7 @@ class Trainer:
         print(f"game {game}: {result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
               f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
               + (f" | chain drill>conv {'Y' if result['drillToConveyor'] else 'n'} conv>core {'Y' if result['conveyorToCore'] else 'n'}"
-                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} | fed turrets {result['fedTurrets']} unused {result['unused']}"
+                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} unused {result['unused']}"
                  if 'drillToConveyor' in result else ""), flush=True)
         if self.args.games and self.games_this_run >= self.args.games:
             self.stop = True

@@ -24,6 +24,7 @@ import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.distribution.Junction;
 import mindustry.world.blocks.distribution.Conveyor;
 import mindustry.world.blocks.distribution.ItemBridge;
+import mindustry.world.blocks.distribution.Router;
 import mindustry.world.blocks.liquid.LiquidBlock;
 import mindustry.world.blocks.power.PowerNode;
 import mindustry.world.blocks.production.Drill;
@@ -157,15 +158,29 @@ public class Agent{
     /**
      * Copper-chain milestones (the user's rule, 2026-10-30): +50 once per game each, the first time
      * a drill puts copper on a conveyor, a conveyor carries copper into the core, and a conveyor carries copper into a turret.
+     * Added 2026-10-30: the first time a router passes copper into a turret beside it.
      * Only blocks this bot built count.
      */
-    boolean drillToConveyor, conveyorToCore, conveyorToTurret;
+    boolean drillToConveyor, conveyorToCore, conveyorToTurret, routerToTurret;
     static final float CHAIN_BONUS = 50f;
 
     void checkUsed(){
         for(Building b : ownBuildings()){
             if(!usedBlocks.contains(b.pos()) && judged(b) && inUse(b)) usedBlocks.add(b.pos());
             if(b instanceof Conveyor.ConveyorBuild c && builder.builtPos.contains(c.pos()) && c.items.has(Items.copper)) checkChain(c);
+            if(!routerToTurret && b instanceof Router.RouterBuild r && builder.builtPos.contains(r.pos())
+                && (r.lastItem == Items.copper || r.items.has(Items.copper))) checkRouter(r);
+        }
+    }
+
+    void checkRouter(Router.RouterBuild r){
+        for(Building o : r.proximity){
+            if(o instanceof ItemTurret.ItemTurretBuild t && t.team == team && builder.builtPos.contains(t.pos())
+                && t.ammo.contains(e -> e instanceof ItemTurret.ItemEntry ie && ie.item == Items.copper)){
+                routerToTurret = true;
+                addPoints(CHAIN_BONUS);
+                return;
+            }
         }
     }
 
