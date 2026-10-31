@@ -15,6 +15,7 @@ import signal
 import socket
 import struct
 import subprocess
+import sys
 import threading
 import time
 from collections import deque
@@ -23,7 +24,6 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from bloodbot import gallery
 from bloodbot.ppo import Dims, Net, act, gae, ppo_update
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -382,7 +382,8 @@ def main():
                 s.wait(timeout=20)
             except subprocess.TimeoutExpired:
                 s.terminate()
-        gallery.main()
+        # A fresh process, so the pages are built with the current gallery code, not the copy loaded at startup.
+        subprocess.run(["nice", "-n", "19", sys.executable, "-m", "bloodbot.gallery"], cwd=Path(__file__).resolve().parent.parent)
 
 
 if __name__ == "__main__":
