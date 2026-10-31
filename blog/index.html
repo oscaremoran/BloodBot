@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BloodBot progress blog</title>
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<style>
+body { font-family: Arial, sans-serif; background: #ffd3b6; color: #061627; margin: 0; padding: 40px 20px; line-height: 1.6; }
+main { max-width: 860px; margin: 0 auto; }
+h1 { font-size: 2.6em; margin: 24px 0 8px; }
+.intro { font-size: 1.2em; margin: 0 0 24px; }
+.back { background: #061627; color: #ffe700; padding: 12px 24px; border-radius: 50px; text-decoration: none;
+        font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.back:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+.toc { background: #061627; border-radius: 16px; padding: 18px 26px; margin: 24px 0; }
+.toc h2 { color: #ffe700; margin: 0 0 8px; font-size: 1.1em; letter-spacing: 2px; text-transform: uppercase; }
+.toc ol { margin: 0; padding-left: 20px; color: #e2e8f0; }
+.toc a { color: #e2e8f0; text-decoration: none; }
+.toc a:hover { color: #ffe700; }
+.toc .date { color: #94a3b8; font-size: 0.9em; margin-right: 8px; }
+article { background: #fff; border-radius: 18px; padding: 28px 36px; margin: 32px 0;
+          box-shadow: 0 8px 20px rgba(6,22,39,0.15); border-top: 6px solid #ffe700; overflow-x: auto; }
+article h1 { font-size: 1.8em; margin-top: 0; }
+article h2 { font-size: 1.3em; margin-top: 28px; }
+table { border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+th, td { border: 1px solid #d5dde6; padding: 6px 12px; text-align: left; }
+th { background: #061627; color: #ffe700; }
+thead:not(:has(th:not(:empty))) { display: none; }
+tr:nth-child(even) td { background: #f6f8fb; }
+blockquote { margin: 12px 0; padding: 8px 16px; border-left: 4px solid #ffe700; background: #fff8d6; border-radius: 0 8px 8px 0; }
+code { background: #eef2f7; padding: 1px 5px; border-radius: 4px; }
+pre { background: #061627; color: #e2e8f0; padding: 14px; border-radius: 10px; overflow-x: auto; }
+pre code { background: none; }
+a { color: #0a4a8a; }
+.error { background: #fff; padding: 20px; border-radius: 12px; }
+</style>
+</head>
+<body>
+<main>
+<a href="https://oscaremoran.github.io/" class="back">&larr; Back to portfolio</a>
+<h1>BloodBot progress blog</h1>
+<p class="intro">A self-learning bot working its way up to the Mindustry map Bloodshed Bastion.</p>
+<nav class="toc" id="toc" hidden><h2>Posts</h2><ol id="toc-list"></ol></nav>
+<div id="posts">Loading posts&hellip;</div>
+</main>
+<script>
+// The post list lives in README.md's table: | date | [title](file.md) |
+async function load() {
+    const posts = document.getElementById('posts');
+    try {
+        const readme = await (await fetch('README.md')).text();
+        const entries = [...readme.matchAll(/^\|\s*([\d-]+)\s*\|\s*\[([^\]]+)\]\(([^)]+\.md)\)/gm)]
+            .map(m => ({ date: m[1], title: m[2], file: m[3] }));
+        const texts = await Promise.all(entries.map(e => fetch(e.file).then(r => r.ok ? r.text() : '')));
+
+        posts.innerHTML = '';
+        const toc = document.getElementById('toc-list');
+        entries.forEach((e, i) => {
+            if (!texts[i]) return;
+            const id = e.file.replace(/\.md$/, '');
+            const article = document.createElement('article');
+            article.id = id;
+            article.innerHTML = marked.parse(texts[i]);
+            posts.appendChild(article);
+            toc.insertAdjacentHTML('beforeend',
+                `<li><span class="date">${e.date}</span><a href="#${id}"></a></li>`);
+            toc.lastElementChild.querySelector('a').textContent = e.title;
+        });
+        document.getElementById('toc').hidden = false;
+        if (location.hash) document.querySelector(location.hash)?.scrollIntoView();
+    } catch (err) {
+        posts.innerHTML = '<p class="error">Couldn\'t load the posts.</p>';
+    }
+}
+load();
+</script>
+</body>
+</html>
