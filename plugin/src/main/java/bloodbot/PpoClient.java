@@ -141,6 +141,9 @@ public class PpoClient implements Agent.Policy{
         endGame();
     }
 
+    /** Extra points for winning, on top of the outcome score's own win bonus (the user's rule, 2026-10-31). */
+    static final float WIN_BONUS = 100f;
+
     void endGame(){
         Team player = Vars.state.rules.defaultTeam;
         boolean won = plugin.winner == player;
@@ -148,6 +151,7 @@ public class PpoClient implements Agent.Policy{
         float coreHealth = player.core() == null ? 0f : player.core().health / player.core().maxHealth;
         float capTicks = CAP_SECONDS * 60;
         int unused = agent.penalizeUnused();
+        if(won) agent.addPoints(WIN_BONUS);
         float fitness = agent.fitness(won, plugin.ticks, capTicks) + agent.rulePointsTotal;
         float reward = stepReward() + (won ? (agent.fitness(true, plugin.ticks, capTicks) - agent.potential(plugin.ticks, capTicks)) / 100f : 0f);
 

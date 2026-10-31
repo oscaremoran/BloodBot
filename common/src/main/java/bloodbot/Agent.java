@@ -253,8 +253,17 @@ public class Agent{
         enemyCoresStart = enemyCores();
     }
 
+    /** Core health at the last check, for the core-damage penalty (the user's rule, 2026-10-31): -10 per 1% lost. */
+    float lastCoreHealth = 1f;
+    static final float CORE_DAMAGE_PENALTY = 1000f;
+
     void update(){
         builder.update();
+        if(Vars.state.updateId % 10 == 7 && builder.core() != null){
+            float hp = builder.core().health / builder.core().maxHealth;
+            if(hp < lastCoreHealth) addPoints(-CORE_DAMAGE_PENALTY * (lastCoreHealth - hp));
+            lastCoreHealth = hp;
+        }
         if(Vars.state.updateId % 60 == 30 && builder.core() != null) checkTurretAmmo();
         if(Vars.state.updateId % 10 == 5 && builder.core() != null) checkUsed();
         if(Vars.state.updateId % 10 == 0 && builder.core() != null){
