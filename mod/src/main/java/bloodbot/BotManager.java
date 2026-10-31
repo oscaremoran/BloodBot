@@ -31,7 +31,11 @@ public class BotManager{
         Fi file = brainDir.child(d.brainFile);
         if(file.exists()){
             brain = Brain.load(file);
-            if(!Arrays.equals(brain.shape, Agent.shape())){
+            // Everything but the hidden size (index 6) must match this game's inputs and outputs; the hidden size is the
+            // brain's own business (64 for the old evolution brains, 256 for PPO).
+            int[] want = Agent.shape().clone(), got = brain.shape.clone();
+            if(got.length == want.length){ want[6] = 0; got[6] = 0; }
+            if(!Arrays.equals(got, want)){
                 Log.err("[bloodbot] @ was trained with a different block list or brain layout; it can't be used with this game version.", d.brainFile);
                 brain = null;
             }

@@ -24,6 +24,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from bloodbot import export_ppo
 from bloodbot.ppo import Dims, Net, act, gae, ppo_update, widen
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -149,6 +150,10 @@ class Trainer:
         torch.save({"net": self.net.state_dict(), "opt": self.opt.state_dict(), "state": self.state,
                     "dims": self.dims.as_list()}, tmp)
         os.replace(tmp, OUT / "checkpoint.pt")
+        # Brain snapshots for the mod's difficulty levels (python3 -m bloodbot.pick_brains): every 25 updates, plus the newest.
+        export_ppo.export(OUT / "checkpoint.pt", OUT / "brains" / "latest.bin")
+        if self.state["updates"] % 25 == 0:
+            export_ppo.export(OUT / "checkpoint.pt", OUT / "brains" / f"update_{self.state['updates']:05d}.bin")
 
     # ---- curriculum ----
 
