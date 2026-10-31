@@ -13,3 +13,4 @@ server/server-release.jar
 server/config/*
 !server/config/rules.hjson
 maps/library/
+runs/**/brains/
