@@ -14,12 +14,16 @@ h1 { font-size: 2.6em; margin: 24px 0 8px; }
         font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .back:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-.toc { background: #061627; border-radius: 16px; padding: 18px 26px; margin: 24px 0; }
-.toc h2 { color: #ffe700; margin: 0 0 8px; font-size: 1.1em; letter-spacing: 2px; text-transform: uppercase; }
-.toc ol { margin: 0; padding-left: 20px; color: #e2e8f0; }
-.toc a { color: #e2e8f0; text-decoration: none; }
-.toc a:hover { color: #ffe700; }
-.toc .date { color: #94a3b8; font-size: 0.9em; margin-right: 8px; }
+.post-list { list-style: none; padding: 0; margin: 24px 0; display: grid; gap: 14px; }
+.post-list a { display: block; background: #061627; color: #e2e8f0; text-decoration: none; border-radius: 16px;
+               padding: 18px 24px; border: 2px solid #061627; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+               transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+.post-list a:hover { transform: translateY(-3px); border-color: #ffe700; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+.post-list .date { display: block; color: #94a3b8; font-size: 0.9em; }
+.post-list .title { display: block; color: #ffe700; font-size: 1.3em; font-weight: bold; margin-top: 2px; }
+.post-nav { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+.post-nav a { color: #061627; font-weight: bold; text-decoration: none; }
+.post-nav a:hover { text-decoration: underline; }
 article { background: #fff; border-radius: 18px; padding: 28px 36px; margin: 32px 0;
           box-shadow: 0 8px 20px rgba(6,22,39,0.15); border-top: 6px solid #ffe700; overflow-x: auto; }
 article h1 { font-size: 1.8em; margin-top: 0; }
@@ -39,40 +43,69 @@ a { color: #0a4a8a; }
 </head>
 <body>
 <main>
-<a href="https://oscaremoran.github.io/" class="back">&larr; Back to portfolio</a>
-<h1>BloodBot progress blog</h1>
-<p class="intro">A self-learning bot working its way up to the Mindustry map Bloodshed Bastion.</p>
-<nav class="toc" id="toc" hidden><h2>Posts</h2><ol id="toc-list"></ol></nav>
-<div id="posts">Loading posts&hellip;</div>
+<a href="https://oscaremoran.github.io/" class="back" id="back">&larr; Back to portfolio</a>
+<div id="view">Loading&hellip;</div>
 </main>
 <script>
-// The post list lives in README.md's table: | date | [title](file.md) |
+// The post list lives in blog/README.md's table: | date | [title](file.md) |
+// No hash shows the list; #<post-file-name> shows that one post.
+let entries = [];
+
+function esc(t) {
+    return t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+function showList() {
+    document.title = 'BloodBot progress blog';
+    document.getElementById('back').href = 'https://oscaremoran.github.io/';
+    document.getElementById('back').innerHTML = '&larr; Back to portfolio';
+    document.getElementById('view').innerHTML = `
+        <h1>BloodBot progress blog</h1>
+        <p class="intro">A self-learning bot working its way up to the Mindustry map Bloodshed Bastion.</p>
+        <ul class="post-list">${entries.map(e => `
+            <li><a href="#${e.id}"><span class="date">${esc(e.date)}</span><span class="title">${esc(e.title)}</span></a></li>`).join('')}
+        </ul>`;
+}
+
+async function showPost(i) {
+    const e = entries[i];
+    const view = document.getElementById('view');
+    document.title = e.title + ' | BloodBot blog';
+    document.getElementById('back').href = '#';
+    document.getElementById('back').innerHTML = '&larr; All posts';
+    const res = await fetch('blog/' + e.file);
+    if (!res.ok) throw new Error(res.status);
+    // entries are newest first, so the newer post is i-1
+    const newer = entries[i - 1], older = entries[i + 1];
+    view.innerHTML = `<article>${marked.parse(await res.text())}</article>
+        <div class="post-nav">
+            <span>${older ? `<a href="#${older.id}">&larr; ${esc(older.title)}</a>` : ''}</span>
+            <span>${newer ? `<a href="#${newer.id}">${esc(newer.title)} &rarr;</a>` : ''}</span>
+        </div>`;
+}
+
+async function route() {
+    const id = location.hash.slice(1);
+    const i = entries.findIndex(e => e.id === id);
+    try {
+        if (i >= 0) await showPost(i); else showList();
+    } catch (err) {
+        document.getElementById('view').innerHTML = '<p class="error">Couldn\'t load that post.</p>';
+    }
+    window.scrollTo(0, 0);
+}
+
 async function load() {
-    const posts = document.getElementById('posts');
     try {
         const readme = await (await fetch('blog/README.md')).text();
-        const entries = [...readme.matchAll(/^\|\s*([\d-]+)\s*\|\s*\[([^\]]+)\]\(([^)]+\.md)\)/gm)]
-            .map(m => ({ date: m[1], title: m[2], file: m[3] }));
-        const texts = await Promise.all(entries.map(e => fetch('blog/' + e.file).then(r => r.ok ? r.text() : '')));
-
-        posts.innerHTML = '';
-        const toc = document.getElementById('toc-list');
-        entries.forEach((e, i) => {
-            if (!texts[i]) return;
-            const id = e.file.replace(/\.md$/, '');
-            const article = document.createElement('article');
-            article.id = id;
-            article.innerHTML = marked.parse(texts[i]);
-            posts.appendChild(article);
-            toc.insertAdjacentHTML('beforeend',
-                `<li><span class="date">${e.date}</span><a href="#${id}"></a></li>`);
-            toc.lastElementChild.querySelector('a').textContent = e.title;
-        });
-        document.getElementById('toc').hidden = false;
-        if (location.hash) document.querySelector(location.hash)?.scrollIntoView();
+        entries = [...readme.matchAll(/^\|\s*([\d-]+)\s*\|\s*\[([^\]]+)\]\(([^)]+\.md)\)/gm)]
+            .map(m => ({ date: m[1], title: m[2], file: m[3], id: m[3].replace(/\.md$/, '') }));
     } catch (err) {
-        posts.innerHTML = '<p class="error">Couldn\'t load the posts.</p>';
+        document.getElementById('view').innerHTML = '<p class="error">Couldn\'t load the posts.</p>';
+        return;
     }
+    window.addEventListener('hashchange', route);
+    route();
 }
 load();
 </script>
