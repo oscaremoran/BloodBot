@@ -167,11 +167,11 @@ class Trainer:
         if new_best:
             self.best_wave[result["map"]] = result["wave"]
             print(f"new best wave on {result['map']}: {result['wave']} (game {game}, recorded)", flush=True)
-        # The user's rule (2026-10-30): also record the first game finished in each round (learning update).
+        # The user's rules (2026-10-30): always record wins, and the first game finished in each round (learning update).
         first_of_round = s.get("roundRecorded", -1) != s["updates"]
         if first_of_round:
             s["roundRecorded"] = s["updates"]
-        if scheduled(game) or first_win or new_best or first_of_round or self.args.record_all:
+        if scheduled(game) or won or new_best or first_of_round or self.args.record_all:
             save = str(OUT / result["map"] / f"game_{game:05d}")
             if first_win:
                 s["firstWin"].append(result["map"])
