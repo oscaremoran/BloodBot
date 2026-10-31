@@ -126,14 +126,23 @@ def _bar(lo, hi, lg, ticks, height):
     shift = lambda v: "0" if v <= lo else "-100%" if v >= hi else "-50%"
     fill = max(0.0, min(1.0, (lg - lo) / (hi - lo))) * 100
     parts = []
+    n_above = n_below = 0  # labels alternate between two rows so neighbours never overlap
     for v, above, below, strong in ticks:
         parts.append(f'<div style="position:absolute;left:{pos(v)};top:0;height:{height}px;'
                      f'border-left:{2 if strong else 1}px solid {"#fffa" if strong else "#fff5"}"></div>')
         if above:
-            parts.append(f'<div style="position:absolute;left:{pos(v)};bottom:{height + 6}px;transform:translateX({shift(v)});'
+            up = 6 + 22 * (n_above % 2)
+            n_above += 1
+            parts.append(f'<div style="position:absolute;left:{pos(v)};bottom:{height}px;height:{up}px;'
+                         f'border-left:1px dotted #ffd37f88"></div>'
+                         f'<div style="position:absolute;left:{pos(v)};bottom:{height + up}px;transform:translateX({shift(v)});'
                          f'text-align:center;white-space:nowrap;line-height:15px">{above}</div>')
         if below:
-            parts.append(f'<div style="position:absolute;left:{pos(v)};top:{height + 6}px;transform:translateX({shift(v)});'
+            down = 6 + 38 * (n_below % 2)
+            n_below += 1
+            parts.append(f'<div style="position:absolute;left:{pos(v)};top:{height}px;height:{down}px;'
+                         f'border-left:1px dotted #fff6"></div>'
+                         f'<div style="position:absolute;left:{pos(v)};top:{height + down}px;transform:translateX({shift(v)});'
                          f'text-align:center;white-space:nowrap;line-height:15px">{below}</div>')
     return (f'<div style="position:relative;height:{height}px;border-radius:{height // 2}px;background:#8884">'
             f'<div style="height:100%;width:{fill:.2f}%;border-radius:{height // 2}px;'
@@ -164,9 +173,10 @@ def evo_bar(e):
         for lv in range(len(EVO_LEVELS)) if evo_win(m, lv) > lo]
     zoom = _bar(lo, hi, lg, zticks, 30)
     name = EVO_MARKS[m + 1][1]
-    return (f'<div style="margin:44px 8px 64px">{whole}</div>'
+    return (f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:1100px;margin:70px 0 100px">{whole}</div>'
+            f'</div>'
             f'<div class="muted" style="font-size:13px;margin:0 0 30px">Zoom: {name}</div>'
-            f'<div style="margin:0 8px 40px">{zoom}</div>')
+            f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:700px;margin:50px 0 90px">{zoom}</div></div>')
 
 
 def rank(g):
