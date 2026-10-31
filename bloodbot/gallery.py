@@ -109,10 +109,10 @@ def current_evolution(games, run):
 EVO_MARKS = [(0, "Random")] + list(zip(EVO_END, ["Ground Zero", "Frozen Forest", "Craters", "Fungal Pass", "USS Iowa",
                                                  "Bloodshed Bastion"]))
 # Human skill levels on the same scale (log10), roughly what a human player at that level can beat.
-# Nobody has ever beaten Bloodshed Bastion, so the top of the scale is beyond every human; Oscar is past USS Iowa,
-# halfway to it.
+# Nobody has ever beaten Bloodshed Bastion, so the top of the scale is beyond every human; Oscar is halfway between
+# Veteran and Nobody yet.
 HUMAN_LEVELS = [(3.0, "Noob"), (EVO_END[0], "Bad"), (4.0, "Fine"), (EVO_END[2], "Good"), (5.0, "Veteran"),
-                ((EVO_END[4] + EVO_END[5]) / 2, "Oscar"), (6.0, "Nobody yet")]
+                ((EVO_END[3] + EVO_END[5]) / 2, "Oscar"), (6.0, "Nobody yet")]
 
 
 def evo_num(v):
@@ -131,7 +131,7 @@ def _bar(lo, hi, lg, ticks, height):
         parts.append(f'<div style="position:absolute;left:{pos(v)};top:0;height:{height}px;'
                      f'border-left:{2 if strong else 1}px solid {"#fffa" if strong else "#fff5"}"></div>')
         if above:
-            up = 6 + 22 * (n_above % 2)
+            up = 6 + 36 * (n_above % 2)
             n_above += 1
             parts.append(f'<div style="position:absolute;left:{pos(v)};bottom:{height}px;height:{up}px;'
                          f'border-left:1px dotted #ffd37f88"></div>'
@@ -173,15 +173,45 @@ def evo_bar(e):
         for lv in range(len(EVO_LEVELS)) if evo_win(m, lv) > lo]
     zoom = _bar(lo, hi, lg, zticks, 30)
     # Zoom on the human skill levels: Noob through Nobody yet.
-    hticks = [(v, gold(name), small(evo_num(v)), True) for v, name in HUMAN_LEVELS]
+    # Human levels above (with their numbers), and the maps beaten in that range below.
+    human_at = {v: name for v, name in HUMAN_LEVELS}
+    maps_at = {v: name for v, name in EVO_MARKS if v >= HUMAN_LEVELS[0][0]}
+    hticks = [(v, f'{gold(human_at[v])}<br>{small(f"{evo_num(v)} · Elo {400 * v:.0f}")}' if v in human_at else None,
+               f'{maps_at[v]}<br>{small(evo_num(v))}' if v in maps_at else None, v in human_at)
+              for v in sorted(set(human_at) | set(maps_at))]
     levels = _bar(HUMAN_LEVELS[0][0], HUMAN_LEVELS[-1][0], lg, hticks, 30)
     name = EVO_MARKS[m + 1][1]
-    return (f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:1100px;margin:70px 0 100px">{whole}</div>'
+    return (f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:1100px;margin:80px 0 100px">{whole}</div>'
             f'</div>'
             f'<div class="muted" style="font-size:13px;margin:0 0 30px">Zoom: levels</div>'
-            f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:900px;margin:50px 0 80px">{levels}</div></div>'
+            f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:1000px;margin:90px 0 100px">{levels}</div></div>'
             f'<div class="muted" style="font-size:13px;margin:0 0 30px">Zoom: {name}</div>'
             f'<div style="overflow-x:auto;padding:0 60px"><div style="min-width:700px;margin:50px 0 90px">{zoom}</div></div>')
+
+
+# ---- Elo: each level (map at an enemy strength) is an opponent rated 400 x its winning evolution (log10), so
+# Ground Zero at 30% = 1200, Bloodshed Bastion at 100% = 2400, and the human skill levels land at Noob 1200 ...
+# Oscar ~2296, Nobody yet 2400. The bot starts at 800 and gains or loses rating after every game, chess-style.
+ELO_START, ELO_K = 800.0, 24.0
+
+
+def level_elo(g):
+    m = EVO_LADDER.index(g["map"])
+    level = min(range(4), key=lambda i: abs(EVO_LEVELS[i] - g["difficulty"]))
+    return 400 * evo_win(m, level)
+
+
+def elo_ratings(games):
+    """Elo after each game, per run: {(run, game): rating}."""
+    out, rating = {}, {}
+    for g in sorted(games, key=lambda g: (g["run"], g["game"])):
+        if g["bot"] != "learning" or g["map"] not in EVO_LADDER:
+            continue
+        r = rating.get(g["run"], ELO_START)
+        expected = 1 / (1 + 10 ** ((level_elo(g) - r) / 400))
+        r += ELO_K * ((g["outcome"] == "win") - expected)
+        rating[g["run"]] = out[(g["run"], g["game"])] = r
+    return out
 
 
 def rank(g):
@@ -212,25 +242,30 @@ def write_scoreboard(games):
               <span class="muted">game {b['game']} ({b['who']}) · {b['minutes']:.0f} min · core {b['core']:.0%}</span>{link}</div>""")
         best_cards.append(f'<div class="card"><h3 style="margin:0 0 8px">{nice_map(m)}</h3>{"<br>".join(lines)}</div>')
 
+    elo = elo_ratings(games)
     rows = []
     for g in sorted(games, key=lambda g: (g["run"], g["game"])):
+        e = elo.get((g["run"], g["game"]))
         link = f'<a href="viewer.html?game={g["replay"]}">watch</a>' if g["replay"] else ""
         rows.append(f"""<tr data-map="{g['map']}" data-run="{html.escape(g['run'])}" data-gen="{'' if g['generation'] is None else g['generation']}">
           <td>{html.escape(g['run'])}</td><td>{g['game']}</td><td>{g['generation'] if g['generation'] is not None else ''}</td>
           <td>{html.escape(g['who'])}</td><td>{nice_map(g['map'])}</td><td>{int(g['difficulty'] * 100)}%</td>
           <td class="{g['outcome']}">{g['outcome']}</td><td data-v="{g['wave']}">{wave_text(g)}</td>
           <td>{g['core']:.0%}</td><td>{'' if g['fitness'] is None else f"{g['fitness']:.1f}"}</td>
-          <td data-v="{evolution(g) or 0}">{fmt_evo(evolution(g))}</td><td>{g['minutes']:.1f}</td><td>{g['blocks']}</td><td>{link}</td></tr>""")
+          <td data-v="{evolution(g) or 0}">{fmt_evo(evolution(g))}</td><td data-v="{e or 0}">{'' if e is None else f"{e:.0f}"}</td><td>{g['minutes']:.1f}</td><td>{g['blocks']}</td><td>{link}</td></tr>""")
 
     runs = sorted({g["run"] for g in games if g["bot"] == "learning"}, key=lambda r: max(x["game"] for x in games if x["run"] == r))
     latest = max(runs, key=lambda r: (RUNS / r / "log.csv").stat().st_mtime) if runs else None
     cur = current_evolution(games, latest) if latest else None
+    cur_elo = elo[max((k for k in elo if k[0] == latest), key=lambda k: k[1])] if any(k[0] == latest for k in elo) else ELO_START
     evo_banner = (f'<div style="margin:-24px -24px 24px;padding:16px 24px 6px;background:#161b22;border-bottom:1px solid #30363d">'
                   f'<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">'
                   f'<span><span class="muted">Current evolution ({latest})</span> '
                   f'<span style="font-size:28px;font-weight:700;margin-left:8px">{fmt_evo(cur)}</span>'
                   f'<span style="font-size:28px;font-weight:700;margin-left:16px;color:#ffd37f">'
-                  f'{max(0.0, min(1.0, math.log10(max(cur, 1)) / 6)) * 100:.1f}%</span></span>'
+                  f'{max(0.0, min(1.0, math.log10(max(cur, 1)) / 6)) * 100:.1f}%</span>'
+                  f'<span class="muted" style="margin-left:28px">Elo</span>'
+                  f'<span style="font-size:28px;font-weight:700;margin-left:8px">{cur_elo:.0f}</span></span>'
                   f'<span class="muted">Logarithmic scale (each step = ×10) · 1 = random start · 1,000 = beats Ground Zero at 30% · 1,000,000 = beats Bloodshed Bastion</span></div>'
                   f'{evo_bar(cur)}</div>'
                   if cur is not None else "")
@@ -252,7 +287,7 @@ Generation: <input id="genFilter" size="8" placeholder="e.g. 40 or 30-40" title=
 <span class="muted">Click a column to sort.</span></p>
 <table id="games"><thead><tr>
 <th>run</th><th>game</th><th>generation</th><th>player</th><th>map</th><th>enemy strength</th><th>result</th><th>wave</th>
-<th>core left</th><th>score</th><th>evolution</th><th>minutes</th><th>blocks built</th><th>replay</th>
+<th>core left</th><th>score</th><th>evolution</th><th>Elo</th><th>minutes</th><th>blocks built</th><th>replay</th>
 </tr></thead><tbody>{''.join(rows)}</tbody></table>
 <script>
 const table = document.getElementById("games"), body = table.tBodies[0];
