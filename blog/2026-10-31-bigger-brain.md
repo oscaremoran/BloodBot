@@ -1,6 +1,9 @@
 # 2026-10-31: A bigger brain and a second pair of eyes
 
-> ✍️ *Intro: what today was about.*
+I increased the brain size by 4x, which seems to make it better. If my brain was four times as big, hopefully I would have already made a bot that could beat BB :( So it's beaten 55% and it's working through 80%. The flamethrower enemies (maces) on the last few waves seem to really annoy the AI. It got a new record on points in game 1470, where it won. Right now we have 10 wins (about 8%) on 80% difficulty. On game 1397, for some reason the bot decided to build ONE THOUSAND AND FORTY SEVEN blocks and it somehow won!
+
+![Game 1397's base: 1,047 blocks](images/game-1397-base.png)
+
 
 ## Where it stands
 
