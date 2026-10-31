@@ -37,7 +37,8 @@ blockquote { margin: 12px 0; padding: 8px 16px; border-left: 4px solid #ffe700; 
 code { background: #eef2f7; padding: 1px 5px; border-radius: 4px; }
 pre { background: #061627; color: #e2e8f0; padding: 14px; border-radius: 10px; overflow-x: auto; }
 pre code { background: none; }
-article img { max-width: 100%; height: auto; border-radius: 12px; display: block; margin: 16px 0; }
+article img { max-width: 100%; height: auto; border-radius: 12px; display: block; margin: 0 0 16px; }
+article .caption { font-weight: bold; font-style: italic; margin: 20px 0 8px; }
 a { color: #0a4a8a; }
 .error { background: #fff; padding: 20px; border-radius: 12px; }
 </style>
@@ -85,6 +86,14 @@ async function showPost(i) {
             <span>${older ? `<a href="#${older.id}">&larr; ${esc(older.title)}</a>` : ''}</span>
             <span>${newer ? `<a href="#${newer.id}">${esc(newer.title)} &rarr;</a>` : ''}</span>
         </div>`;
+    // show each image's alt text as a caption just above it
+    view.querySelectorAll('article img[alt]').forEach(img => {
+        if (!img.alt.trim()) return;
+        const cap = document.createElement('div');
+        cap.className = 'caption';
+        cap.textContent = img.alt;
+        img.before(cap);
+    });
 }
 
 async function route() {
