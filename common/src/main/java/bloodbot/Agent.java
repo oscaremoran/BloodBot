@@ -204,18 +204,26 @@ public class Agent{
         for(Building b : ownBuildings()){
             if(!usedBlocks.contains(b.pos()) && judged(b) && inUse(b)) usedBlocks.add(b.pos());
             if(b instanceof Conveyor.ConveyorBuild c && builder.builtPos.contains(c.pos()) && c.items.has(Items.copper)) checkChain(c);
-            if(!routerToTurret && b instanceof Router.RouterBuild r && builder.builtPos.contains(r.pos())
+            if(b instanceof Router.RouterBuild r && builder.builtPos.contains(r.pos())
                 && (r.lastItem == Items.copper || r.items.has(Items.copper))) checkRouter(r);
         }
     }
 
+    /**
+     * Router rule (the user's, 2026-10-31; was +50 once per game): +30 for each bot-built turret a bot-built router feeds
+     * copper into, times the forward multiplier, so a router line feeding a row of duos on the enemy path pays the most.
+     */
+    static final float ROUTER_TURRET_BONUS = 30f;
+    final IntSet routerFedTurrets = new IntSet();
+
     void checkRouter(Router.RouterBuild r){
         for(Building o : r.proximity){
             if(o instanceof ItemTurret.ItemTurretBuild t && t.team == team && builder.builtPos.contains(t.pos())
+                && !routerFedTurrets.contains(t.pos())
                 && t.ammo.contains(e -> e instanceof ItemTurret.ItemEntry ie && ie.item == Items.copper)){
                 routerToTurret = true;
-                addPoints(CHAIN_BONUS);
-                return;
+                routerFedTurrets.add(t.pos());
+                addPoints(ROUTER_TURRET_BONUS * forward(t.x, t.y));
             }
         }
     }

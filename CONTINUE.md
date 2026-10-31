@@ -14,6 +14,14 @@ How to run things:
 - Pages: `python3 -m bloodbot.gallery` → `runs/index.html` (replay viewer) and `runs/scoreboard.html`.
 - Stop everything: `pkill -TERM -f bloodbot.ppo_train; pkill -f "java .*server-release.jar"`.
 
+Session 2026-10-31 (end at game 1794, Ground Zero 80%, about 6% wins there; still not cleared). Changes made today, all live:
+brain 64 -> 256 neurons per layer; two views (minimap + 32x32-tile close-up around the ship); PPO brain exported to the mod
+(bloodbot/export_ppo.py, pick_brains defaults to runs/ppo); rewards: -10 per 1% core HP lost, +100 extra per win, +100 per
+mace killed, walls earn +1 per 20 HP of enemy damage soaked (max 300/game), turret hits / mace kills / router-fed turrets pay
+x1..x3 by distance from the core (forward defense), +30 per router-fed turret (was +50 once per game); updates every 1,024
+decisions. Tried and reverted: exploration 0.005 (made it timid). The last three reward changes (walls, forward, routers)
+had only ~30 games before stopping: judge them first next session (watch "wall soak", "router-fed" in trainer.log).
+
 Open ideas, not done:
 - **(next, from me) Reward chokepoints and walls:** give points for walls that make enemies take a longer path or bunch up in front of turrets (chokepoints), so it learns to steer enemies into kill zones instead of ringing the core with duos.
 - (a) Export PPO brains to the mod.

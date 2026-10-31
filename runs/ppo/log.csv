@@ -1684,3 +1684,120 @@ game,generation,member,map,difficulty,outcome,wave,winWave,coreHealth,fitness,ga
 1675,526,1,groundZero,0.8,loss,9,10,0.0,1111.57,1130,60.4,431,build=341;remove=1;rebuild=3;supply items=152;ship guard=2;ship mine=2
 1676,527,2,groundZero,0.8,loss,9,10,0.0,663.87,1092,54.5,119,wait=53;build=262;remove=39;rebuild=102;supply items=127;configure=291;ship guard=2;ship mine=4
 1677,527,1,groundZero,0.8,loss,8,10,0.0,733.48,1007,42.5,174,wait=3;build=197;rebuild=35;supply items=111;ship guard=1;ship mine=2
+1678,528,3,groundZero,0.8,loss,8,10,0.0,192.37,1005,60.4,234,wait=31;build=257;remove=30;rebuild=53;supply items=125;ship guard=2;ship mine=3
+1679,528,2,groundZero,0.8,loss,8,10,0.0,460.57,1008,55.7,280,wait=8;build=229;remove=2;rebuild=66;supply items=175;ship guard=2;ship mine=3
+1680,529,3,groundZero,0.8,loss,7,10,0.0,56.6,888,37.8,211,wait=33;build=274;remove=12;rebuild=46;supply items=114;ship guard=1;ship mine=3
+1681,530,1,groundZero,0.8,loss,9,10,0.0,491.36,1130,53.2,323,wait=142;build=406;remove=84;rebuild=31;supply items=300;configure=9;ship guard=3;ship mine=3;ship deliver=2
+1682,530,2,groundZero,0.8,loss,7,10,0.0,-340.82,887,40.1,220,wait=40;build=278;remove=50;rebuild=152;supply items=214;ship guard=2;ship mine=2
+1683,532,3,groundZero,0.8,loss,9,10,0.0,1755.56,1134,53.7,332,wait=6;build=320;remove=3;rebuild=85;supply items=344;configure=318;ship guard=2;ship mine=3;ship deliver=1
+1684,533,1,groundZero,0.8,loss,9,10,0.0,861.62,1132,54.1,472,wait=140;build=436;remove=46;rebuild=17;supply items=369;configure=20;ship guard=2;ship mine=4;ship deliver=2
+1685,533,2,groundZero,0.8,loss,8,10,0.0,155.39,1006,48.8,183,wait=120;build=256;remove=86;rebuild=140;supply items=262;ship guard=2;ship mine=3
+1686,535,3,groundZero,0.8,loss,7,10,0.0,208.82,890,42.3,216,wait=38;build=231;remove=20;rebuild=127;supply items=259;configure=145;ship guard=2;ship mine=3
+1687,536,2,groundZero,0.8,loss,8,10,0.0,-109.43,1008,46.3,248,wait=122;build=326;remove=105;rebuild=15;supply items=319;ship guard=2;ship mine=3
+1688,536,1,groundZero,0.8,win,10,10,0.135,1621.29,1249,57.4,555,wait=134;build=550;remove=52;rebuild=13;supply items=492;ship guard=2;ship mine=4;ship deliver=3
+1689,538,3,groundZero,0.8,loss,9,10,0.0,1495.09,1131,52.9,256,wait=78;build=427;remove=11;rebuild=54;supply items=313;supply power=34;configure=198;ship guard=2;ship mine=4;ship deliver=1
+1690,538,2,groundZero,0.8,loss,7,10,0.0,-202.43,887,40.5,261,wait=80;build=325;remove=33;rebuild=84;supply items=249;ship guard=1;ship mine=2;ship deliver=1
+1691,539,1,groundZero,0.8,loss,9,10,0.0,624.76,1128,53.3,234,wait=91;build=314;remove=49;rebuild=142;supply items=386;configure=96;ship guard=2;ship mine=3;ship deliver=3
+1692,539,3,groundZero,0.8,loss,6,10,0.0,-82.64,767,31.6,188,build=227;supply items=59;ship guard=1;ship mine=1
+1693,541,2,groundZero,0.8,loss,9,10,0.0,1177.36,1128,56.4,186,wait=48;build=254;remove=30;rebuild=107;supply items=272;configure=212;ship guard=2;ship mine=2;ship deliver=1
+1694,542,1,groundZero,0.8,loss,9,10,0.0,274.24,1128,56.9,336,wait=220;build=524;remove=61;rebuild=19;supply items=299;ship guard=3;ship mine=3
+1695,542,3,groundZero,0.8,loss,8,10,0.0,861.93,1012,46.9,219,wait=12;build=340;remove=1;rebuild=52;supply items=217;configure=101;ship guard=2;ship mine=2
+1696,543,2,groundZero,0.8,loss,6,10,0.0,-676.43,771,34.9,317,wait=105;build=394;remove=17;rebuild=27;supply items=205;configure=3;ship guard=1;ship mine=3
+1697,545,3,groundZero,0.8,loss,9,10,0.0,659.56,1132,51.3,369,wait=97;build=297;remove=25;rebuild=134;supply items=180;configure=259;ship guard=2;ship mine=4;ship deliver=1
+1698,545,1,groundZero,0.8,win,10,10,0.015,1769.37,1248,56.5,468,wait=152;build=550;remove=49;rebuild=13;supply items=350;configure=21;ship guard=2;ship mine=4
+1699,546,2,groundZero,0.8,loss,9,10,0.0,749.2,1128,52.6,316,wait=113;build=270;remove=26;rebuild=359;supply items=266;ship guard=3;ship mine=3
+1700,546,1,groundZero,0.8,loss,8,10,0.0,641.18,1009,41.9,91,build=180;supply items=38;ship guard=1;ship mine=1
+1701,547,3,groundZero,0.8,loss,7,10,0.0,-408.8,887,60.5,290,wait=101;build=412;remove=26;rebuild=123;supply items=143;configure=78;ship guard=1;ship mine=3;ship deliver=1
+1702,548,2,groundZero,0.8,loss,8,10,0.0,-116.19,1009,64.0,282,wait=198;build=431;remove=34;rebuild=10;supply items=150;ship guard=2;ship mine=3
+1703,548,3,groundZero,0.8,loss,8,10,0.0,660.58,1008,42.0,108,wait=2;build=216;supply items=50;ship guard=1;ship mine=1
+1704,549,1,groundZero,0.8,loss,9,10,0.0,449.45,1130,66.7,580,wait=124;build=497;remove=28;rebuild=44;supply items=247;ship guard=2;ship mine=3
+1705,549,2,groundZero,0.8,loss,8,10,0.0,526.06,1007,55.7,180,wait=6;build=255;rebuild=57;supply items=115;ship guard=1;ship mine=2
+1706,550,2,groundZero,0.8,loss,8,10,0.0,560.19,1007,41.7,81,build=186;supply items=41;ship guard=1;ship mine=1
+1707,551,3,groundZero,0.8,loss,9,10,0.0,-214.5,1127,89.1,515,wait=191;build=557;remove=74;rebuild=17;supply items=282;ship guard=3;ship mine=4
+1708,551,1,groundZero,0.8,loss,9,10,0.0,444.03,1129,86.0,228,wait=118;build=409;remove=21;rebuild=46;supply items=160;configure=211;ship guard=3;ship mine=3;ship deliver=1
+1709,551,3,groundZero,0.8,loss,2,10,0.0,-985.86,320,11.5,3,build=18;supply items=8;ship mine=1
+1710,551,2,groundZero,0.8,loss,5,10,0.0,-221.71,652,27.9,89,build=155;supply items=29;ship guard=1;ship mine=1
+1711,553,3,groundZero,0.8,loss,6,10,0.0,-105.83,768,35.6,140,wait=10;build=151;remove=2;rebuild=132;supply items=55;ship guard=1;ship mine=2
+1712,553,1,groundZero,0.8,loss,8,10,0.0,437.65,1008,45.5,178,wait=58;build=156;remove=18;rebuild=197;supply items=94;ship guard=2;ship mine=2
+1713,554,2,groundZero,0.8,loss,9,10,0.0,970.25,1131,53.0,528,wait=73;build=436;remove=9;rebuild=65;supply items=275;ship guard=3;ship mine=3;ship deliver=1
+1714,554,3,groundZero,0.8,loss,8,10,0.0,384.18,1009,42.3,208,wait=39;build=247;rebuild=41;supply items=58;configure=136;ship guard=1;ship mine=3
+1715,554,1,groundZero,0.8,loss,8,10,0.0,537.02,1007,40.4,192,wait=2;build=203;rebuild=16;supply items=48;ship guard=1;ship mine=2
+1716,554,2,groundZero,0.8,loss,7,10,0.0,45.33,888,35.0,307,wait=9;build=226;rebuild=64;supply items=104;ship guard=1;ship mine=2
+1717,555,2,groundZero,0.8,loss,8,10,0.0,575.99,1006,40.8,133,wait=5;build=202;rebuild=20;supply items=86;ship guard=1;ship mine=1
+1718,556,1,groundZero,0.8,loss,6,10,0.0,-590.79,771,55.9,123,wait=148;build=185;remove=18;rebuild=76;supply items=86;configure=53;ship guard=2;ship mine=3
+1719,556,3,groundZero,0.8,loss,8,10,0.0,-377.72,1010,65.6,268,wait=249;build=377;remove=54;rebuild=17;supply items=90;ship guard=3;ship mine=3
+1720,557,2,groundZero,0.8,loss,8,10,0.0,-90.11,1006,44.8,244,wait=114;build=192;remove=13;rebuild=413;supply items=86;ship guard=1;ship mine=4
+1721,557,3,groundZero,0.8,loss,8,10,0.0,575.72,1009,40.3,124,wait=1;build=215;supply items=31;ship guard=1;ship mine=1
+1722,557,1,groundZero,0.8,loss,9,10,0.0,959.76,1130,46.9,275,wait=10;build=252;remove=2;rebuild=142;supply items=106;ship guard=1;ship mine=2
+1723,557,1,groundZero,0.8,loss,2,10,0.0,-1020.89,319,13.4,30,build=78;supply items=9;ship guard=1;ship mine=1
+1724,557,2,groundZero,0.8,loss,6,10,0.0,-203.61,768,32.9,97,build=107;rebuild=34;supply items=17;ship guard=1;ship mine=2
+1725,557,3,groundZero,0.8,loss,8,10,0.0,339.08,1007,42.6,89,wait=1;build=150;supply items=20;ship guard=1;ship mine=1
+1726,557,1,groundZero,0.8,loss,5,10,0.0,-186.34,656,29.4,209,wait=8;build=245;rebuild=35;supply items=75;ship guard=1;ship mine=2
+1727,558,2,groundZero,0.8,loss,6,10,0.0,-50.86,767,34.4,175,wait=4;build=226;remove=1;rebuild=36;supply items=65;ship guard=1;ship mine=2
+1728,559,3,groundZero,0.8,loss,7,10,0.0,187.83,889,43.2,238,wait=28;build=236;remove=16;rebuild=160;supply items=91;ship guard=2;ship mine=2
+1729,559,1,groundZero,0.8,loss,8,10,0.0,209.15,1007,49.7,174,wait=46;build=206;remove=27;rebuild=359;supply items=100;ship guard=2;ship mine=3
+1730,559,2,groundZero,0.8,loss,7,10,0.0,140.74,887,40.2,123,build=172;supply items=49;ship guard=1;ship mine=1
+1731,560,2,groundZero,0.8,loss,5,10,0.0,-452.51,649,29.4,117,build=236;rebuild=23;supply items=34;configure=117;ship mine=2
+1732,560,1,groundZero,0.8,loss,7,10,0.0,17.94,891,46.7,191,wait=2;build=193;rebuild=93;supply items=62;ship guard=1;ship mine=2
+1733,562,3,groundZero,0.8,loss,10,10,0.0,815.12,1247,82.0,576,wait=177;build=662;remove=32;rebuild=25;supply items=339;ship guard=2;ship mine=3;ship deliver=6
+1734,563,2,groundZero,0.8,loss,8,10,0.0,-252.96,1006,52.9,191,wait=104;build=452;remove=33;rebuild=209;supply items=69;ship guard=2;ship mine=4
+1735,563,1,groundZero,0.8,loss,9,10,0.0,779.01,1129,56.7,223,wait=71;build=310;remove=9;rebuild=133;supply items=134;configure=392;ship guard=2;ship mine=4
+1736,563,3,groundZero,0.8,loss,9,10,0.0,1021.85,1127,50.2,192,wait=1;build=227;rebuild=15;supply items=76;ship guard=1;ship mine=2
+1737,564,1,groundZero,0.8,loss,3,10,0.0,-735.32,419,38.3,34,build=89;supply items=20;ship guard=1;ship mine=1
+1738,564,2,groundZero,0.8,loss,7,10,0.0,93.42,890,59.7,281,wait=8;build=238;remove=3;rebuild=209;supply items=108;ship guard=2;ship mine=2
+1739,564,3,groundZero,0.8,loss,7,10,0.0,336.59,886,38.8,146,wait=3;build=188;supply items=73;ship guard=1;ship mine=1
+1740,564,1,groundZero,0.8,loss,8,10,0.0,381.93,1005,42.3,175,wait=2;build=205;supply items=55;ship guard=1;ship mine=1
+1741,565,2,groundZero,0.8,loss,6,10,0.0,-170.71,768,56.9,39,build=87;supply items=18;ship guard=1;ship mine=1
+1742,565,1,groundZero,0.8,loss,8,10,0.0,503.92,1006,45.1,100,wait=1;build=175;supply items=51;ship guard=1;ship mine=1
+1743,565,3,groundZero,0.8,loss,9,10,0.0,1049.91,1126,70.2,164,wait=2;build=245;rebuild=1;supply items=66;ship guard=1;ship mine=2
+1744,565,2,groundZero,0.8,loss,7,10,0.0,139.17,887,37.8,119,build=207;remove=1;supply items=37;ship guard=1;ship mine=1
+1745,566,1,groundZero,0.8,loss,3,10,0.0,-631.2,432,34.8,180,wait=3;build=183;remove=1;rebuild=3;supply items=65;ship guard=1;ship mine=2
+1746,566,3,groundZero,0.8,loss,7,10,0.0,399.83,888,53.7,211,wait=2;build=253;rebuild=1;supply items=82;ship guard=1;ship mine=2
+1747,566,2,groundZero,0.8,loss,9,10,0.0,1044.97,1129,48.5,158,build=183;supply items=43;ship guard=1;ship mine=1
+1748,566,1,groundZero,0.8,loss,8,10,0.0,578.04,1006,42.7,111,build=229;rebuild=28;supply items=63;ship guard=1;ship mine=2
+1749,566,1,groundZero,0.8,loss,2,10,0.0,-1210.8,320,15.5,194,wait=4;build=240;remove=3;supply items=72;ship guard=1;ship mine=1
+1750,568,2,groundZero,0.8,loss,7,10,0.0,193.96,891,45.9,177,wait=14;build=321;remove=3;rebuild=25;supply items=177;configure=336;ship guard=2;ship mine=3
+1751,568,3,groundZero,0.8,loss,8,10,0.0,-302.57,1006,50.4,227,wait=91;build=219;remove=30;rebuild=85;supply items=110;configure=250;ship guard=2;ship mine=4
+1752,569,1,groundZero,0.8,loss,8,10,0.0,313.14,1008,51.5,220,wait=31;build=177;remove=4;rebuild=363;supply items=223;ship guard=2;ship mine=3
+1753,569,2,groundZero,0.8,loss,6,10,0.0,106.07,771,36.7,256,wait=4;build=245;remove=1;rebuild=30;supply items=118;ship guard=1;ship mine=2
+1754,569,3,groundZero,0.8,loss,6,10,0.0,-152.49,770,36.3,109,wait=1;build=192;supply items=52;ship guard=1;ship mine=1
+1755,570,2,groundZero,0.8,loss,2,10,0.0,-1188.28,321,16.9,79,wait=1;build=207;supply items=36;ship guard=1;ship mine=1
+1756,570,2,groundZero,0.8,loss,8,10,0.0,553.12,1007,43.8,167,build=196;supply items=55;ship guard=1;ship mine=1
+1757,571,1,groundZero,0.8,loss,9,10,0.0,-151.49,1128,84.2,488,wait=195;build=441;remove=52;rebuild=72;supply items=234;ship guard=3;ship mine=4
+1758,571,3,groundZero,0.8,loss,7,10,0.0,329.98,890,66.7,214,wait=7;build=212;rebuild=72;supply items=113;ship guard=1;ship mine=2
+1759,572,2,groundZero,0.8,loss,6,10,0.0,-121.95,771,35.8,174,wait=3;build=198;remove=2;rebuild=115;supply items=89;ship guard=1;ship mine=2
+1760,572,3,groundZero,0.8,loss,7,10,0.0,122.06,886,46.1,157,wait=6;build=204;supply items=49;ship guard=1;ship mine=2
+1761,572,1,groundZero,0.8,loss,5,10,0.0,-169.36,650,29.4,62,build=135;remove=1;supply items=50;ship guard=1;ship mine=1
+1762,573,2,groundZero,0.8,loss,6,10,0.0,15.66,768,38.3,176,wait=8;build=160;remove=1;rebuild=154;supply items=83;ship guard=1;ship mine=4
+1763,573,3,groundZero,0.8,loss,6,10,0.0,-45.23,771,40.7,322,wait=67;build=300;remove=17;rebuild=14;supply items=150;configure=181;ship guard=1;ship mine=4
+1764,575,3,groundZero,0.8,loss,5,10,0.0,-1163.42,650,33.6,302,wait=72;build=366;remove=47;rebuild=3;supply items=159;ship guard=2;ship mine=2
+1765,575,1,groundZero,0.8,loss,8,10,0.0,1074.21,1005,51.6,163,wait=26;build=197;remove=7;rebuild=397;supply items=129;ship guard=1;ship mine=4
+1766,575,2,groundZero,0.8,loss,7,10,0.0,-402.64,889,45.4,300,wait=162;build=391;remove=102;rebuild=22;supply items=196;ship guard=2;ship mine=3
+1767,576,3,groundZero,0.8,loss,3,10,0.0,-934.54,369,19.0,154,wait=17;build=235;remove=17;supply items=99;ship guard=1;ship mine=1
+1768,576,1,groundZero,0.8,loss,2,10,0.0,-998.33,321,15.9,164,wait=1;build=140;supply items=37;ship guard=1;ship mine=1
+1769,576,2,groundZero,0.8,loss,8,10,0.0,1036.36,1005,45.4,164,wait=1;build=187;rebuild=22;supply items=96;ship guard=1;ship mine=2
+1770,577,3,groundZero,0.8,loss,5,10,0.0,-239.66,651,45.4,254,wait=16;build=193;remove=1;rebuild=40;supply items=103;ship guard=1;ship mine=2
+1771,577,2,groundZero,0.8,loss,9,10,0.0,1668.7,1090,49.6,154,wait=3;build=232;remove=1;supply items=90;ship guard=1;ship mine=1
+1772,578,3,groundZero,0.8,loss,5,10,0.0,11.34,663,59.1,136,wait=2;build=195;supply items=54;ship guard=1;ship mine=2
+1773,578,1,groundZero,0.8,loss,9,10,0.0,2452.72,1132,102.9,658,wait=54;build=547;remove=9;rebuild=13;supply items=282;configure=220;ship guard=2;ship mine=4;ship deliver=2
+1774,579,2,groundZero,0.8,loss,6,10,0.0,42.32,769,36.9,175,wait=39;build=293;remove=12;rebuild=16;supply items=99;ship guard=1;ship mine=2
+1775,579,1,groundZero,0.8,loss,6,10,0.0,329.16,768,36.2,62,wait=1;build=165;supply items=37;ship guard=1;ship mine=1
+1776,580,3,groundZero,0.8,loss,7,10,0.0,249.75,886,47.0,148,wait=82;build=333;remove=37;rebuild=126;supply items=153;ship guard=2;ship mine=3
+1777,581,2,groundZero,0.8,loss,6,10,0.0,166.34,767,39.7,185,wait=26;build=349;remove=8;rebuild=77;supply items=131;configure=173;ship guard=1;ship mine=3
+1778,582,1,groundZero,0.8,loss,8,10,0.0,580.55,1007,50.1,257,wait=182;build=398;remove=42;rebuild=178;supply items=176;ship guard=2;ship mine=3;ship deliver=1
+1779,582,2,groundZero,0.8,loss,7,10,0.0,715.5,888,40.1,218,wait=8;build=283;remove=2;rebuild=29;supply items=124;ship guard=1;ship mine=2
+1780,583,3,groundZero,0.8,loss,9,10,0.0,2016.63,1129,59.4,361,wait=100;build=466;remove=12;rebuild=29;supply items=230;configure=261;ship guard=2;ship mine=3;ship deliver=6
+1781,583,1,groundZero,0.8,loss,9,10,0.0,1625.23,1090,51.4,154,wait=4;build=197;supply items=55;ship guard=1;ship mine=1
+1782,584,2,groundZero,0.8,loss,7,10,0.0,1034.27,891,61.8,221,wait=6;build=308;remove=2;rebuild=98;supply items=108;ship guard=1;ship mine=2;ship deliver=2
+1783,585,3,groundZero,0.8,loss,6,10,0.0,-819.28,769,57.8,427,wait=207;build=365;remove=30;rebuild=14;supply items=149;ship guard=2;ship mine=3
+1784,586,3,groundZero,0.8,loss,5,10,0.0,-796.74,649,31.3,210,wait=50;build=208;remove=10;rebuild=83;supply items=99;ship guard=1;ship mine=2
+1785,586,1,groundZero,0.8,loss,9,10,0.0,554.53,1130,60.0,505,wait=152;build=589;remove=20;rebuild=125;supply items=232;ship guard=2;ship mine=3;ship deliver=2
+1786,586,2,groundZero,0.8,loss,9,10,0.0,1742.97,1129,53.6,186,wait=3;build=224;rebuild=23;supply items=55;configure=19;ship guard=1;ship mine=2
+1787,587,3,groundZero,0.8,loss,8,10,0.0,1149.27,1009,44.6,248,wait=8;build=241;rebuild=86;supply items=69;ship guard=2;ship mine=3
+1788,587,1,groundZero,0.8,loss,7,10,0.0,101.16,888,40.8,297,wait=31;build=257;remove=11;rebuild=71;supply items=88;ship guard=2;ship mine=2
+1789,587,2,groundZero,0.8,loss,6,10,0.0,-289.13,768,34.8,300,wait=2;build=183;remove=2;rebuild=27;supply items=79;configure=25;ship guard=2;ship mine=2
+1790,588,3,groundZero,0.8,loss,7,10,0.0,525.24,891,44.0,304,wait=39;build=195;remove=25;rebuild=150;supply items=95;ship guard=2;ship mine=3
+1791,588,2,groundZero,0.8,loss,3,10,0.0,-774.26,434,19.8,84,build=114;supply items=26;ship guard=1;ship mine=1
+1792,589,2,groundZero,0.8,loss,2,10,0.0,-1240.79,320,17.3,70,build=87;rebuild=1;supply items=15;configure=216;ship mine=2
+1793,590,3,groundZero,0.8,loss,9,10,0.0,1551.99,1127,56.5,195,wait=55;build=216;remove=44;rebuild=290;supply items=232;ship guard=3;ship mine=3
+1794,590,1,groundZero,0.8,loss,9,10,0.0,1758.01,1128,57.8,250,wait=48;build=471;remove=16;rebuild=27;supply items=83;configure=406;ship guard=3;ship mine=4
