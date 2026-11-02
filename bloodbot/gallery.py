@@ -39,16 +39,18 @@ def load_games():
     games = []
     for log in sorted(RUNS.glob("*/log.csv")):
         run = log.parent.name
+        human = run == "human"  # games logged by hand with bloodbot.human; member = the player's name
         with open(log) as f:
             for row in csv.DictReader(f):
                 replay = log.parent / row["map"] / f"game_{int(row['game']):05d}"
                 games.append({
-                    "run": run, "bot": "learning", "game": int(row["game"]), "generation": int(row["generation"]),
-                    "who": "brain" if row["member"] == "brain" else f"variant {row['member']}",
+                    "run": run, "bot": "human" if human else "learning", "game": int(row["game"]),
+                    "generation": None if human else int(row["generation"]),
+                    "who": row["member"] if human else "brain" if row["member"] == "brain" else f"variant {row['member']}" + (" (practice from wave 8)" if row.get("start") else ""),
                     "map": row["map"], "difficulty": float(row.get("difficulty") or 1), "outcome": row["outcome"],
                     "wave": int(row["wave"]), "winWave": int(row["winWave"]), "core": float(row["coreHealth"]),
                     "fitness": float(row["fitness"]), "minutes": int(row["gameSeconds"]) / 60,
-                    "blocks": int(row.get("blocksBuilt") or 0),
+                    "blocks": int(row.get("blocksBuilt") or 0), "practice": bool(row.get("start")),
                     "replay": replay.relative_to(RUNS).as_posix() if (replay / "replay.js").exists() else None,
                 })
     for result in sorted(RUNS.glob("campaign/*/game_*/result.json")):
@@ -81,12 +83,18 @@ def evo_win(m, level):
 
 def evolution(g):
     """Evolution shown by one game."""
-    if g["map"] not in EVO_LADDER:
+    if g["map"] not in EVO_LADDER or g.get("practice"):  # practice games start at wave 8: not a real result
         return None
     m = EVO_LADDER.index(g["map"])
     level = min(range(4), key=lambda i: abs(EVO_LEVELS[i] - g["difficulty"]))
     if g["outcome"] == "win":
         return 10 ** evo_win(m, level)
+    if g.get("bot") == "human":
+        # A human loss proves nothing about the levels below it (they didn't climb the ladder like the bot), so only
+        # wins score, except progress through Ground Zero's waves on the first map.
+        if m == 0:
+            return 10 ** (2.0 + (min(1.0, g["wave"] / g["winWave"]) if g["winWave"] else 0.0))
+        return None
     progress = min(1.0, g["wave"] / g["winWave"]) if g["winWave"] else 0.5
     if m == 0 and level == 0:  # before any win: 1 for building at all, up to 2 for surviving
         return 10 ** ((1.0 if g["blocks"] > 0 else 0.0) + progress)
@@ -113,6 +121,19 @@ EVO_MARKS = [(0, "Random")] + list(zip(EVO_END, ["Ground Zero", "Frozen Forest",
 # way from beating USS Iowa to beating it.
 HUMAN_LEVELS = [(3.0, "Noob"), (EVO_END[0], "Bad"), (4.0, "Fine"), (EVO_END[2], "Good"), (5.0, "Veteran"),
                 (EVO_END[4] + (EVO_END[5] - EVO_END[4]) / 4, "Oscar"), (6.0, "Nobody yet")]
+
+
+def humans_line(games):
+    """Each human's evolution (their best logged game: the hardest thing they've beaten), for the banner."""
+    best = {}
+    for g in games:
+        if g["bot"] == "human":
+            best[g["who"]] = max(best.get(g["who"], 0), evolution(g) or 0)
+    if not best:
+        return ""
+    parts = " · ".join(f'{html.escape(n)} <b>{fmt_evo(e)}</b> ({max(0.0, math.log10(max(e, 1)) / 6) * 100:.1f}%)'
+                       for n, e in sorted(best.items(), key=lambda t: -t[1]))
+    return f'<div class="muted" style="margin-top:6px">Humans (best game): {parts}</div>'
 
 
 def evo_num(v):
@@ -237,7 +258,7 @@ def write_scoreboard(games):
                   f'<span style="font-size:28px;font-weight:700;margin-left:16px;color:#ffd37f">'
                   f'{max(0.0, min(1.0, math.log10(max(cur, 1)) / 6)) * 100:.1f}%</span></span>'
                   f'<span class="muted">Logarithmic scale (each step = ×10) · 1 = random start · 1,000 = beats Ground Zero at 30% · 1,000,000 = beats Bloodshed Bastion</span></div>'
-                  f'{evo_bar(cur)}</div>'
+                  f'{humans_line(games)}{evo_bar(cur)}</div>'
                   if cur is not None else "")
     options = "".join(f'<option value="{m}">{nice_map(m)}</option>' for m in maps)
     run_options = "".join(f'<option value="{html.escape(r)}"{" selected" if r == latest else ""}>{html.escape(r)}</option>'

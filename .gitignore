@@ -15,3 +15,5 @@ server/config/*
 maps/library/
 runs/**/brains/
 runs/**/*.pt
+runs/**/practice/
+server/practice/

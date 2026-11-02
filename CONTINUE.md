@@ -26,6 +26,8 @@ had only ~30 games before stopping: judge them first next session (watch "wall s
 
 **Runs (2026-11-01):** run 2 ended at game 2239 and is archived as `runs/ppo-run2` (log, replays, trainer.log, checkpoints). The active folder is still `runs/ppo` (run 3): it was seeded with run 2's checkpoint.pt, best.pt and brains, so it carries on at Ground Zero 80% with game numbers continuing from 2239; its log.csv starts empty. Run 2's last hour (games 2018-2239, mace-damage reward, --steps 2048 --lr 2e-4): 10 wins in 222 (4.5%), 44% reached wave 9+, 11 mace kills; best 10-game stretch had 2 wins.
 
+**Mace practice (built 2026-11-02, on by default):** normal games that reach wave 8 save their own base (runs/ppo/practice/<map>_<strength>/game_N.msav + .json sidecar with core items and the agent's per-game memory; newest 40 kept); `--practice 0.33` (default) starts that share of games from a random save. Practice rows have start=wave8 in log.csv and never count toward climb, best brain, best wave or evolution. 20-min test (games 2477-2573): practice won 3/30, normal 2/67 incl. game 2559 (81% core, best ever). log.csv uses \r\n line endings: strip \r in awk.
+
 Open ideas, not done:
 - **(TODO, user asked 2026-11-01) Highlight reel GIF** of its best wins (2131 with 60% core, game 1397's 1,047 blocks, the first win): niced, only when no training is running.
 - **Race the bot (2026-11-01):** user plays Ground Zero at 80% with the bot's rules (copper duos, 50 copper, no ship gun); add the result to the scoreboard as a human data point.

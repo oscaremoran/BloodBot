@@ -11,6 +11,8 @@ import argparse
 import csv
 import json
 import os
+import random
+import shutil
 import signal
 import socket
 import struct
@@ -35,7 +37,11 @@ DIFFICULTY = [0.3, 0.55, 0.8, 1.0]
 BEST_WINDOW = 20  # games judged together when deciding whether to keep the best brain
 FRAME_EVERY = 8  # save every 8th observation of recorded games (frames.npz, for bloodbot.attention)
 LOG_COLUMNS = ["game", "generation", "member", "map", "difficulty", "outcome", "wave", "winWave", "coreHealth",
-               "fitness", "gameSeconds", "realSeconds", "blocksBuilt", "actions"]
+               "fitness", "gameSeconds", "realSeconds", "blocksBuilt", "actions", "start"]
+# Mace practice (the user's choice, 2026-11-02): normal games save their own base at wave 8 into a pool per map and
+# strength; this share of games starts from a random save in the pool instead (once it holds PRACTICE_MIN saves).
+# Practice games ("start" = wave8 in log.csv) never count toward the climb, best brain, best wave or evolution.
+PRACTICE_MIN, PRACTICE_MAX = 5, 40
 
 
 def scheduled(game):
@@ -101,6 +107,10 @@ class Trainer:
         if not (OUT / "log.csv").exists():
             with open(OUT / "log.csv", "w", newline="") as f:
                 csv.writer(f).writerow(LOG_COLUMNS)
+        else:  # older logs: add the "start" column to the header (old rows just leave it empty)
+            lines = (OUT / "log.csv").read_text().split("\n", 1)
+            if "start" not in lines[0].split(","):
+                (OUT / "log.csv").write_text(lines[0] + ",start\n" + (lines[1] if len(lines) > 1 else ""))
         # Best wave reached so far on each map (from this run's log), so new records get recorded.
         # Also: once any bot has beaten Ground Zero at 30%, turrets earn their +50 for any ammo, not just copper.
         self.best_wave = {}
@@ -108,7 +118,8 @@ class Trainer:
         self.window = []  # (won, wave fraction) of the last BEST_WINDOW games at the current level
         with open(OUT / "log.csv") as f:
             for row in csv.DictReader(f):
-                self.best_wave[row["map"]] = max(self.best_wave.get(row["map"], 0), int(row["wave"]))
+                if not row.get("start"):
+                    self.best_wave[row["map"]] = max(self.best_wave.get(row["map"], 0), int(row["wave"]))
                 if row["map"] == "groundZero" and row["outcome"] == "win" and abs(float(row["difficulty"]) - 0.3) < 1e-6:
                     self.any_ammo = True
 
@@ -147,12 +158,12 @@ class Trainer:
                 # Re-count the climb from the log, so a change to what counts takes effect at once.
                 with open(log, newline="") as f:
                     here = [r["outcome"] == "win" for r in csv.DictReader(f)
-                            if r["map"] == LADDER[self.state["rung"]][0]
+                            if r["map"] == LADDER[self.state["rung"]][0] and not r.get("start")
                             and abs(float(r["difficulty"]) - DIFFICULTY[self.state["level"]]) < 1e-6]
                 self.state["recent"] = here[-10:]
                 with open(log, newline="") as f:
                     self.window = [(r["outcome"] == "win", int(r["wave"]) / max(1, int(r["winWave"])))
-                                   for r in csv.DictReader(f) if r["map"] == LADDER[self.state["rung"]][0]
+                                   for r in csv.DictReader(f) if r["map"] == LADDER[self.state["rung"]][0] and not r.get("start")
                                    and abs(float(r["difficulty"]) - DIFFICULTY[self.state["level"]]) < 1e-6][-BEST_WINDOW:]
             print(f"resumed: {self.state['games']} games, {self.state['updates']} updates, "
                   f"map {LADDER[self.state['rung']][0]} at {int(DIFFICULTY[self.state['level']] * 100)}%")
@@ -173,8 +184,31 @@ class Trainer:
 
     def next_game(self):
         name, wave = LADDER[self.state["rung"]]
-        return {"map": str(M / f"{name}.msav"), "winWave": wave, "difficulty": DIFFICULTY[self.state["level"]],
+        game = {"map": str(M / f"{name}.msav"), "winWave": wave, "difficulty": DIFFICULTY[self.state["level"]],
                 "bonuses": self.args.bonuses, "allBlocks": False, "anyAmmo": self.any_ammo}
+        pool = sorted(self.practice_dir().glob("game_*.msav"))
+        if len(pool) >= PRACTICE_MIN and random.random() < self.args.practice:
+            game["practice"] = str(random.choice(pool))
+        return game
+
+    def practice_dir(self, map_name=None, difficulty=None):
+        name = map_name or LADDER[self.state["rung"]][0]
+        diff = DIFFICULTY[self.state["level"]] if difficulty is None else difficulty
+        return OUT / "practice" / f"{name}_{round(diff * 100)}"
+
+    def keep_practice(self, result, game):
+        """A normal game that reached wave 8 saved its base: add it to the pool, dropping the oldest past PRACTICE_MAX."""
+        src = Path(result.get("practiceSave") or "")
+        if result.get("practice") or not src.name or not src.exists() or not src.with_suffix(".json").exists():
+            return
+        dest = self.practice_dir(result["map"], result["difficulty"])
+        dest.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(src), dest / f"game_{game:05d}.msav")
+        shutil.move(str(src.with_suffix(".json")), dest / f"game_{game:05d}.json")
+        saves = sorted(dest.glob("game_*.msav"))
+        for old in saves[:-PRACTICE_MAX]:
+            old.unlink()
+            old.with_suffix(".json").unlink(missing_ok=True)
 
     def record_result(self, result):
         """Log a finished game; decide whether to keep its replay; climb the ladder. Returns the save dir or None."""
@@ -182,18 +216,20 @@ class Trainer:
         s["games"] += 1
         game = s["games"]
         won = result["outcome"] == "win"
+        practice = bool(result.get("practice"))
         beaten = won  # the user's rule (2026-10-30): any win counts toward the climb, whatever core is left
         with open(OUT / "log.csv", "a", newline="") as f:
             csv.writer(f).writerow([game, s["updates"], result["worker"] + 1, result["map"], result["difficulty"],
                                     result["outcome"], result["wave"], result["winWave"], result["coreHealth"],
                                     result["fitness"], result["gameSeconds"], result["realSeconds"],
-                                    result["blocksBuilt"], result["actions"]])
+                                    result["blocksBuilt"], result["actions"], "wave8" if practice else ""])
+        self.keep_practice(result, game)
         save = None
         first_win = won and result["map"] not in s["firstWin"]
         if won and result["map"] == "groundZero" and abs(result["difficulty"] - 0.3) < 1e-6 and not self.any_ammo:
             self.any_ammo = True
             print("Ground Zero beaten at 30%: any ammo now counts as fed", flush=True)
-        new_best = result["wave"] > self.best_wave.get(result["map"], 0)
+        new_best = not practice and result["wave"] > self.best_wave.get(result["map"], 0)
         if new_best:
             self.best_wave[result["map"]] = result["wave"]
             print(f"new best wave on {result['map']}: {result['wave']} (game {game}, recorded)", flush=True)
@@ -206,7 +242,7 @@ class Trainer:
             if first_win:
                 s["firstWin"].append(result["map"])
         # Same climb as before: half of the last 10 games at this level beaten -> harder; at 100% -> next map.
-        if result["map"] == LADDER[s["rung"]][0] and abs(result["difficulty"] - DIFFICULTY[s["level"]]) < 1e-6:
+        if not practice and result["map"] == LADDER[s["rung"]][0] and abs(result["difficulty"] - DIFFICULTY[s["level"]]) < 1e-6:
             s["recent"] = (s["recent"] + [beaten])[-10:]
             if len(s["recent"]) == 10 and sum(s["recent"]) >= 5:
                 s["recent"] = []
@@ -220,7 +256,7 @@ class Trainer:
                 self.window = (self.window + [(won, result["wave"] / max(1, result["winWave"]))])[-BEST_WINDOW:]
                 self.keep_if_best(game)
         self.games_this_run += 1
-        print(f"game {game}: {result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
+        print(f"game {game}: {'PRACTICE from wave 8, ' if practice else ''}{result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
               f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
               + (f" | chain drill>conv {'Y' if result['drillToConveyor'] else 'n'} conv>core {'Y' if result['conveyorToCore'] else 'n'}"
                  f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} unused {result['unused']}"
@@ -386,6 +422,7 @@ def main():
     p.add_argument("--bonuses", action=argparse.BooleanOptionalAction, default=True,
                    help="one-time rewards for first block built and first copper (the user's rule)")
     p.add_argument("--record-all", action="store_true")
+    p.add_argument("--practice", type=float, default=1 / 3, help="share of games started from the bot's own wave-8 saves (0 = off)")
     p.add_argument("--nice", type=int, default=int(os.environ.get("BLOODBOT_NICE", 19)))
     args = p.parse_args()
     args.servers = max(1, min(3, args.servers))
