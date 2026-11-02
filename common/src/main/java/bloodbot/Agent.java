@@ -115,6 +115,16 @@ public class Agent{
     /** +100 per enemy mace killed (the user's rule, 2026-10-31): maces on waves 9-10 are what beat it at 80%. */
     static final float MACE_BONUS = 100f;
 
+    /** +1 point per 10 HP of damage the bot's turrets deal to maces, times the forward multiplier (the user's rule,
+     * 2026-11-01): kills are too rare to learn from, every hit on a mace teaches something. */
+    static final float MACE_DAMAGE_PER_POINT = 10f;
+    float maceDamage;
+
+    void maceDamaged(float damage, float x, float y){
+        maceDamage += damage;
+        addPoints(damage / MACE_DAMAGE_PER_POINT * forward(x, y));
+    }
+
     void maceKilled(float x, float y){
         maceKills++;
         addPoints(MACE_BONUS * forward(x, y));

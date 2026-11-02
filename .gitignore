@@ -14,3 +14,4 @@ server/config/*
 !server/config/rules.hjson
 maps/library/
 runs/**/brains/
+runs/**/*.pt

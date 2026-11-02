@@ -10,19 +10,25 @@ Where we are (end of 2026-10-30):
 - **Mod:** `mod/` builds `BloodBot.zip` and syncs to Steam's mods folder. It still uses the old evolution brains, because the **PPO → mod brain export isn't built yet**.
 
 How to run things:
-- Train: `.venv/bin/python -m bloodbot.ppo_train --servers 3 --minutes 60 --nice 0 --steps 1024` (updates every 1,024 decisions since 2026-10-31; exploration 0.005 was tried and made it build less, so it stays 0.01; never more than 3 servers) in the background, plus a backup-stop timer whose pkill pattern is split (`"server-rel""ease.jar"`, `"bloodbot.ppo""_train"`) so it can't kill itself. Never run `plugin/build.sh` while servers are running.
+- Train: `.venv/bin/python -m bloodbot.ppo_train --servers 3 --minutes 60 --nice 0 --steps 2048 --lr 2e-4` (2,048 decisions per update and lr 2e-4 since 2026-11-01, halfway between the old 1,024/3e-4 and the too-slow 4,096/1e-4; best brain kept in runs/ppo/best.pt; exploration 0.005 was tried and made it build less, so it stays 0.01; never more than 3 servers) in the background, plus a backup-stop timer whose pkill pattern is split (`"server-rel""ease.jar"`, `"bloodbot.ppo""_train"`) so it can't kill itself. Never run `plugin/build.sh` while servers are running.
 - Pages: `python3 -m bloodbot.gallery` → `runs/index.html` (replay viewer) and `runs/scoreboard.html`.
 - Stop everything: `pkill -TERM -f bloodbot.ppo_train; pkill -f "java .*server-release.jar"`.
 
 Session 2026-10-31 (end at game 1794, Ground Zero 80%, about 6% wins there; still not cleared). Changes made today, all live:
 brain 64 -> 256 neurons per layer; two views (minimap + 32x32-tile close-up around the ship); PPO brain exported to the mod
-(bloodbot/export_ppo.py, pick_brains defaults to runs/ppo); rewards: -10 per 1% core HP lost, +100 extra per win, +100 per
+(bloodbot/export_ppo.py, pick_brains defaults to runs/ppo); rewards: -10 per 1% core HP lost, +100 extra per win, +1 per 10 HP of damage dealt to maces (x forward, since 2026-11-01), +100 per
 mace killed, walls earn +1 per 20 HP of enemy damage soaked (max 300/game), turret hits / mace kills / router-fed turrets pay
 x1..x3 by distance from the core (forward defense), +30 per router-fed turret (was +50 once per game); updates every 1,024
 decisions. Tried and reverted: exploration 0.005 (made it timid). The last three reward changes (walls, forward, routers)
 had only ~30 games before stopping: judge them first next session (watch "wall soak", "router-fed" in trainer.log).
 
+**Prediction (2026-11-01, at game 2186):** the user guessed the bot clears Ground Zero 80% at game **2230** (missed); new guess at game 2230: **2375**. My guess: 2900. Tell them when it clears and how close the guess was.
+
+**Runs (2026-11-01):** run 2 ended at game 2239 and is archived as `runs/ppo-run2` (log, replays, trainer.log, checkpoints). The active folder is still `runs/ppo` (run 3): it was seeded with run 2's checkpoint.pt, best.pt and brains, so it carries on at Ground Zero 80% with game numbers continuing from 2239; its log.csv starts empty. Run 2's last hour (games 2018-2239, mace-damage reward, --steps 2048 --lr 2e-4): 10 wins in 222 (4.5%), 44% reached wave 9+, 11 mace kills; best 10-game stretch had 2 wins.
+
 Open ideas, not done:
+- **(TODO, user asked 2026-11-01) Highlight reel GIF** of its best wins (2131 with 60% core, game 1397's 1,047 blocks, the first win): niced, only when no training is running.
+- **Race the bot (2026-11-01):** user plays Ground Zero at 80% with the bot's rules (copper duos, 50 copper, no ship gun); add the result to the scoreboard as a human data point.
 - **(next, from me) Reward chokepoints and walls:** give points for walls that make enemies take a longer path or bunch up in front of turrets (chokepoints), so it learns to steer enemies into kill zones instead of ringing the core with duos.
 - (a) Export PPO brains to the mod.
 - (b) A turrets-built column on the scoreboard.

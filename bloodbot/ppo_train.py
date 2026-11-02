@@ -32,6 +32,8 @@ OUT = ROOT / "runs" / "ppo"
 M = ROOT / "maps" / "campaign"
 LADDER = [("groundZero", 10), ("frozenForest", 15), ("crateredBattleground", 20), ("fungalPass", 0), ("ussIowa", 0)]
 DIFFICULTY = [0.3, 0.55, 0.8, 1.0]
+BEST_WINDOW = 20  # games judged together when deciding whether to keep the best brain
+FRAME_EVERY = 8  # save every 8th observation of recorded games (frames.npz, for bloodbot.attention)
 LOG_COLUMNS = ["game", "generation", "member", "map", "difficulty", "outcome", "wave", "winWave", "coreHealth",
                "fitness", "gameSeconds", "realSeconds", "blocksBuilt", "actions"]
 
@@ -103,6 +105,7 @@ class Trainer:
         # Also: once any bot has beaten Ground Zero at 30%, turrets earn their +50 for any ammo, not just copper.
         self.best_wave = {}
         self.any_ammo = False
+        self.window = []  # (won, wave fraction) of the last BEST_WINDOW games at the current level
         with open(OUT / "log.csv") as f:
             for row in csv.DictReader(f):
                 self.best_wave[row["map"]] = max(self.best_wave.get(row["map"], 0), int(row["wave"]))
@@ -147,6 +150,10 @@ class Trainer:
                             if r["map"] == LADDER[self.state["rung"]][0]
                             and abs(float(r["difficulty"]) - DIFFICULTY[self.state["level"]]) < 1e-6]
                 self.state["recent"] = here[-10:]
+                with open(log, newline="") as f:
+                    self.window = [(r["outcome"] == "win", int(r["wave"]) / max(1, int(r["winWave"])))
+                                   for r in csv.DictReader(f) if r["map"] == LADDER[self.state["rung"]][0]
+                                   and abs(float(r["difficulty"]) - DIFFICULTY[self.state["level"]]) < 1e-6][-BEST_WINDOW:]
             print(f"resumed: {self.state['games']} games, {self.state['updates']} updates, "
                   f"map {LADDER[self.state['rung']][0]} at {int(DIFFICULTY[self.state['level']] * 100)}%")
         else:
@@ -208,17 +215,38 @@ class Trainer:
                 elif s["rung"] + 1 < len(LADDER):
                     s["rung"] += 1
                     s["level"] = 0
+                self.window = []
+            else:
+                self.window = (self.window + [(won, result["wave"] / max(1, result["winWave"]))])[-BEST_WINDOW:]
+                self.keep_if_best(game)
         self.games_this_run += 1
         print(f"game {game}: {result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
               f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
               + (f" | chain drill>conv {'Y' if result['drillToConveyor'] else 'n'} conv>core {'Y' if result['conveyorToCore'] else 'n'}"
-                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} unused {result['unused']}"
+                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} unused {result['unused']}"
                  if 'drillToConveyor' in result else ""), flush=True)
         if self.args.games and self.games_this_run >= self.args.games:
             self.stop = True
         if self.args.minutes and time.time() - self.started > self.args.minutes * 60:
             self.stop = True
         return save
+
+    def keep_if_best(self, game):
+        """Save the brain as runs/ppo/best.pt (+ brains/best.bin) when its last BEST_WINDOW games at this level are
+        its best yet: most wins, then furthest average wave. A bad stretch never costs the good brain."""
+        if len(self.window) < BEST_WINDOW:
+            return
+        s = self.state
+        wins = sum(w for w, _ in self.window)
+        key = wins + sum(f for _, f in self.window) / len(self.window)  # wins first, average progress breaks ties
+        best = s.get("best")
+        if best and best["rung"] == s["rung"] and best["level"] == s["level"] and key <= best["key"]:
+            return
+        s["best"] = {"rung": s["rung"], "level": s["level"], "key": key, "game": game}
+        torch.save({"net": self.net.state_dict(), "state": dict(s), "dims": self.dims.as_list()}, OUT / "best.pt")
+        export_ppo.export(OUT / "best.pt", OUT / "brains" / "best.bin")
+        print(f"best brain kept: game {game}, last {BEST_WINDOW} games {wins} wins, "
+              f"avg wave {sum(f for _, f in self.window) / len(self.window) * LADDER[s['rung']][1]:.1f}", flush=True)
 
     # ---- one game server ----
 
@@ -229,6 +257,8 @@ class Trainer:
             game = self.next_game()
         send_utf(sock, 2, json.dumps(game))
         last = None  # the previous decision, waiting for its reward
+        frames = []  # every FRAME_EVERY-th observation + action, saved with the replay (for the attention heatmap)
+        decisions = 0
         while True:
             kind = recv_int(sock)
             reward = recv_float(sock)
@@ -245,6 +275,11 @@ class Trainer:
                     nxt = {} if stop else self.next_game()
                 if save:
                     nxt["saveDir"] = save
+                    if frames:
+                        Path(save).mkdir(parents=True, exist_ok=True)
+                        np.savez_compressed(Path(save) / "frames.npz", **{k: np.stack([f[k] for f in frames])
+                                                                         for k in frames[0]})
+                frames, decisions = [], 0
                 if stop:
                     nxt["quit"] = True
                 send_utf(sock, 2, json.dumps(nxt))
@@ -274,6 +309,11 @@ class Trainer:
                 last = {"obs": obs, "action": action, "logp": logp, "value": value, "reward": 0.0, "done": False}
                 self.buffers.setdefault(worker, []).append(last)
                 self.steps += 1
+            if decisions % FRAME_EVERY == 0:
+                frames.append({"grid": obs["grid"].astype(np.float16), "scalars": obs["scalars"],
+                               **{k: obs[k] for k in ("type", "block", "cell", "mine", "deliver")},
+                               "action": np.array(action, np.int16)})
+            decisions += 1
             sock.sendall(struct.pack(">8i", 1, *action))
 
     # ---- learning ----

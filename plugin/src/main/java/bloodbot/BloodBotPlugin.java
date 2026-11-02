@@ -85,7 +85,10 @@ public class BloodBotPlugin extends Plugin{
         });
 
         // +5 per turret hit on an enemy, +50 for each turret's first hit (the user's rules), for the PPO bot.
-        Events.on(UnitDamageEvent.class, e -> turretHit(e.bullet, e.unit.team, e.unit.x, e.unit.y));
+        Events.on(UnitDamageEvent.class, e -> {
+            turretHit(e.bullet, e.unit.team, e.unit.x, e.unit.y);
+            if(e.unit.type == mindustry.content.UnitTypes.mace) maceHit(e.bullet, e.unit);
+        });
         Events.on(BuildDamageEvent.class, e -> {
             turretHit(e.source, e.build.team, e.build.x, e.build.y);
             wallHit(e.build, e.source);
@@ -172,6 +175,17 @@ public class BloodBotPlugin extends Plugin{
         if(bullet.team == us && victim != us && bullet.owner instanceof mindustry.gen.Building b
             && b.block instanceof mindustry.world.blocks.defense.turrets.Turret){
             ppo.agent.turretHit(b, x, y);
+        }
+    }
+
+    /** Damage the bot's turrets deal to an enemy mace (after armor), for the mace-damage reward. */
+    void maceHit(mindustry.gen.Bullet bullet, mindustry.gen.Unit mace){
+        if(ppo == null || ppo.agent == null || ppo.loading || bullet == null) return;
+        Team us = ppo.agent.team;
+        if(bullet.team == us && mace.team != us && bullet.owner instanceof mindustry.gen.Building b
+            && b.block instanceof mindustry.world.blocks.defense.turrets.Turret){
+            ppo.agent.maceDamaged(mindustry.entities.Damage.applyArmor(bullet.damage, mace.armor) / mace.healthMultiplier,
+                mace.x, mace.y);
         }
     }
 
