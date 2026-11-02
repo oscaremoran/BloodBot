@@ -2,7 +2,11 @@
 
 Today I worked on recovering from a big slump at the end of last time. After some new rewards I added, it started slumping and getting worse. I looked at why, and didn't find a clear reason. I reset to about 200 games before to remove the slump and make it recover, changing some of the rewards. Now it's doing better, reaching the last two waves on 80% difficulty about half the time. I hope it continues to do well!
 
-![Brain scan: the 256×256 middle layer](images/brain-scan.png)
+![Brain scan of the bot's new shiny brain](images/brain-scan.png)
+
+**Evolution: 1,940** (54.8% of the way to Bloodshed Bastion), back to where it was before the slump (1,877 at the bottom).
+
+![Evolution at 1,940](images/evolution-1940.png)
 
 
 
