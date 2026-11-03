@@ -28,6 +28,8 @@ had only ~30 games before stopping: judge them first next session (watch "wall s
 
 **Mace practice (built 2026-11-02, on by default):** normal games that reach wave 8 save their own base (runs/ppo/practice/<map>_<strength>/game_N.msav + .json sidecar with core items and the agent's per-game memory; newest 40 kept); `--practice 0.33` (default; 0.5 was tried 2026-11-02 and normal games got weaker: 27% reached wave 9 vs 45%) starts that share of games from a save, and saves from games that went on to lose (file name ends _loss) are picked 3x as often as ones that won. Practice rows have start=wave8 in log.csv and never count toward climb, best brain, best wave or evolution. 20-min test (games 2477-2573): practice won 3/30, normal 2/67 incl. game 2559 (81% core, best ever). log.csv uses \r\n line endings: strip \r in awk.
 
+**Early-game forgetting (2026-11-02):** with practice at 1/3 + losing saves 3x, normal games slid from 2% to 38% dying by wave 3 (games 2901-3124, avg wave 7.6 -> 5.4). Rolled back to best.pt (game 2613) at game 3124 (backup checkpoint.before-rollback-940.pt): next 24 normal games 3 wins, 4% early deaths, avg wave 8.2. Watch early deaths; if they creep up, cut practice to 1/5 and drop the 3x loss weighting. Train detached (nohup ... & disown): a killed Claude Code background task took training down once.
+
 Open ideas, not done:
 - **(TODO, user asked 2026-11-01) Highlight reel GIF** of its best wins (2131 with 60% core, game 1397's 1,047 blocks, the first win): niced, only when no training is running.
 - **Race the bot (2026-11-01):** user plays Ground Zero at 80% with the bot's rules (copper duos, 50 copper, no ship gun); add the result to the scoreboard as a human data point.
