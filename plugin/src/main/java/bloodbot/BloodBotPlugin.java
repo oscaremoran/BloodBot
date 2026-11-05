@@ -32,7 +32,7 @@ import java.lang.reflect.Field;
 public class BloodBotPlugin extends Plugin{
     /** Game logic runs at 60 ticks per second of game time. */
     static final float TICKS_PER_SECOND = 60f;
-    static final int STARTING_COPPER = 50;
+    static final int STARTING_COPPER = Integer.getInteger("bloodbot.startingCopper", 200);
 
     long ticks;
     long benchStartNanos;
@@ -233,7 +233,7 @@ public class BloodBotPlugin extends Plugin{
     void startGame(Map map, int winWave){
         loadMap(map);
         if(winWave > 0) Vars.state.rules.winWave = winWave;
-        // Starting copper for every bot game (the user's choice, 2026-10-29), so building is possible from the first second.
+        // Starting copper for every bot game (200 by the user's rule, 2026-11-05), so building is possible from the first second.
         var core = Vars.state.rules.defaultTeam.core();
         if(core != null) core.items.add(mindustry.content.Items.copper, STARTING_COPPER);
         if(Vars.state.rules.waves && Vars.state.rules.objectives.any()){
