@@ -30,7 +30,7 @@ from bloodbot import export_ppo
 from bloodbot.ppo import Dims, Net, act, gae, ppo_update, widen, add_closeup
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "runs" / "ppo"
+OUT = ROOT / "runs" / os.environ.get("BLOODBOT_RUN", "ppo")
 M = ROOT / "maps" / "campaign"
 LADDER = [("groundZero", 10), ("frozenForest", 15), ("crateredBattleground", 20), ("fungalPass", 0), ("ussIowa", 0)]
 DIFFICULTY = [0.3, 0.55, 0.8, 1.0]
@@ -43,6 +43,13 @@ LOG_COLUMNS = ["game", "generation", "member", "map", "difficulty", "outcome", "
 # Practice games ("start" = wave8 in log.csv) never count toward the climb, best brain, best wave or evolution.
 # Saves from games that went on to LOSE were picked 3x as often from 2026-11-02; back to 1 (even) 2026-11-04 with practice at 1/5, after normal games slid again.
 PRACTICE_MIN, PRACTICE_MAX, LOSS_WEIGHT = 5, 40, 1
+
+
+# Outlast (the user's choice, 2026-11-04): the learning brain and a frozen rival each play their own copies of one pre-built
+# map, and whoever survives more waves wins. Every OUTLAST_EVERY-th game is the rival's. A rival game logs start=rival, so it
+# never counts as the learner's. The win wave is out of reach of the game cap, so games end in a loss or at the cap, and
+# survival still earns its points. When the learner's last OUTLAST_WINDOW games beat the rival's, it becomes the new rival.
+OUTLAST_EVERY, OUTLAST_WINDOW, OUTLAST_WIN_WAVE = 3, 20, 25
 
 
 def scheduled(game):
@@ -105,6 +112,9 @@ class Trainer:
         self.stop = False
         self.games_this_run = 0
         self.started = time.time()
+        self.rival = None      # the frozen brain, in outlast mode
+        self.outlast_games = 0
+        self.outlast_scores = {False: deque(maxlen=OUTLAST_WINDOW), True: deque(maxlen=OUTLAST_WINDOW)}  # rival? -> scores
         if not (OUT / "log.csv").exists():
             with open(OUT / "log.csv", "w", newline="") as f:
                 csv.writer(f).writerow(LOG_COLUMNS)
@@ -170,6 +180,11 @@ class Trainer:
                   f"map {LADDER[self.state['rung']][0]} at {int(DIFFICULTY[self.state['level']] * 100)}%")
         else:
             print(f"new run: {sum(p.numel() for p in self.net.parameters())} parameters")
+        if self.args.outlast:
+            data = torch.load(OUT / "rival.pt", map_location="cpu", weights_only=False)
+            self.rival = Net(dims)
+            self.rival.load_state_dict(data["net"])
+            print(f"outlast on {self.args.outlast}: rival from game {data['state']['games']}", flush=True)
 
     def save(self):
         tmp = OUT / "checkpoint.pt.tmp"
@@ -184,6 +199,11 @@ class Trainer:
     # ---- curriculum ----
 
     def next_game(self):
+        if self.args.outlast:
+            self.outlast_games += 1
+            return {"map": str(M / f"{self.args.outlast}.msav"), "winWave": OUTLAST_WIN_WAVE,
+                    "difficulty": self.args.outlast_difficulty, "bonuses": self.args.bonuses, "allBlocks": False,
+                    "anyAmmo": True, "rival": self.outlast_games % OUTLAST_EVERY == 0}
         name, wave = LADDER[self.state["rung"]]
         game = {"map": str(M / f"{name}.msav"), "winWave": wave, "difficulty": DIFFICULTY[self.state["level"]],
                 "bonuses": self.args.bonuses, "allBlocks": False, "anyAmmo": self.any_ammo}
@@ -213,7 +233,21 @@ class Trainer:
             old.unlink()
             old.with_suffix(".json").unlink(missing_ok=True)
 
-    def record_result(self, result):
+    def score_outlast(self, result, rival):
+        """Waves survived, with core health as the tiebreak; a beaten rival is replaced by the learner."""
+        scores = self.outlast_scores
+        scores[rival].append(result["wave"] + result["coreHealth"])
+        if len(scores[False]) < OUTLAST_WINDOW or len(scores[True]) < OUTLAST_WINDOW:
+            return
+        mine, theirs = (sum(scores[r]) / OUTLAST_WINDOW for r in (False, True))
+        if mine > theirs:
+            self.rival.load_state_dict(self.net.state_dict())
+            torch.save({"net": self.net.state_dict(), "state": dict(self.state), "dims": self.dims.as_list()}, OUT / "rival.pt")
+            print(f"rival beaten at game {self.state['games']}: {mine:.2f} vs {theirs:.2f}; learner is the new rival", flush=True)
+            for s in scores.values():
+                s.clear()
+
+    def record_result(self, result, rival=False):
         """Log a finished game; decide whether to keep its replay; climb the ladder. Returns the save dir or None."""
         s = self.state
         s["games"] += 1
@@ -225,14 +259,17 @@ class Trainer:
             csv.writer(f).writerow([game, s["updates"], result["worker"] + 1, result["map"], result["difficulty"],
                                     result["outcome"], result["wave"], result["winWave"], result["coreHealth"],
                                     result["fitness"], result["gameSeconds"], result["realSeconds"],
-                                    result["blocksBuilt"], result["actions"], "wave8" if practice else ""])
+                                    result["blocksBuilt"], result["actions"],
+                                    "rival" if rival else "wave8" if practice else ""])
+        if self.args.outlast:
+            self.score_outlast(result, rival)
         self.keep_practice(result, game)
         save = None
         first_win = won and result["map"] not in s["firstWin"]
         if won and result["map"] == "groundZero" and abs(result["difficulty"] - 0.3) < 1e-6 and not self.any_ammo:
             self.any_ammo = True
             print("Ground Zero beaten at 30%: any ammo now counts as fed", flush=True)
-        new_best = not practice and result["wave"] > self.best_wave.get(result["map"], 0)
+        new_best = not practice and not rival and result["wave"] > self.best_wave.get(result["map"], 0)
         if new_best:
             self.best_wave[result["map"]] = result["wave"]
             print(f"new best wave on {result['map']}: {result['wave']} (game {game}, recorded)", flush=True)
@@ -259,7 +296,7 @@ class Trainer:
                 self.window = (self.window + [(won, result["wave"] / max(1, result["winWave"]))])[-BEST_WINDOW:]
                 self.keep_if_best(game)
         self.games_this_run += 1
-        print(f"game {game}: {'PRACTICE from wave 8, ' if practice else ''}{result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
+        print(f"game {game}: {'RIVAL, ' if rival else ''}{'PRACTICE from wave 8, ' if practice else ''}{result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
               f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
               + (f" | chain drill>conv {'Y' if result['drillToConveyor'] else 'n'} conv>core {'Y' if result['conveyorToCore'] else 'n'}"
                  f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} unused {result['unused']}"
@@ -294,6 +331,7 @@ class Trainer:
         grid_n, nb = d.C * d.G * d.G, d.NB
         with self.lock:
             game = self.next_game()
+        rival = game.pop("rival", False)
         send_utf(sock, 2, json.dumps(game))
         last = None  # the previous decision, waiting for its reward
         frames = []  # every FRAME_EVERY-th observation + action, saved with the replay (for the attention heatmap)
@@ -309,9 +347,10 @@ class Trainer:
                     last["done"] = True
                 last = None
                 with self.lock:
-                    save = self.record_result(result)
+                    save = self.record_result(result, rival)
                     stop = self.stop
                     nxt = {} if stop else self.next_game()
+                rival = nxt.pop("rival", False)
                 if save:
                     nxt["saveDir"] = save
                     if frames:
@@ -344,10 +383,14 @@ class Trainer:
                 g = torch.from_numpy(obs["grid"])[None]
                 sc = torch.from_numpy(obs["scalars"])[None]
                 masks = {k: torch.from_numpy(obs[k])[None] for k in ("type", "block", "cell", "mine", "deliver")}
-                action, logp, value = act(self.net, g, sc, masks)
-                last = {"obs": obs, "action": action, "logp": logp, "value": value, "reward": 0.0, "done": False}
-                self.buffers.setdefault(worker, []).append(last)
-                self.steps += 1
+                if rival:  # the rival only plays: nothing it does is learned from
+                    with torch.no_grad():
+                        action, _, _ = act(self.rival, g, sc, masks)
+                else:
+                    action, logp, value = act(self.net, g, sc, masks)
+                    last = {"obs": obs, "action": action, "logp": logp, "value": value, "reward": 0.0, "done": False}
+                    self.buffers.setdefault(worker, []).append(last)
+                    self.steps += 1
             if decisions % FRAME_EVERY == 0:
                 frames.append({"grid": obs["grid"].astype(np.float16), "scalars": obs["scalars"],
                                **{k: obs[k] for k in ("type", "block", "cell", "mine", "deliver")},
@@ -426,6 +469,8 @@ def main():
                    help="one-time rewards for first block built and first copper (the user's rule)")
     p.add_argument("--record-all", action="store_true")
     p.add_argument("--practice", type=float, default=0.2, help="share of games started from the bot's own wave-8 saves (0 = off; 0.5 made normal games weaker, 2026-11-02)")
+    p.add_argument("--outlast", default="", help="map in maps/campaign for an outlast run against runs/<run>/rival.pt")
+    p.add_argument("--outlast-difficulty", type=float, default=1.0, help="enemy strength in an outlast run")
     p.add_argument("--nice", type=int, default=int(os.environ.get("BLOODBOT_NICE", 19)))
     args = p.parse_args()
     args.servers = max(1, min(3, args.servers))

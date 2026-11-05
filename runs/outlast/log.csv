@@ -1,0 +1,115 @@
+game,generation,member,map,difficulty,outcome,wave,winWave,coreHealth,fitness,gameSeconds,realSeconds,blocksBuilt,actions,start
+3772,1075,2,archipelago,1.0,loss,7,25,0.0,839.82,1020,47.9,9,wait=1;build=15;supply items=3;supply power=5;configure=27;ship mine=1,
+3773,1075,3,archipelago,1.0,loss,7,25,0.0,1068.2,1034,49.6,29,wait=4;build=35;supply items=12;supply power=13;configure=86;ship guard=1;ship mine=1,rival
+3774,1075,1,archipelago,1.0,loss,7,25,0.0,971.79,1031,50.0,38,wait=1;build=42;rebuild=29;supply items=12;supply power=23;supply liquid=1;configure=66;ship guard=1;ship mine=2,
+3775,1075,3,archipelago,1.0,loss,7,25,0.0,772.5,1021,46.3,49,wait=2;build=48;rebuild=1;supply items=7;supply power=20;supply liquid=7;configure=76;ship mine=2,
+3776,1075,2,archipelago,1.0,loss,7,25,0.0,1003.87,1028,48.8,153,wait=20;build=105;remove=9;rebuild=98;supply items=16;supply power=32;supply liquid=20;configure=135;ship mine=5,
+3777,1075,1,archipelago,1.0,loss,7,25,0.0,1077.57,1032,48.4,85,wait=1;build=63;rebuild=67;supply items=19;supply power=21;supply liquid=8;configure=174;ship guard=1;ship mine=3,rival
+3778,1075,2,archipelago,1.0,loss,7,25,0.0,828.71,1021,45.4,28,build=28;supply items=6;supply power=9;configure=36;ship mine=1,
+3779,1075,3,archipelago,1.0,loss,7,25,0.0,784.85,1028,48.1,105,wait=4;build=65;rebuild=22;supply items=23;supply power=24;supply liquid=6;configure=174;ship guard=1;ship mine=2,
+3780,1075,1,archipelago,1.0,loss,7,25,0.0,824.3,1020,46.5,42,wait=2;build=46;supply items=11;supply power=14;supply liquid=4;configure=136;ship guard=1;ship mine=1,rival
+3781,1075,3,archipelago,1.0,loss,6,25,0.0,323.96,900,40.5,33,build=32;supply items=5;supply power=15;supply liquid=2;configure=57;ship mine=1;ship deliver=3,
+3782,1075,2,archipelago,1.0,loss,7,25,0.0,830.13,1021,46.9,67,wait=2;build=62;rebuild=13;supply items=19;supply power=39;supply liquid=8;configure=109;ship mine=2,
+3783,1075,1,archipelago,1.0,loss,8,25,0.0,1531.31,1164,52.6,32,wait=2;build=35;supply items=10;supply power=11;supply liquid=3;configure=92;ship guard=1;ship mine=1,rival
+3784,1075,3,archipelago,1.0,loss,7,25,0.0,807.73,1021,45.9,30,wait=1;build=37;supply items=16;supply power=14;supply liquid=4;configure=68;ship guard=1;ship mine=1,
+3785,1075,2,archipelago,1.0,loss,7,25,0.0,1118.24,1032,46.3,46,build=52;rebuild=14;supply items=22;supply power=23;configure=78;ship guard=1;ship mine=1,
+3786,1075,1,archipelago,1.0,loss,7,25,0.0,1104.45,1031,46.8,53,build=50;remove=1;rebuild=1;supply items=12;supply power=25;supply liquid=5;configure=121;ship mine=2,rival
+3787,1076,3,archipelago,1.0,loss,7,25,0.0,1177.67,1035,57.0,20,wait=1;build=27;supply items=7;supply power=24;supply liquid=1;configure=47;ship mine=2,
+3788,1076,2,archipelago,1.0,loss,7,25,0.0,806.38,1022,56.5,39,build=46;supply items=4;supply power=8;configure=54;ship guard=1;ship mine=1,
+3789,1076,1,archipelago,1.0,loss,7,25,0.0,1000.67,1028,49.8,28,build=34;supply items=6;supply power=9;supply liquid=1;configure=92;ship mine=1,rival
+3790,1076,3,archipelago,1.0,loss,7,25,0.0,817.96,1021,46.0,22,build=28;supply items=4;supply power=9;configure=27;ship mine=1,
+3791,1076,2,archipelago,1.0,loss,7,25,0.0,1103.24,1032,46.2,23,build=29;supply items=5;supply power=7;configure=34;ship mine=1,
+3792,1076,1,archipelago,1.0,loss,7,25,0.0,996.63,1030,46.6,32,build=39;remove=1;supply items=8;supply power=15;configure=59;ship mine=1,rival
+3793,1076,3,archipelago,1.0,loss,7,25,0.0,860.44,1027,48.1,112,wait=7;build=76;remove=1;rebuild=27;supply items=22;supply power=30;supply liquid=6;configure=152;ship mine=3,
+3794,1076,2,archipelago,1.0,loss,7,25,0.0,1051.87,1031,46.3,46,build=36;supply items=11;supply power=18;configure=65;ship mine=1;ship deliver=3,
+3795,1076,1,archipelago,1.0,loss,7,25,0.0,806.73,1022,47.5,44,wait=3;build=47;remove=1;supply items=15;supply power=18;supply liquid=7;configure=124;ship mine=2,rival
+3796,1076,3,archipelago,1.0,loss,7,25,0.0,1004.11,1030,47.0,17,build=25;supply items=4;supply power=7;configure=20;ship mine=1,
+3797,1076,2,archipelago,1.0,loss,7,25,0.0,828.4,1020,47.7,46,wait=2;build=52;remove=1;rebuild=6;supply items=19;supply power=20;configure=72;ship guard=1;ship mine=1,
+3798,1076,1,archipelago,1.0,loss,8,25,0.0,2034.4,1166,56.7,88,wait=9;build=59;remove=1;rebuild=270;supply items=19;supply power=15;supply liquid=12;configure=155;ship mine=6;ship deliver=1,rival
+3799,1076,3,archipelago,1.0,loss,6,25,0.0,644.29,906,42.7,67,wait=3;build=63;rebuild=18;supply items=22;supply power=19;configure=114;ship guard=1;ship mine=2,
+3800,1076,2,archipelago,1.0,loss,7,25,0.0,847.31,1021,46.1,28,wait=1;build=30;supply items=10;supply power=16;supply liquid=2;configure=31;ship guard=1;ship mine=1,
+3801,1076,1,archipelago,1.0,loss,8,25,0.0,1421.78,1161,56.4,197,wait=10;build=109;remove=1;rebuild=196;supply items=26;supply power=48;supply liquid=14;configure=205;ship guard=1;ship mine=4,rival
+3802,1076,3,archipelago,1.0,loss,7,25,0.0,831.01,1021,45.8,58,wait=1;build=30;supply items=4;supply power=13;supply liquid=3;configure=52;ship mine=1,
+3803,1076,2,archipelago,1.0,loss,7,25,0.0,823.6,1021,45.9,27,build=33;supply items=12;supply power=8;configure=47;ship mine=1,
+3804,1076,1,archipelago,1.0,loss,7,25,0.0,797.25,1021,45.8,30,build=36;supply items=7;supply power=10;supply liquid=1;configure=54;ship mine=1,rival
+3805,1076,3,archipelago,1.0,loss,6,25,0.0,459.77,898,40.6,65,build=68;rebuild=20;supply items=14;supply power=17;supply liquid=3;configure=90;ship guard=1;ship mine=1;ship deliver=1,
+3806,1076,2,archipelago,1.0,loss,7,25,0.0,1039.43,1031,45.2,25,wait=1;build=29;supply items=8;supply power=11;configure=39;ship mine=1,
+3807,1076,2,archipelago,1.0,loss,7,25,0.0,799.29,1020,45.4,32,wait=2;build=39;supply items=8;supply power=16;supply liquid=1;configure=61;ship mine=1;ship deliver=1,
+3808,1077,1,archipelago,1.0,loss,8,25,0.0,1634.77,1168,81.1,262,wait=67;build=145;remove=17;rebuild=203;supply items=43;supply power=62;supply liquid=49;configure=394;ship mine=6,rival
+3809,1077,3,archipelago,1.0,loss,9,25,0.0,1988.9,1301,83.0,103,wait=101;build=94;remove=23;rebuild=79;supply items=37;supply power=47;configure=148;ship guard=1;ship mine=5,
+3810,1077,2,archipelago,1.0,loss,7,25,0.0,971.34,1030,50.6,31,build=37;supply items=8;supply power=9;configure=73;ship mine=2,rival
+3811,1077,1,archipelago,1.0,loss,7,25,0.0,1064.51,1030,48.0,25,build=31;supply items=7;supply power=8;supply liquid=1;configure=36;ship mine=1,
+3812,1077,3,archipelago,1.0,loss,7,25,0.0,814.97,1022,50.9,40,wait=1;build=42;rebuild=14;supply items=14;supply power=10;supply liquid=5;configure=48;ship guard=1;ship mine=1,
+3813,1077,2,archipelago,1.0,loss,7,25,0.0,1036.19,1031,50.4,27,wait=1;build=33;supply items=5;supply power=8;configure=61;ship mine=1,rival
+3814,1077,1,archipelago,1.0,loss,7,25,0.0,999.36,1031,49.2,36,wait=1;build=34;supply items=5;supply power=11;supply liquid=1;configure=39;ship mine=2,
+3815,1077,3,archipelago,1.0,loss,7,25,0.0,835.21,1022,45.7,22,build=29;supply items=3;supply power=3;configure=24;ship mine=1,
+3816,1077,2,archipelago,1.0,loss,7,25,0.0,777.48,1021,45.0,33,wait=2;build=39;supply items=9;supply power=16;configure=91;ship mine=1,rival
+3817,1077,1,archipelago,1.0,loss,7,25,0.0,805.79,1021,45.1,43,wait=1;build=38;remove=1;rebuild=2;supply items=11;supply power=15;supply liquid=2;configure=62;ship mine=2;ship deliver=1,
+3818,1077,3,archipelago,1.0,loss,7,25,0.0,792.15,1022,44.9,37,build=43;supply items=3;supply power=8;configure=28;ship mine=2,
+3819,1077,2,archipelago,1.0,loss,7,25,0.0,1025.32,1030,45.8,40,build=43;supply items=14;supply power=7;configure=70;ship mine=2,rival
+3820,1077,1,archipelago,1.0,loss,7,25,0.0,1006.18,1028,45.5,26,build=32;supply items=3;supply power=14;configure=31;ship mine=1,
+3821,1077,3,archipelago,1.0,loss,7,25,0.0,1110.63,1034,46.0,52,build=47;remove=1;rebuild=18;supply items=12;supply power=15;configure=59;ship guard=1;ship mine=3,
+3822,1077,2,archipelago,1.0,loss,7,25,0.0,857.0,1022,45.9,25,build=32;rebuild=1;supply items=8;supply power=12;configure=79;ship mine=2;ship deliver=4,rival
+3823,1077,1,archipelago,1.0,loss,7,25,0.0,1011.29,1031,46.8,31,wait=1;build=37;supply items=6;supply power=15;configure=25;ship guard=1;ship mine=1,
+3824,1077,3,archipelago,1.0,loss,7,25,0.0,1060.71,1031,47.0,33,wait=1;build=40;remove=1;supply items=5;supply power=18;supply liquid=4;configure=48;ship mine=1,
+3825,1077,2,archipelago,1.0,loss,7,25,0.0,1048.59,1037,49.3,142,wait=1;build=58;rebuild=23;supply items=12;supply power=14;configure=104;ship mine=3,rival
+3826,1077,1,archipelago,1.0,loss,7,25,0.0,848.9,1021,47.5,18,build=25;supply items=4;supply power=7;configure=14;ship mine=1,
+3827,1077,3,archipelago,1.0,loss,7,25,0.0,842.96,1022,47.9,22,build=21;supply items=5;supply power=7;supply liquid=1;configure=29;ship mine=1,
+3828,1077,1,archipelago,1.0,loss,6,25,0.0,507.86,898,43.0,25,build=31;supply items=5;supply power=16;configure=49;ship guard=1;ship mine=1,
+3829,1077,3,archipelago,1.0,loss,7,25,0.0,1037.36,1031,48.6,24,wait=1;build=32;supply items=8;supply power=10;supply liquid=2;configure=56;ship guard=1;ship mine=1,rival
+3830,1077,2,archipelago,1.0,loss,7,25,0.0,1043.86,1031,48.8,24,build=30;supply items=10;supply power=14;configure=43;ship mine=2,
+3831,1078,3,archipelago,1.0,loss,7,25,0.0,962.95,1030,47.2,43,wait=2;build=31;rebuild=6;supply items=6;supply power=8;supply liquid=3;configure=47;ship guard=1;ship mine=2,
+3832,1078,2,archipelago,1.0,loss,7,25,0.0,1001.34,1030,48.1,32,wait=4;build=39;supply items=14;supply power=15;supply liquid=4;configure=109;ship guard=1;ship mine=1;ship deliver=1,rival
+3833,1078,1,archipelago,1.0,loss,8,25,0.0,1474.49,1164,56.0,85,wait=18;build=63;remove=1;rebuild=261;supply items=9;supply power=29;configure=110;ship mine=6,
+3834,1078,3,archipelago,1.0,loss,7,25,0.0,1040.38,1029,45.4,18,wait=3;build=25;supply items=4;supply power=5;configure=17;ship mine=1,
+3835,1078,2,archipelago,1.0,loss,7,25,0.0,979.96,1030,45.8,31,wait=1;build=37;remove=1;supply items=10;supply power=16;configure=29;ship mine=1,
+3836,1079,1,archipelago,1.0,loss,8,25,0.0,1768.5,1166,56.4,179,wait=36;build=104;remove=10;rebuild=160;supply items=23;supply power=39;supply liquid=10;configure=230;ship mine=6,rival
+3837,1079,2,archipelago,1.0,loss,7,25,0.0,853.78,1021,46.4,22,wait=1;build=28;supply items=3;supply power=6;supply liquid=3;configure=20;ship mine=1,
+3838,1079,3,archipelago,1.0,loss,7,25,0.0,1131.6,1037,48.3,67,wait=3;build=70;rebuild=37;supply items=22;supply power=29;configure=84;ship guard=1;ship mine=2,
+3839,1079,1,archipelago,1.0,loss,7,25,0.0,1036.59,1031,45.7,19,build=25;supply items=6;supply power=8;configure=43;ship mine=1,rival
+3840,1079,2,archipelago,1.0,loss,6,25,0.0,242.85,893,39.3,29,build=29;supply items=7;supply power=14;configure=41;ship mine=1,
+3841,1079,3,archipelago,1.0,loss,7,25,0.0,1060.03,1032,45.6,32,wait=1;build=39;remove=1;supply items=8;supply power=26;configure=31;ship mine=1,
+3842,1079,1,archipelago,1.0,loss,7,25,0.0,1008.64,1031,46.0,28,wait=1;build=34;supply items=15;supply power=9;supply liquid=5;configure=62;ship mine=1,rival
+3843,1080,2,archipelago,1.0,loss,7,25,0.0,1000.89,1031,57.0,37,build=51;supply items=11;supply power=16;supply liquid=1;configure=49;ship guard=1;ship mine=1,
+3844,1080,3,archipelago,1.0,loss,7,25,0.0,1051.8,1031,56.9,27,build=35;supply items=12;supply power=15;supply liquid=6;configure=32;ship mine=2;ship deliver=2,
+3845,1080,1,archipelago,1.0,loss,7,25,0.0,1291.22,1034,49.6,145,wait=7;build=82;remove=1;rebuild=275;supply items=12;supply power=33;supply liquid=6;configure=162;ship mine=5,rival
+3846,1080,3,archipelago,1.0,loss,8,25,0.0,1540.92,1164,55.4,30,wait=1;build=36;supply items=10;supply power=9;supply liquid=1;configure=42;ship guard=1;ship mine=1,
+3847,1081,1,archipelago,1.0,loss,7,25,0.0,856.77,1028,73.9,63,wait=1;build=45;rebuild=1;supply items=8;supply power=6;configure=100;ship guard=1;ship mine=1,rival
+3848,1081,2,archipelago,1.0,loss,8,25,0.0,1731.22,1167,87.7,269,wait=67;build=134;remove=9;rebuild=90;supply items=31;supply power=72;supply liquid=24;configure=148;ship guard=1;ship mine=6;ship deliver=1,
+3849,1081,3,archipelago,1.0,loss,7,25,0.0,1004.07,1031,47.3,27,wait=1;build=33;remove=1;supply items=7;supply power=16;supply liquid=1;configure=28;ship mine=2,
+3850,1082,1,archipelago,1.0,loss,7,25,0.0,786.59,1021,65.0,35,wait=3;build=41;supply items=20;supply power=24;supply liquid=2;configure=66;ship guard=1;ship mine=1,
+3851,1082,3,archipelago,1.0,loss,6,25,0.0,448.41,896,41.4,32,wait=4;build=39;supply items=19;supply power=20;supply liquid=2;configure=41;ship guard=1;ship mine=1,
+3852,1082,2,archipelago,1.0,loss,7,25,0.0,793.53,1021,65.1,25,wait=2;build=34;supply items=19;supply power=20;supply liquid=6;configure=97;ship mine=2,rival
+3853,1082,1,archipelago,1.0,loss,7,25,0.0,1020.0,1029,51.3,33,wait=2;build=37;supply items=14;supply power=8;supply liquid=1;configure=43;ship guard=1;ship mine=1,
+3854,1082,3,archipelago,1.0,loss,7,25,0.0,856.03,1020,51.8,30,wait=1;build=36;supply items=11;supply power=15;supply liquid=4;configure=91;ship mine=2,rival
+3855,1082,2,archipelago,1.0,loss,7,25,0.0,1042.9,1031,51.7,24,build=30;supply items=6;supply power=11;configure=24;ship guard=1;ship mine=1,
+3856,1083,3,archipelago,1.0,loss,6,25,0.0,551.96,899,42.9,31,wait=2;build=37;supply items=10;supply power=13;supply liquid=4;configure=75;ship mine=2,rival
+3857,1083,1,archipelago,1.0,loss,7,25,0.0,1083.01,1031,48.8,56,wait=2;build=29;supply items=10;supply power=16;configure=30;ship mine=1,
+3858,1083,2,archipelago,1.0,loss,7,25,0.0,983.66,1034,50.7,114,wait=13;build=98;rebuild=75;supply items=26;supply power=55;configure=99;ship guard=2;ship mine=2,
+3859,1083,1,archipelago,1.0,loss,7,25,0.0,808.44,1021,46.6,29,build=37;supply items=7;supply power=17;supply liquid=4;configure=89;ship mine=1,rival
+3860,1084,3,archipelago,1.0,loss,8,25,0.0,1531.34,1165,97.8,58,wait=4;build=64;supply items=9;supply power=31;supply liquid=4;configure=54;ship guard=1;ship mine=2,
+3861,1084,1,archipelago,1.0,loss,7,25,0.0,804.38,1021,55.4,37,build=35;supply items=12;supply power=16;configure=27;ship guard=1;ship mine=1,
+3862,1084,2,archipelago,1.0,loss,8,25,0.0,1852.59,1167,97.9,28,wait=1;build=35;supply items=6;supply power=12;configure=25;ship guard=1;ship mine=1,
+3863,1084,3,archipelago,1.0,loss,7,25,0.0,999.39,1031,48.8,47,wait=1;build=51;rebuild=15;supply items=24;supply power=12;supply liquid=5;configure=103;ship guard=1;ship mine=1,rival
+3864,1084,2,archipelago,1.0,loss,7,25,0.0,1037.98,1031,47.1,21,build=27;supply items=11;supply power=14;configure=19;ship mine=1,
+3865,1084,1,archipelago,1.0,loss,8,25,0.0,1423.19,1161,54.3,86,wait=3;build=74;rebuild=56;supply items=15;supply power=53;supply liquid=9;configure=57;ship guard=1;ship mine=3;ship deliver=1,
+3866,1085,3,archipelago,1.0,loss,7,25,0.0,320.13,1022,53.7,146,wait=1;build=60;rebuild=3;supply items=12;supply power=18;supply liquid=3;configure=87;ship guard=1;ship mine=1,rival
+3867,1085,2,archipelago,1.0,loss,7,25,0.0,958.7,1030,52.8,59,wait=1;build=51;remove=1;rebuild=16;supply items=21;supply power=27;configure=30;ship mine=3;ship deliver=1,
+3868,1086,1,archipelago,1.0,loss,8,25,0.0,1931.98,1169,65.3,184,wait=27;build=128;remove=3;rebuild=125;supply items=22;supply power=65;supply liquid=15;configure=108;ship guard=2;ship mine=4;ship deliver=1,
+3869,1086,2,archipelago,1.0,loss,7,25,0.0,827.33,1021,48.8,23,build=30;supply items=5;supply power=13;configure=14;ship mine=1,
+3870,1086,3,archipelago,1.0,loss,7,25,0.0,822.67,1020,54.7,19,build=25;supply items=3;supply power=8;supply liquid=3;configure=42;ship mine=2,rival
+3871,1086,1,archipelago,1.0,loss,7,25,0.0,1013.82,1030,50.1,24,build=27;supply items=13;supply power=12;supply liquid=1;configure=28;ship mine=1,
+3872,1086,3,archipelago,1.0,loss,7,25,0.0,1044.36,1031,48.5,27,wait=1;build=33;supply items=7;supply power=7;configure=12;ship mine=1;ship deliver=1,
+3873,1086,2,archipelago,1.0,loss,7,25,0.0,812.16,1021,48.9,29,wait=1;build=36;supply items=17;supply power=15;supply liquid=5;configure=82;ship guard=1;ship mine=1,rival
+3874,1086,1,archipelago,1.0,loss,7,25,0.0,839.44,1021,46.9,30,build=36;supply items=2;supply power=11;configure=18;ship mine=1,
+3875,1086,2,archipelago,1.0,loss,7,25,0.0,801.64,1021,46.5,35,wait=1;build=41;supply items=10;supply power=19;supply liquid=2;configure=15;ship mine=1;ship deliver=1,
+3876,1086,3,archipelago,1.0,loss,7,25,0.0,1022.31,1031,47.5,34,wait=2;build=42;supply items=8;supply power=19;supply liquid=6;configure=79;ship guard=1;ship mine=1;ship deliver=1,rival
+3877,1087,1,archipelago,1.0,loss,7,25,0.0,813.86,1021,72.0,24,build=30;supply items=9;supply power=12;configure=7;ship guard=1;ship mine=1,
+3878,1087,3,archipelago,1.0,loss,7,25,0.0,820.11,1022,45.7,47,build=33;supply items=2;supply power=15;supply liquid=1;configure=16;ship mine=1,
+3879,1087,2,archipelago,1.0,loss,7,25,0.0,943.98,1032,50.4,136,wait=8;build=111;rebuild=67;supply items=28;supply power=29;supply liquid=24;configure=289;ship mine=4,rival
+3880,1087,3,archipelago,1.0,loss,6,25,0.0,727.14,907,40.7,33,build=39;supply items=10;supply power=14;configure=84;ship guard=1;ship mine=1,rival
+3881,1087,1,archipelago,1.0,loss,7,25,0.0,1059.71,1032,45.9,26,wait=2;build=32;supply items=5;supply power=10;configure=14;ship mine=1,
+3882,1087,2,archipelago,1.0,loss,6,25,0.0,624.02,899,39.7,9,wait=1;build=16;supply items=5;supply power=7;configure=11;ship mine=1,
+3883,1087,3,archipelago,1.0,loss,7,25,0.0,972.07,1030,46.1,28,build=36;supply items=7;supply power=10;supply liquid=2;configure=13;ship mine=1,
+3884,1087,1,archipelago,1.0,loss,7,25,0.0,1016.16,1029,48.2,36,build=34;supply items=2;supply power=15;configure=68;ship mine=1,rival
+3885,1087,2,archipelago,1.0,loss,7,25,0.0,1110.73,1031,48.7,22,wait=2;build=29;supply items=4;supply power=19;configure=9;ship mine=1,

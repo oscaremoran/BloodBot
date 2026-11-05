@@ -22,7 +22,7 @@
 <h2>Best on each map</h2>
 <p class="muted">Best = a win beats a loss, then higher enemy strength, then higher score.</p>
 <div class="grid"><div class="card"><h3 style="margin:0 0 8px">Ground Zero</h3><div><b>Learning bot</b>
-              <span class="muted">(4161 games)</span><br>
+              <span class="muted">(4182 games)</span><br>
               <span class="win">WIN</span> · wave 10/10 · 80% enemy strength · score 5173.6<br>
               <span class="muted">game 3663 (variant 2) · 21 min · core 71%</span> · <a href="viewer.html?game=ppo/groundZero/game_03663">watch</a></div><br><div><b>Scripted benchmark</b>
               <span class="muted">(1 games)</span><br>
@@ -33,10 +33,13 @@
               <span class="muted">game 1 (scripted benchmark) · 9 min · core 0%</span> · <a href="viewer.html?game=campaign/frozenForest/game_0001">watch</a></div></div><div class="card"><h3 style="margin:0 0 8px">Cratered Battleground</h3><div><b>Scripted benchmark</b>
               <span class="muted">(1 games)</span><br>
               <span class="loss">LOSS</span> · wave 12/20 · 100% enemy strength<br>
-              <span class="muted">game 1 (scripted benchmark) · 19 min · core 0%</span> · <a href="viewer.html?game=campaign/crateredBattleground/game_0001">watch</a></div></div></div>
-<h2>All games <span class="muted" style="font-size:14px">(4164)</span></h2>
-<p>Map: <select id="filter"><option value="">all maps</option><option value="groundZero">Ground Zero</option><option value="frozenForest">Frozen Forest</option><option value="crateredBattleground">Cratered Battleground</option></select>
-Run: <select id="runFilter"><option value="">all runs</option><option value="campaign">campaign</option><option value="ppo" selected>ppo</option><option value="ppo-run1">ppo-run1</option><option value="ppo-run2">ppo-run2</option><option value="train">train</option><option value="train_test">train_test</option></select>
+              <span class="muted">game 1 (scripted benchmark) · 19 min · core 0%</span> · <a href="viewer.html?game=campaign/crateredBattleground/game_0001">watch</a></div></div><div class="card"><h3 style="margin:0 0 8px">archipelago</h3><div><b>Learning bot</b>
+              <span class="muted">(114 games)</span><br>
+              <span class="loss">LOSS</span> · wave 8/25 · 100% enemy strength · score 2034.4<br>
+              <span class="muted">game 3798 (variant 1 (practice from wave 8)) · 19 min · core 0%</span></div></div></div>
+<h2>All games <span class="muted" style="font-size:14px">(4299)</span></h2>
+<p>Map: <select id="filter"><option value="">all maps</option><option value="groundZero">Ground Zero</option><option value="frozenForest">Frozen Forest</option><option value="crateredBattleground">Cratered Battleground</option><option value="archipelago">archipelago</option></select>
+Run: <select id="runFilter"><option value="">all runs</option><option value="campaign">campaign</option><option value="outlast">outlast</option><option value="ppo" selected>ppo</option><option value="ppo-run1">ppo-run1</option><option value="ppo-run2">ppo-run2</option><option value="train">train</option><option value="train_test">train_test</option></select>
 Generation: <input id="genFilter" size="8" placeholder="e.g. 40 or 30-40" title="a number, or a range like 30-40; blank = all">
 <span class="muted">Click a column to sort.</span></p>
 <table id="games"><thead><tr>
@@ -57,7 +60,577 @@ Generation: <input id="genFilter" size="8" placeholder="e.g. 40 or 30-40" title=
           <td>scripted benchmark</td><td>Ground Zero</td><td>100%</td>
           <td class="loss">loss</td><td data-v="10">10/10</td>
           <td>0%</td><td></td>
-          <td data-v="2891.3455626423843">2,891</td><td>20.8</td><td>315</td><td><a href="viewer.html?game=campaign/groundZero/game_0001">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="729">
+          <td data-v="2891.3455626423843">2,891</td><td>20.8</td><td>315</td><td><a href="viewer.html?game=campaign/groundZero/game_0001">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3772</td><td>1075</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>839.8</td>
+          <td data-v="0"></td><td>17.0</td><td>9</td><td><a href="viewer.html?game=outlast/archipelago/game_03772">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3773</td><td>1075</td>
+          <td>variant 3 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1068.2</td>
+          <td data-v="0"></td><td>17.2</td><td>29</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3774</td><td>1075</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>971.8</td>
+          <td data-v="0"></td><td>17.2</td><td>38</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3775</td><td>1075</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>772.5</td>
+          <td data-v="0"></td><td>17.0</td><td>49</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3776</td><td>1075</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1003.9</td>
+          <td data-v="0"></td><td>17.1</td><td>153</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3777</td><td>1075</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1077.6</td>
+          <td data-v="0"></td><td>17.2</td><td>85</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3778</td><td>1075</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>828.7</td>
+          <td data-v="0"></td><td>17.0</td><td>28</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3779</td><td>1075</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>784.9</td>
+          <td data-v="0"></td><td>17.1</td><td>105</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3780</td><td>1075</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>824.3</td>
+          <td data-v="0"></td><td>17.0</td><td>42</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3781</td><td>1075</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="6">6/25</td>
+          <td>0%</td><td>324.0</td>
+          <td data-v="0"></td><td>15.0</td><td>33</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3782</td><td>1075</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>830.1</td>
+          <td data-v="0"></td><td>17.0</td><td>67</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3783</td><td>1075</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>1531.3</td>
+          <td data-v="0"></td><td>19.4</td><td>32</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3784</td><td>1075</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>807.7</td>
+          <td data-v="0"></td><td>17.0</td><td>30</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3785</td><td>1075</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1118.2</td>
+          <td data-v="0"></td><td>17.2</td><td>46</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1075">
+          <td>outlast</td><td>3786</td><td>1075</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1104.5</td>
+          <td data-v="0"></td><td>17.2</td><td>53</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3787</td><td>1076</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1177.7</td>
+          <td data-v="0"></td><td>17.2</td><td>20</td><td><a href="viewer.html?game=outlast/archipelago/game_03787">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3788</td><td>1076</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>806.4</td>
+          <td data-v="0"></td><td>17.0</td><td>39</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3789</td><td>1076</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1000.7</td>
+          <td data-v="0"></td><td>17.1</td><td>28</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3790</td><td>1076</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>818.0</td>
+          <td data-v="0"></td><td>17.0</td><td>22</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3791</td><td>1076</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1103.2</td>
+          <td data-v="0"></td><td>17.2</td><td>23</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3792</td><td>1076</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>996.6</td>
+          <td data-v="0"></td><td>17.2</td><td>32</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3793</td><td>1076</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>860.4</td>
+          <td data-v="0"></td><td>17.1</td><td>112</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3794</td><td>1076</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1051.9</td>
+          <td data-v="0"></td><td>17.2</td><td>46</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3795</td><td>1076</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>806.7</td>
+          <td data-v="0"></td><td>17.0</td><td>44</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3796</td><td>1076</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1004.1</td>
+          <td data-v="0"></td><td>17.2</td><td>17</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3797</td><td>1076</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>828.4</td>
+          <td data-v="0"></td><td>17.0</td><td>46</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3798</td><td>1076</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>2034.4</td>
+          <td data-v="0"></td><td>19.4</td><td>88</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3799</td><td>1076</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="6">6/25</td>
+          <td>0%</td><td>644.3</td>
+          <td data-v="0"></td><td>15.1</td><td>67</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3800</td><td>1076</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>847.3</td>
+          <td data-v="0"></td><td>17.0</td><td>28</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3801</td><td>1076</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>1421.8</td>
+          <td data-v="0"></td><td>19.4</td><td>197</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3802</td><td>1076</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>831.0</td>
+          <td data-v="0"></td><td>17.0</td><td>58</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3803</td><td>1076</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>823.6</td>
+          <td data-v="0"></td><td>17.0</td><td>27</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3804</td><td>1076</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>797.2</td>
+          <td data-v="0"></td><td>17.0</td><td>30</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3805</td><td>1076</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="6">6/25</td>
+          <td>0%</td><td>459.8</td>
+          <td data-v="0"></td><td>15.0</td><td>65</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3806</td><td>1076</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1039.4</td>
+          <td data-v="0"></td><td>17.2</td><td>25</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1076">
+          <td>outlast</td><td>3807</td><td>1076</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>799.3</td>
+          <td data-v="0"></td><td>17.0</td><td>32</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3808</td><td>1077</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>1634.8</td>
+          <td data-v="0"></td><td>19.5</td><td>262</td><td><a href="viewer.html?game=outlast/archipelago/game_03808">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3809</td><td>1077</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="9">9/25</td>
+          <td>0%</td><td>1988.9</td>
+          <td data-v="0"></td><td>21.7</td><td>103</td><td><a href="viewer.html?game=outlast/archipelago/game_03809">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3810</td><td>1077</td>
+          <td>variant 2 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>971.3</td>
+          <td data-v="0"></td><td>17.2</td><td>31</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3811</td><td>1077</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1064.5</td>
+          <td data-v="0"></td><td>17.2</td><td>25</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3812</td><td>1077</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>815.0</td>
+          <td data-v="0"></td><td>17.0</td><td>40</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3813</td><td>1077</td>
+          <td>variant 2 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1036.2</td>
+          <td data-v="0"></td><td>17.2</td><td>27</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3814</td><td>1077</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>999.4</td>
+          <td data-v="0"></td><td>17.2</td><td>36</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3815</td><td>1077</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>835.2</td>
+          <td data-v="0"></td><td>17.0</td><td>22</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3816</td><td>1077</td>
+          <td>variant 2 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>777.5</td>
+          <td data-v="0"></td><td>17.0</td><td>33</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3817</td><td>1077</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>805.8</td>
+          <td data-v="0"></td><td>17.0</td><td>43</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3818</td><td>1077</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>792.1</td>
+          <td data-v="0"></td><td>17.0</td><td>37</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3819</td><td>1077</td>
+          <td>variant 2 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1025.3</td>
+          <td data-v="0"></td><td>17.2</td><td>40</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3820</td><td>1077</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1006.2</td>
+          <td data-v="0"></td><td>17.1</td><td>26</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3821</td><td>1077</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1110.6</td>
+          <td data-v="0"></td><td>17.2</td><td>52</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3822</td><td>1077</td>
+          <td>variant 2 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>857.0</td>
+          <td data-v="0"></td><td>17.0</td><td>25</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3823</td><td>1077</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1011.3</td>
+          <td data-v="0"></td><td>17.2</td><td>31</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3824</td><td>1077</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1060.7</td>
+          <td data-v="0"></td><td>17.2</td><td>33</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3825</td><td>1077</td>
+          <td>variant 2 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1048.6</td>
+          <td data-v="0"></td><td>17.3</td><td>142</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3826</td><td>1077</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>848.9</td>
+          <td data-v="0"></td><td>17.0</td><td>18</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3827</td><td>1077</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>843.0</td>
+          <td data-v="0"></td><td>17.0</td><td>22</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3828</td><td>1077</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="6">6/25</td>
+          <td>0%</td><td>507.9</td>
+          <td data-v="0"></td><td>15.0</td><td>25</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3829</td><td>1077</td>
+          <td>variant 3 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1037.4</td>
+          <td data-v="0"></td><td>17.2</td><td>24</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1077">
+          <td>outlast</td><td>3830</td><td>1077</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1043.9</td>
+          <td data-v="0"></td><td>17.2</td><td>24</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1078">
+          <td>outlast</td><td>3831</td><td>1078</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>963.0</td>
+          <td data-v="0"></td><td>17.2</td><td>43</td><td><a href="viewer.html?game=outlast/archipelago/game_03831">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1078">
+          <td>outlast</td><td>3832</td><td>1078</td>
+          <td>variant 2 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1001.3</td>
+          <td data-v="0"></td><td>17.2</td><td>32</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1078">
+          <td>outlast</td><td>3833</td><td>1078</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>1474.5</td>
+          <td data-v="0"></td><td>19.4</td><td>85</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1078">
+          <td>outlast</td><td>3834</td><td>1078</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1040.4</td>
+          <td data-v="0"></td><td>17.1</td><td>18</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1078">
+          <td>outlast</td><td>3835</td><td>1078</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>980.0</td>
+          <td data-v="0"></td><td>17.2</td><td>31</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1079">
+          <td>outlast</td><td>3836</td><td>1079</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>1768.5</td>
+          <td data-v="0"></td><td>19.4</td><td>179</td><td><a href="viewer.html?game=outlast/archipelago/game_03836">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1079">
+          <td>outlast</td><td>3837</td><td>1079</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>853.8</td>
+          <td data-v="0"></td><td>17.0</td><td>22</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1079">
+          <td>outlast</td><td>3838</td><td>1079</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1131.6</td>
+          <td data-v="0"></td><td>17.3</td><td>67</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1079">
+          <td>outlast</td><td>3839</td><td>1079</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1036.6</td>
+          <td data-v="0"></td><td>17.2</td><td>19</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1079">
+          <td>outlast</td><td>3840</td><td>1079</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="6">6/25</td>
+          <td>0%</td><td>242.8</td>
+          <td data-v="0"></td><td>14.9</td><td>29</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1079">
+          <td>outlast</td><td>3841</td><td>1079</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1060.0</td>
+          <td data-v="0"></td><td>17.2</td><td>32</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1079">
+          <td>outlast</td><td>3842</td><td>1079</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1008.6</td>
+          <td data-v="0"></td><td>17.2</td><td>28</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1080">
+          <td>outlast</td><td>3843</td><td>1080</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1000.9</td>
+          <td data-v="0"></td><td>17.2</td><td>37</td><td><a href="viewer.html?game=outlast/archipelago/game_03843">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1080">
+          <td>outlast</td><td>3844</td><td>1080</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1051.8</td>
+          <td data-v="0"></td><td>17.2</td><td>27</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1080">
+          <td>outlast</td><td>3845</td><td>1080</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1291.2</td>
+          <td data-v="0"></td><td>17.2</td><td>145</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1080">
+          <td>outlast</td><td>3846</td><td>1080</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>1540.9</td>
+          <td data-v="0"></td><td>19.4</td><td>30</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1081">
+          <td>outlast</td><td>3847</td><td>1081</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>856.8</td>
+          <td data-v="0"></td><td>17.1</td><td>63</td><td><a href="viewer.html?game=outlast/archipelago/game_03847">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1081">
+          <td>outlast</td><td>3848</td><td>1081</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>1731.2</td>
+          <td data-v="0"></td><td>19.4</td><td>269</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1081">
+          <td>outlast</td><td>3849</td><td>1081</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1004.1</td>
+          <td data-v="0"></td><td>17.2</td><td>27</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1082">
+          <td>outlast</td><td>3850</td><td>1082</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>786.6</td>
+          <td data-v="0"></td><td>17.0</td><td>35</td><td><a href="viewer.html?game=outlast/archipelago/game_03850">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1082">
+          <td>outlast</td><td>3851</td><td>1082</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="6">6/25</td>
+          <td>0%</td><td>448.4</td>
+          <td data-v="0"></td><td>14.9</td><td>32</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1082">
+          <td>outlast</td><td>3852</td><td>1082</td>
+          <td>variant 2 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>793.5</td>
+          <td data-v="0"></td><td>17.0</td><td>25</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1082">
+          <td>outlast</td><td>3853</td><td>1082</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1020.0</td>
+          <td data-v="0"></td><td>17.1</td><td>33</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1082">
+          <td>outlast</td><td>3854</td><td>1082</td>
+          <td>variant 3 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>856.0</td>
+          <td data-v="0"></td><td>17.0</td><td>30</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1082">
+          <td>outlast</td><td>3855</td><td>1082</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1042.9</td>
+          <td data-v="0"></td><td>17.2</td><td>24</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1083">
+          <td>outlast</td><td>3856</td><td>1083</td>
+          <td>variant 3 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="6">6/25</td>
+          <td>0%</td><td>552.0</td>
+          <td data-v="0"></td><td>15.0</td><td>31</td><td><a href="viewer.html?game=outlast/archipelago/game_03856">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1083">
+          <td>outlast</td><td>3857</td><td>1083</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1083.0</td>
+          <td data-v="0"></td><td>17.2</td><td>56</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1083">
+          <td>outlast</td><td>3858</td><td>1083</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>983.7</td>
+          <td data-v="0"></td><td>17.2</td><td>114</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1083">
+          <td>outlast</td><td>3859</td><td>1083</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>808.4</td>
+          <td data-v="0"></td><td>17.0</td><td>29</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1084">
+          <td>outlast</td><td>3860</td><td>1084</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>1531.3</td>
+          <td data-v="0"></td><td>19.4</td><td>58</td><td><a href="viewer.html?game=outlast/archipelago/game_03860">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1084">
+          <td>outlast</td><td>3861</td><td>1084</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>804.4</td>
+          <td data-v="0"></td><td>17.0</td><td>37</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1084">
+          <td>outlast</td><td>3862</td><td>1084</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>1852.6</td>
+          <td data-v="0"></td><td>19.4</td><td>28</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1084">
+          <td>outlast</td><td>3863</td><td>1084</td>
+          <td>variant 3 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>999.4</td>
+          <td data-v="0"></td><td>17.2</td><td>47</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1084">
+          <td>outlast</td><td>3864</td><td>1084</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1038.0</td>
+          <td data-v="0"></td><td>17.2</td><td>21</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1084">
+          <td>outlast</td><td>3865</td><td>1084</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>1423.2</td>
+          <td data-v="0"></td><td>19.4</td><td>86</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1085">
+          <td>outlast</td><td>3866</td><td>1085</td>
+          <td>variant 3 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>320.1</td>
+          <td data-v="0"></td><td>17.0</td><td>146</td><td><a href="viewer.html?game=outlast/archipelago/game_03866">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1085">
+          <td>outlast</td><td>3867</td><td>1085</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>958.7</td>
+          <td data-v="0"></td><td>17.2</td><td>59</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1086">
+          <td>outlast</td><td>3868</td><td>1086</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="8">8/25</td>
+          <td>0%</td><td>1932.0</td>
+          <td data-v="0"></td><td>19.5</td><td>184</td><td><a href="viewer.html?game=outlast/archipelago/game_03868">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1086">
+          <td>outlast</td><td>3869</td><td>1086</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>827.3</td>
+          <td data-v="0"></td><td>17.0</td><td>23</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1086">
+          <td>outlast</td><td>3870</td><td>1086</td>
+          <td>variant 3 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>822.7</td>
+          <td data-v="0"></td><td>17.0</td><td>19</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1086">
+          <td>outlast</td><td>3871</td><td>1086</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1013.8</td>
+          <td data-v="0"></td><td>17.2</td><td>24</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1086">
+          <td>outlast</td><td>3872</td><td>1086</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1044.4</td>
+          <td data-v="0"></td><td>17.2</td><td>27</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1086">
+          <td>outlast</td><td>3873</td><td>1086</td>
+          <td>variant 2 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>812.2</td>
+          <td data-v="0"></td><td>17.0</td><td>29</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1086">
+          <td>outlast</td><td>3874</td><td>1086</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>839.4</td>
+          <td data-v="0"></td><td>17.0</td><td>30</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1086">
+          <td>outlast</td><td>3875</td><td>1086</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>801.6</td>
+          <td data-v="0"></td><td>17.0</td><td>35</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1086">
+          <td>outlast</td><td>3876</td><td>1086</td>
+          <td>variant 3 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1022.3</td>
+          <td data-v="0"></td><td>17.2</td><td>34</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1087">
+          <td>outlast</td><td>3877</td><td>1087</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>813.9</td>
+          <td data-v="0"></td><td>17.0</td><td>24</td><td><a href="viewer.html?game=outlast/archipelago/game_03877">watch</a></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1087">
+          <td>outlast</td><td>3878</td><td>1087</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>820.1</td>
+          <td data-v="0"></td><td>17.0</td><td>47</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1087">
+          <td>outlast</td><td>3879</td><td>1087</td>
+          <td>variant 2 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>944.0</td>
+          <td data-v="0"></td><td>17.2</td><td>136</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1087">
+          <td>outlast</td><td>3880</td><td>1087</td>
+          <td>variant 3 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="6">6/25</td>
+          <td>0%</td><td>727.1</td>
+          <td data-v="0"></td><td>15.1</td><td>33</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1087">
+          <td>outlast</td><td>3881</td><td>1087</td>
+          <td>variant 1</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1059.7</td>
+          <td data-v="0"></td><td>17.2</td><td>26</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1087">
+          <td>outlast</td><td>3882</td><td>1087</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="6">6/25</td>
+          <td>0%</td><td>624.0</td>
+          <td data-v="0"></td><td>15.0</td><td>9</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1087">
+          <td>outlast</td><td>3883</td><td>1087</td>
+          <td>variant 3</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>972.1</td>
+          <td data-v="0"></td><td>17.2</td><td>28</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1087">
+          <td>outlast</td><td>3884</td><td>1087</td>
+          <td>variant 1 (practice from wave 8)</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1016.2</td>
+          <td data-v="0"></td><td>17.1</td><td>36</td><td></td></tr><tr data-map="archipelago" data-run="outlast" data-gen="1087">
+          <td>outlast</td><td>3885</td><td>1087</td>
+          <td>variant 2</td><td>archipelago</td><td>100%</td>
+          <td class="loss">loss</td><td data-v="7">7/25</td>
+          <td>0%</td><td>1110.7</td>
+          <td data-v="0"></td><td>17.2</td><td>22</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="729">
           <td>ppo</td><td>2240</td><td>729</td>
           <td>variant 1</td><td>Ground Zero</td><td>80%</td>
           <td class="loss">loss</td><td data-v="2">2/10</td>
@@ -7717,7 +8290,112 @@ Generation: <input id="genFilter" size="8" placeholder="e.g. 40 or 30-40" title=
           <td>variant 1</td><td>Ground Zero</td><td>80%</td>
           <td class="loss">loss</td><td data-v="8">8/10</td>
           <td>0%</td><td>1146.4</td>
-          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>224</td><td></td></tr><tr data-map="groundZero" data-run="ppo-run1" data-gen="0">
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>224</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1075">
+          <td>ppo</td><td>3772</td><td>1075</td>
+          <td>variant 3</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="5">5/10</td>
+          <td>0%</td><td>0.5</td>
+          <td data-v="1700.3957076640672">1,700</td><td>11.1</td><td>175</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1076">
+          <td>ppo</td><td>3773</td><td>1076</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>491.5</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>163</td><td><a href="viewer.html?game=ppo/groundZero/game_03773">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1076">
+          <td>ppo</td><td>3774</td><td>1076</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>807.0</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>223</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1076">
+          <td>ppo</td><td>3775</td><td>1076</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-934.5</td>
+          <td data-v="0"></td><td>2.9</td><td>19</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1076">
+          <td>ppo</td><td>3776</td><td>1076</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>620.8</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>221</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1076">
+          <td>ppo</td><td>3777</td><td>1076</td>
+          <td>variant 3</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1600.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>208</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1077">
+          <td>ppo</td><td>3778</td><td>1077</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1394.8</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>347</td><td><a href="viewer.html?game=ppo/groundZero/game_03778">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1078">
+          <td>ppo</td><td>3779</td><td>1078</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>909.0</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>777</td><td><a href="viewer.html?game=ppo/groundZero/game_03779">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1078">
+          <td>ppo</td><td>3780</td><td>1078</td>
+          <td>variant 3</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2663.4</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>459</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1078">
+          <td>ppo</td><td>3781</td><td>1078</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>379.1</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>201</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1078">
+          <td>ppo</td><td>3782</td><td>1078</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>848.6</td>
+          <td data-v="1877.0679742098696">1,877</td><td>17.0</td><td>416</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1078">
+          <td>ppo</td><td>3783</td><td>1078</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>958.9</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>232</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1079">
+          <td>ppo</td><td>3784</td><td>1079</td>
+          <td>variant 3</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2434.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>363</td><td><a href="viewer.html?game=ppo/groundZero/game_03784">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1079">
+          <td>ppo</td><td>3785</td><td>1079</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="5">5/10</td>
+          <td>0%</td><td>-581.1</td>
+          <td data-v="1700.3957076640672">1,700</td><td>10.8</td><td>205</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1079">
+          <td>ppo</td><td>3786</td><td>1079</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-748.9</td>
+          <td data-v="0"></td><td>2.9</td><td>45</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1080">
+          <td>ppo</td><td>3787</td><td>1080</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>1372.5</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>269</td><td><a href="viewer.html?game=ppo/groundZero/game_03787">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1080">
+          <td>ppo</td><td>3788</td><td>1080</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-590.3</td>
+          <td data-v="0"></td><td>2.8</td><td>2</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1080">
+          <td>ppo</td><td>3789</td><td>1080</td>
+          <td>variant 3</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1334.4</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>400</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1080">
+          <td>ppo</td><td>3790</td><td>1080</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="5">5/10</td>
+          <td>0%</td><td>-660.2</td>
+          <td data-v="1700.3957076640672">1,700</td><td>10.9</td><td>273</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1080">
+          <td>ppo</td><td>3791</td><td>1080</td>
+          <td>variant 3 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="10">10/10</td>
+          <td>0%</td><td>532.3</td>
+          <td data-v="0"></td><td>4.8</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1081">
+          <td>ppo</td><td>3792</td><td>1081</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="10">10/10</td>
+          <td>0%</td><td>3354.4</td>
+          <td data-v="2004.9336272477267">2,005</td><td>20.8</td><td>487</td><td><a href="viewer.html?game=ppo/groundZero/game_03792">watch</a></td></tr><tr data-map="groundZero" data-run="ppo-run1" data-gen="0">
           <td>ppo-run1</td><td>1</td><td>0</td>
           <td>variant 3</td><td>Ground Zero</td><td>30%</td>
           <td class="loss">loss</td><td data-v="3">3/10</td>

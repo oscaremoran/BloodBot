@@ -118,6 +118,18 @@ public class BloodBotPlugin extends Plugin{
 
         handler.register("bbinfo", "Print teams, cores and rules of the loaded map.", args -> printInfo());
 
+        handler.register("bbblocks", "Print what each team has built on the loaded map, and the spawn counts.", args -> {
+            for(TeamData data : Vars.state.teams.getActive()){
+                var counts = new java.util.TreeMap<String, Integer>();
+                data.buildings.each(b -> counts.merge(b.block.name, 1, Integer::sum));
+                Log.info("[bloodbot] blocks @: @", data.team, counts);
+            }
+            var core = Vars.state.rules.defaultTeam.core();
+            Log.info("[bloodbot] core @ at @,@ items @; ground spawns @ flyer spawns @", core == null ? "none" : core.block.name,
+                core == null ? -1 : core.tileX(), core == null ? -1 : core.tileY(), core == null ? "" : core.items.total(),
+                Vars.spawner.countGroundSpawns(), Vars.spawner.countFlyerSpawns());
+        });
+
         handler.register("bbkillenemy", "Destroy every enemy core, to test game-over detection.", args -> {
             Team enemy = Vars.state.rules.waveTeam;
             enemy.cores().copy().each(c -> c.kill());
