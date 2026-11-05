@@ -41,8 +41,8 @@ LOG_COLUMNS = ["game", "generation", "member", "map", "difficulty", "outcome", "
 # Mace practice (the user's choice, 2026-11-02): normal games save their own base at wave 8 into a pool per map and
 # strength; this share of games starts from a random save in the pool instead (once it holds PRACTICE_MIN saves).
 # Practice games ("start" = wave8 in log.csv) never count toward the climb, best brain, best wave or evolution.
-# Saves from games that went on to LOSE are picked LOSS_WEIGHT times as often (2026-11-02): drill what it fails at.
-PRACTICE_MIN, PRACTICE_MAX, LOSS_WEIGHT = 5, 40, 3
+# Saves from games that went on to LOSE were picked 3x as often from 2026-11-02; back to 1 (even) 2026-11-04 with practice at 1/5, after normal games slid again.
+PRACTICE_MIN, PRACTICE_MAX, LOSS_WEIGHT = 5, 40, 1
 
 
 def scheduled(game):
@@ -425,7 +425,7 @@ def main():
     p.add_argument("--bonuses", action=argparse.BooleanOptionalAction, default=True,
                    help="one-time rewards for first block built and first copper (the user's rule)")
     p.add_argument("--record-all", action="store_true")
-    p.add_argument("--practice", type=float, default=1 / 3, help="share of games started from the bot's own wave-8 saves (0 = off; 0.5 made normal games weaker, 2026-11-02)")
+    p.add_argument("--practice", type=float, default=0.2, help="share of games started from the bot's own wave-8 saves (0 = off; 0.5 made normal games weaker, 2026-11-02)")
     p.add_argument("--nice", type=int, default=int(os.environ.get("BLOODBOT_NICE", 19)))
     args = p.parse_args()
     args.servers = max(1, min(3, args.servers))
