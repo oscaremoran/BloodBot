@@ -22,7 +22,7 @@
 <h2>Best on each map</h2>
 <p class="muted">Best = a win beats a loss, then higher enemy strength, then higher score.</p>
 <div class="grid"><div class="card"><h3 style="margin:0 0 8px">Ground Zero</h3><div><b>Learning bot</b>
-              <span class="muted">(4421 games)</span><br>
+              <span class="muted">(4599 games)</span><br>
               <span class="win">WIN</span> · wave 10/10 · 80% enemy strength · score 5173.6<br>
               <span class="muted">game 3663 (variant 2) · 21 min · core 71%</span> · <a href="viewer.html?game=ppo/groundZero/game_03663">watch</a></div><br><div><b>Scripted benchmark</b>
               <span class="muted">(1 games)</span><br>
@@ -37,7 +37,7 @@
               <span class="muted">(114 games)</span><br>
               <span class="loss">LOSS</span> · wave 8/25 · 100% enemy strength · score 2034.4<br>
               <span class="muted">game 3798 (variant 1 (practice from wave 8)) · 19 min · core 0%</span></div></div></div>
-<h2>All games <span class="muted" style="font-size:14px">(4538)</span></h2>
+<h2>All games <span class="muted" style="font-size:14px">(4716)</span></h2>
 <p>Map: <select id="filter"><option value="">all maps</option><option value="groundZero">Ground Zero</option><option value="frozenForest">Frozen Forest</option><option value="crateredBattleground">Cratered Battleground</option><option value="archipelago">archipelago</option></select>
 Run: <select id="runFilter"><option value="">all runs</option><option value="campaign">campaign</option><option value="outlast">outlast</option><option value="ppo" selected>ppo</option><option value="ppo-run1">ppo-run1</option><option value="ppo-run2">ppo-run2</option><option value="train">train</option><option value="train_test">train_test</option></select>
 Generation: <input id="genFilter" size="8" placeholder="e.g. 40 or 30-40" title="a number, or a range like 30-40; blank = all">
@@ -9590,7 +9590,897 @@ Generation: <input id="genFilter" size="8" placeholder="e.g. 40 or 30-40" title=
           <td>variant 2</td><td>Ground Zero</td><td>80%</td>
           <td class="loss">loss</td><td data-v="10">10/10</td>
           <td>0%</td><td>2613.5</td>
-          <td data-v="2004.9336272477267">2,005</td><td>20.8</td><td>572</td><td></td></tr><tr data-map="groundZero" data-run="ppo-run1" data-gen="0">
+          <td data-v="2004.9336272477267">2,005</td><td>20.8</td><td>572</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1142">
+          <td>ppo</td><td>4032</td><td>1142</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-289.3</td>
+          <td data-v="0"></td><td>2.9</td><td>3</td><td><a href="viewer.html?game=ppo/groundZero/game_04032">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1142">
+          <td>ppo</td><td>4033</td><td>1142</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-279.5</td>
+          <td data-v="0"></td><td>2.9</td><td>4</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1142">
+          <td>ppo</td><td>4034</td><td>1142</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1474.9</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>225</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1142">
+          <td>ppo</td><td>4035</td><td>1142</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="10">10/10</td>
+          <td>0%</td><td>3741.0</td>
+          <td data-v="2004.9336272477267">2,005</td><td>20.8</td><td>328</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1142">
+          <td>ppo</td><td>4036</td><td>1142</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="10">10/10</td>
+          <td>0%</td><td>3081.2</td>
+          <td data-v="2004.9336272477267">2,005</td><td>20.8</td><td>200</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1142">
+          <td>ppo</td><td>4037</td><td>1142</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1435.4</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>220</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1142">
+          <td>ppo</td><td>4038</td><td>1142</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1718.6</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>206</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1143">
+          <td>ppo</td><td>4039</td><td>1143</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-414.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>539</td><td><a href="viewer.html?game=ppo/groundZero/game_04039">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1143">
+          <td>ppo</td><td>4040</td><td>1143</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>63.8</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>287</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1143">
+          <td>ppo</td><td>4041</td><td>1143</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2057.7</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>193</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1144">
+          <td>ppo</td><td>4042</td><td>1144</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>757.6</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>258</td><td><a href="viewer.html?game=ppo/groundZero/game_04042">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1144">
+          <td>ppo</td><td>4043</td><td>1144</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1354.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>437</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1144">
+          <td>ppo</td><td>4044</td><td>1144</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="10">10/10</td>
+          <td>0%</td><td>478.0</td>
+          <td data-v="0"></td><td>4.8</td><td>19</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1144">
+          <td>ppo</td><td>4045</td><td>1144</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2571.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>288</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1144">
+          <td>ppo</td><td>4046</td><td>1144</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1671.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>255</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1145">
+          <td>ppo</td><td>4047</td><td>1145</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>205.6</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>395</td><td><a href="viewer.html?game=ppo/groundZero/game_04047">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1145">
+          <td>ppo</td><td>4048</td><td>1145</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>792.7</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>163</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1145">
+          <td>ppo</td><td>4049</td><td>1145</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>329.8</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>219</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1146">
+          <td>ppo</td><td>4050</td><td>1146</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>783.0</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>460</td><td><a href="viewer.html?game=ppo/groundZero/game_04050">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1146">
+          <td>ppo</td><td>4051</td><td>1146</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1864.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>315</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1146">
+          <td>ppo</td><td>4052</td><td>1146</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-891.0</td>
+          <td data-v="0"></td><td>2.9</td><td>38</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1146">
+          <td>ppo</td><td>4053</td><td>1146</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>743.9</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>135</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1146">
+          <td>ppo</td><td>4054</td><td>1146</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>30%</td><td>3896.0</td>
+          <td data-v="2079.696687103696">2,080</td><td>20.8</td><td>392</td><td><a href="viewer.html?game=ppo/groundZero/game_04054">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1146">
+          <td>ppo</td><td>4055</td><td>1146</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1934.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>160</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1147">
+          <td>ppo</td><td>4056</td><td>1147</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1774.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>389</td><td><a href="viewer.html?game=ppo/groundZero/game_04056">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1147">
+          <td>ppo</td><td>4057</td><td>1147</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1776.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>371</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1147">
+          <td>ppo</td><td>4058</td><td>1147</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="10">10/10</td>
+          <td>0%</td><td>390.1</td>
+          <td data-v="0"></td><td>4.8</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1147">
+          <td>ppo</td><td>4059</td><td>1147</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1434.6</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>253</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1147">
+          <td>ppo</td><td>4060</td><td>1147</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1567.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>218</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1148">
+          <td>ppo</td><td>4061</td><td>1148</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-594.1</td>
+          <td data-v="0"></td><td>2.9</td><td>33</td><td><a href="viewer.html?game=ppo/groundZero/game_04061">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1148">
+          <td>ppo</td><td>4062</td><td>1148</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1814.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>158</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1148">
+          <td>ppo</td><td>4063</td><td>1148</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1620.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>231</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1148">
+          <td>ppo</td><td>4064</td><td>1148</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1148.7</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>302</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1148">
+          <td>ppo</td><td>4065</td><td>1148</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>79%</td><td>5114.5</td>
+          <td data-v="2079.696687103696">2,080</td><td>20.8</td><td>551</td><td><a href="viewer.html?game=ppo/groundZero/game_04065">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1148">
+          <td>ppo</td><td>4066</td><td>1148</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1331.6</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>172</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1149">
+          <td>ppo</td><td>4067</td><td>1149</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-304.4</td>
+          <td data-v="0"></td><td>2.9</td><td>12</td><td><a href="viewer.html?game=ppo/groundZero/game_04067">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1149">
+          <td>ppo</td><td>4068</td><td>1149</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1745.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>410</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1149">
+          <td>ppo</td><td>4069</td><td>1149</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>-683.3</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>209</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1149">
+          <td>ppo</td><td>4070</td><td>1149</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-416.9</td>
+          <td data-v="0"></td><td>2.8</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1149">
+          <td>ppo</td><td>4071</td><td>1149</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>-99.8</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>240</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1150">
+          <td>ppo</td><td>4072</td><td>1150</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1663.9</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>255</td><td><a href="viewer.html?game=ppo/groundZero/game_04072">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1150">
+          <td>ppo</td><td>4073</td><td>1150</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-770.5</td>
+          <td data-v="0"></td><td>2.8</td><td>49</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1150">
+          <td>ppo</td><td>4074</td><td>1150</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>32%</td><td>3093.1</td>
+          <td data-v="2079.696687103696">2,080</td><td>20.8</td><td>564</td><td><a href="viewer.html?game=ppo/groundZero/game_04074">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1150">
+          <td>ppo</td><td>4075</td><td>1150</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1527.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>217</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1151">
+          <td>ppo</td><td>4076</td><td>1151</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1564.3</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>430</td><td><a href="viewer.html?game=ppo/groundZero/game_04076">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1151">
+          <td>ppo</td><td>4077</td><td>1151</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>192.8</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>266</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1151">
+          <td>ppo</td><td>4078</td><td>1151</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>583.3</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.2</td><td>180</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1151">
+          <td>ppo</td><td>4079</td><td>1151</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="10">10/10</td>
+          <td>0%</td><td>518.8</td>
+          <td data-v="0"></td><td>4.8</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1152">
+          <td>ppo</td><td>4080</td><td>1152</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2384.4</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>373</td><td><a href="viewer.html?game=ppo/groundZero/game_04080">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1152">
+          <td>ppo</td><td>4081</td><td>1152</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>998.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>491</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1152">
+          <td>ppo</td><td>4082</td><td>1152</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-431.5</td>
+          <td data-v="0"></td><td>2.9</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1153">
+          <td>ppo</td><td>4083</td><td>1153</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>376.3</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>513</td><td><a href="viewer.html?game=ppo/groundZero/game_04083">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1153">
+          <td>ppo</td><td>4084</td><td>1153</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>70%</td><td>4816.8</td>
+          <td data-v="2079.696687103696">2,080</td><td>20.8</td><td>720</td><td><a href="viewer.html?game=ppo/groundZero/game_04084">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1153">
+          <td>ppo</td><td>4085</td><td>1153</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2461.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>203</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1153">
+          <td>ppo</td><td>4086</td><td>1153</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>245.2</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.9</td><td>307</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1153">
+          <td>ppo</td><td>4087</td><td>1153</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>497.8</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>141</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1153">
+          <td>ppo</td><td>4088</td><td>1153</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>57%</td><td>4074.6</td>
+          <td data-v="2079.696687103696">2,080</td><td>20.8</td><td>431</td><td><a href="viewer.html?game=ppo/groundZero/game_04088">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1154">
+          <td>ppo</td><td>4089</td><td>1154</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2430.9</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>300</td><td><a href="viewer.html?game=ppo/groundZero/game_04089">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1154">
+          <td>ppo</td><td>4090</td><td>1154</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>6%</td><td>3526.3</td>
+          <td data-v="2079.696687103696">2,080</td><td>20.8</td><td>468</td><td><a href="viewer.html?game=ppo/groundZero/game_04090">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1154">
+          <td>ppo</td><td>4091</td><td>1154</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-251.9</td>
+          <td data-v="0"></td><td>2.9</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1154">
+          <td>ppo</td><td>4092</td><td>1154</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>729.2</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>143</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1154">
+          <td>ppo</td><td>4093</td><td>1154</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>828.1</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>138</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1154">
+          <td>ppo</td><td>4094</td><td>1154</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1498.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>137</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1154">
+          <td>ppo</td><td>4095</td><td>1154</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1654.4</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>216</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1155">
+          <td>ppo</td><td>4096</td><td>1155</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1075.6</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>154</td><td><a href="viewer.html?game=ppo/groundZero/game_04096">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1155">
+          <td>ppo</td><td>4097</td><td>1155</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2043.6</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>329</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1155">
+          <td>ppo</td><td>4098</td><td>1155</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>-706.1</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>385</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1155">
+          <td>ppo</td><td>4099</td><td>1155</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1572.4</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>127</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1156">
+          <td>ppo</td><td>4100</td><td>1156</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1521.9</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>274</td><td><a href="viewer.html?game=ppo/groundZero/game_04100">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1156">
+          <td>ppo</td><td>4101</td><td>1156</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>944.9</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>74</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1156">
+          <td>ppo</td><td>4102</td><td>1156</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-60.1</td>
+          <td data-v="0"></td><td>2.8</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1156">
+          <td>ppo</td><td>4103</td><td>1156</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1153.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.2</td><td>205</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1156">
+          <td>ppo</td><td>4104</td><td>1156</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>-609.5</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>413</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1157">
+          <td>ppo</td><td>4105</td><td>1157</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>57%</td><td>1631.8</td>
+          <td data-v="0"></td><td>4.8</td><td>1</td><td><a href="viewer.html?game=ppo/groundZero/game_04105">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1157">
+          <td>ppo</td><td>4106</td><td>1157</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-275.4</td>
+          <td data-v="0"></td><td>2.9</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1157">
+          <td>ppo</td><td>4107</td><td>1157</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>-578.8</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>253</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1157">
+          <td>ppo</td><td>4108</td><td>1157</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>627.8</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>127</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1157">
+          <td>ppo</td><td>4109</td><td>1157</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>775.0</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>101</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1158">
+          <td>ppo</td><td>4110</td><td>1158</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>818.8</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>261</td><td><a href="viewer.html?game=ppo/groundZero/game_04110">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1158">
+          <td>ppo</td><td>4111</td><td>1158</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1908.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>208</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1158">
+          <td>ppo</td><td>4112</td><td>1158</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2205.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>363</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1158">
+          <td>ppo</td><td>4113</td><td>1158</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1209.8</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>146</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1159">
+          <td>ppo</td><td>4114</td><td>1159</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1674.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>252</td><td><a href="viewer.html?game=ppo/groundZero/game_04114">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1159">
+          <td>ppo</td><td>4115</td><td>1159</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>766.1</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>114</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1159">
+          <td>ppo</td><td>4116</td><td>1159</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1311.4</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>477</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1159">
+          <td>ppo</td><td>4117</td><td>1159</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="10">10/10</td>
+          <td>0%</td><td>2837.1</td>
+          <td data-v="2004.9336272477267">2,005</td><td>20.8</td><td>156</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1159">
+          <td>ppo</td><td>4118</td><td>1159</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-383.2</td>
+          <td data-v="0"></td><td>2.8</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1160">
+          <td>ppo</td><td>4119</td><td>1160</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>61.2</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>169</td><td><a href="viewer.html?game=ppo/groundZero/game_04119">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1160">
+          <td>ppo</td><td>4120</td><td>1160</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>473.2</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>214</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1161">
+          <td>ppo</td><td>4121</td><td>1161</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>526.6</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>384</td><td><a href="viewer.html?game=ppo/groundZero/game_04121">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1161">
+          <td>ppo</td><td>4122</td><td>1161</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1832.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>294</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1161">
+          <td>ppo</td><td>4123</td><td>1161</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-363.0</td>
+          <td data-v="0"></td><td>2.8</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1161">
+          <td>ppo</td><td>4124</td><td>1161</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>23.9</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>287</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1162">
+          <td>ppo</td><td>4125</td><td>1162</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>-621.6</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>347</td><td><a href="viewer.html?game=ppo/groundZero/game_04125">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1162">
+          <td>ppo</td><td>4126</td><td>1162</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2032.6</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>400</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1162">
+          <td>ppo</td><td>4127</td><td>1162</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2379.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>251</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1162">
+          <td>ppo</td><td>4128</td><td>1162</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>5%</td><td>720.1</td>
+          <td data-v="0"></td><td>4.8</td><td>52</td><td><a href="viewer.html?game=ppo/groundZero/game_04128">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1163">
+          <td>ppo</td><td>4129</td><td>1163</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1318.8</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>341</td><td><a href="viewer.html?game=ppo/groundZero/game_04129">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1163">
+          <td>ppo</td><td>4130</td><td>1163</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1578.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>191</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1163">
+          <td>ppo</td><td>4131</td><td>1163</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>222.1</td>
+          <td data-v="0"></td><td>2.8</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1163">
+          <td>ppo</td><td>4132</td><td>1163</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-220.5</td>
+          <td data-v="0"></td><td>2.9</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1163">
+          <td>ppo</td><td>4133</td><td>1163</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2642.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>172</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1163">
+          <td>ppo</td><td>4134</td><td>1163</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2072.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>219</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1163">
+          <td>ppo</td><td>4135</td><td>1163</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1137.3</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>207</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1164">
+          <td>ppo</td><td>4136</td><td>1164</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>404.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>417</td><td><a href="viewer.html?game=ppo/groundZero/game_04136">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1164">
+          <td>ppo</td><td>4137</td><td>1164</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>-42.4</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>103</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1164">
+          <td>ppo</td><td>4138</td><td>1164</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-498.5</td>
+          <td data-v="0"></td><td>2.8</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1164">
+          <td>ppo</td><td>4139</td><td>1164</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>17%</td><td>1141.8</td>
+          <td data-v="0"></td><td>4.8</td><td>0</td><td><a href="viewer.html?game=ppo/groundZero/game_04139">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1164">
+          <td>ppo</td><td>4140</td><td>1164</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2944.7</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>145</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1164">
+          <td>ppo</td><td>4141</td><td>1164</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-1374.8</td>
+          <td data-v="0"></td><td>2.9</td><td>56</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1164">
+          <td>ppo</td><td>4142</td><td>1164</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2245.0</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>203</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1164">
+          <td>ppo</td><td>4143</td><td>1164</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2158.0</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>210</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1165">
+          <td>ppo</td><td>4144</td><td>1165</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1862.9</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>165</td><td><a href="viewer.html?game=ppo/groundZero/game_04144">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1165">
+          <td>ppo</td><td>4145</td><td>1165</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1116.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>270</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1165">
+          <td>ppo</td><td>4146</td><td>1165</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>1186.7</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.9</td><td>151</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1165">
+          <td>ppo</td><td>4147</td><td>1165</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1403.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>316</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1166">
+          <td>ppo</td><td>4148</td><td>1166</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2760.0</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>334</td><td><a href="viewer.html?game=ppo/groundZero/game_04148">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1166">
+          <td>ppo</td><td>4149</td><td>1166</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1879.8</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>235</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1166">
+          <td>ppo</td><td>4150</td><td>1166</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1737.8</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>173</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1166">
+          <td>ppo</td><td>4151</td><td>1166</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2313.9</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>214</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1167">
+          <td>ppo</td><td>4152</td><td>1167</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2304.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>283</td><td><a href="viewer.html?game=ppo/groundZero/game_04152">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1167">
+          <td>ppo</td><td>4153</td><td>1167</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>37%</td><td>2918.0</td>
+          <td data-v="2079.696687103696">2,080</td><td>20.8</td><td>556</td><td><a href="viewer.html?game=ppo/groundZero/game_04153">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1167">
+          <td>ppo</td><td>4154</td><td>1167</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="10">10/10</td>
+          <td>0%</td><td>623.1</td>
+          <td data-v="0"></td><td>4.8</td><td>2</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1167">
+          <td>ppo</td><td>4155</td><td>1167</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1527.8</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>270</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1167">
+          <td>ppo</td><td>4156</td><td>1167</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1097.6</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>290</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1168">
+          <td>ppo</td><td>4157</td><td>1168</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>-189.2</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>288</td><td><a href="viewer.html?game=ppo/groundZero/game_04157">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1168">
+          <td>ppo</td><td>4158</td><td>1168</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>7%</td><td>1501.0</td>
+          <td data-v="0"></td><td>4.8</td><td>6</td><td><a href="viewer.html?game=ppo/groundZero/game_04158">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1168">
+          <td>ppo</td><td>4159</td><td>1168</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>388.9</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>258</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1169">
+          <td>ppo</td><td>4160</td><td>1169</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>245.2</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>306</td><td><a href="viewer.html?game=ppo/groundZero/game_04160">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1169">
+          <td>ppo</td><td>4161</td><td>1169</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1486.6</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>321</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1170">
+          <td>ppo</td><td>4162</td><td>1170</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1157.3</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>303</td><td><a href="viewer.html?game=ppo/groundZero/game_04162">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1170">
+          <td>ppo</td><td>4163</td><td>1170</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1629.7</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>270</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1170">
+          <td>ppo</td><td>4164</td><td>1170</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>689.4</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>248</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1170">
+          <td>ppo</td><td>4165</td><td>1170</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1008.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>216</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1170">
+          <td>ppo</td><td>4166</td><td>1170</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1630.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>239</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1171">
+          <td>ppo</td><td>4167</td><td>1171</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1206.6</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>291</td><td><a href="viewer.html?game=ppo/groundZero/game_04167">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1171">
+          <td>ppo</td><td>4168</td><td>1171</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>659.4</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>94</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1171">
+          <td>ppo</td><td>4169</td><td>1171</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-1005.5</td>
+          <td data-v="0"></td><td>2.9</td><td>90</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1171">
+          <td>ppo</td><td>4170</td><td>1171</td>
+          <td>variant 1 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>356.8</td>
+          <td data-v="0"></td><td>2.9</td><td>1</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1171">
+          <td>ppo</td><td>4171</td><td>1171</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1695.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>224</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1172">
+          <td>ppo</td><td>4172</td><td>1172</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>261.6</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>294</td><td><a href="viewer.html?game=ppo/groundZero/game_04172">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1172">
+          <td>ppo</td><td>4173</td><td>1172</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2426.0</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>308</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1172">
+          <td>ppo</td><td>4174</td><td>1172</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="6">6/10</td>
+          <td>0%</td><td>-48.7</td>
+          <td data-v="1757.357017668994">1,757</td><td>12.9</td><td>38</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1172">
+          <td>ppo</td><td>4175</td><td>1172</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2447.0</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>273</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1172">
+          <td>ppo</td><td>4176</td><td>1172</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>34.5</td>
+          <td data-v="0"></td><td>2.9</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1172">
+          <td>ppo</td><td>4177</td><td>1172</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>57%</td><td>1232.0</td>
+          <td data-v="0"></td><td>4.8</td><td>36</td><td><a href="viewer.html?game=ppo/groundZero/game_04177">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1172">
+          <td>ppo</td><td>4178</td><td>1172</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1138.0</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.3</td><td>230</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1172">
+          <td>ppo</td><td>4179</td><td>1172</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1913.8</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>217</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1173">
+          <td>ppo</td><td>4180</td><td>1173</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2167.4</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>198</td><td><a href="viewer.html?game=ppo/groundZero/game_04180">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1173">
+          <td>ppo</td><td>4181</td><td>1173</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1333.4</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>545</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1174">
+          <td>ppo</td><td>4182</td><td>1174</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1318.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>281</td><td><a href="viewer.html?game=ppo/groundZero/game_04182">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1174">
+          <td>ppo</td><td>4183</td><td>1174</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2623.6</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>264</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1174">
+          <td>ppo</td><td>4184</td><td>1174</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2117.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>453</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1175">
+          <td>ppo</td><td>4185</td><td>1175</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>5%</td><td>2382.3</td>
+          <td data-v="2079.696687103696">2,080</td><td>20.8</td><td>491</td><td><a href="viewer.html?game=ppo/groundZero/game_04185">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1175">
+          <td>ppo</td><td>4186</td><td>1175</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-175.8</td>
+          <td data-v="0"></td><td>2.8</td><td>0</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1175">
+          <td>ppo</td><td>4187</td><td>1175</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2167.8</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>451</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1175">
+          <td>ppo</td><td>4188</td><td>1175</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>893.7</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.2</td><td>181</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1175">
+          <td>ppo</td><td>4189</td><td>1175</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>645.9</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>85</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1175">
+          <td>ppo</td><td>4190</td><td>1175</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>970.0</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>203</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1176">
+          <td>ppo</td><td>4191</td><td>1176</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>327.4</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>450</td><td><a href="viewer.html?game=ppo/groundZero/game_04191">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1176">
+          <td>ppo</td><td>4192</td><td>1176</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="8">8/10</td>
+          <td>0%</td><td>421.9</td>
+          <td data-v="1877.0679742098696">1,877</td><td>16.8</td><td>39</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1176">
+          <td>ppo</td><td>4193</td><td>1176</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2315.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>102</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1176">
+          <td>ppo</td><td>4194</td><td>1176</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>-1000.6</td>
+          <td data-v="0"></td><td>2.9</td><td>45</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1176">
+          <td>ppo</td><td>4195</td><td>1176</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="7">7/10</td>
+          <td>0%</td><td>-175.9</td>
+          <td data-v="1816.2264663635526">1,816</td><td>14.8</td><td>134</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1176">
+          <td>ppo</td><td>4196</td><td>1176</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2135.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>693</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1176">
+          <td>ppo</td><td>4197</td><td>1176</td>
+          <td>variant 2 (practice from wave 8)</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>8%</td><td>1396.2</td>
+          <td data-v="0"></td><td>4.8</td><td>10</td><td><a href="viewer.html?game=ppo/groundZero/game_04197">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1177">
+          <td>ppo</td><td>4198</td><td>1177</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="6">6/10</td>
+          <td>0%</td><td>-532.3</td>
+          <td data-v="1757.357017668994">1,757</td><td>12.8</td><td>79</td><td><a href="viewer.html?game=ppo/groundZero/game_04198">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1177">
+          <td>ppo</td><td>4199</td><td>1177</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1986.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>408</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1178">
+          <td>ppo</td><td>4200</td><td>1178</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>858.0</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>365</td><td><a href="viewer.html?game=ppo/groundZero/game_04200">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1178">
+          <td>ppo</td><td>4201</td><td>1178</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="win">win</td><td data-v="10">10/10</td>
+          <td>4%</td><td>3208.9</td>
+          <td data-v="2079.696687103696">2,080</td><td>20.8</td><td>637</td><td><a href="viewer.html?game=ppo/groundZero/game_04201">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1178">
+          <td>ppo</td><td>4202</td><td>1178</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1665.8</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>228</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1178">
+          <td>ppo</td><td>4203</td><td>1178</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2508.0</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>393</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1179">
+          <td>ppo</td><td>4204</td><td>1179</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2076.8</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>192</td><td><a href="viewer.html?game=ppo/groundZero/game_04204">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1179">
+          <td>ppo</td><td>4205</td><td>1179</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1360.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>197</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1179">
+          <td>ppo</td><td>4206</td><td>1179</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>899.7</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>320</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1180">
+          <td>ppo</td><td>4207</td><td>1180</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2204.5</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.9</td><td>316</td><td><a href="viewer.html?game=ppo/groundZero/game_04207">watch</a></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1180">
+          <td>ppo</td><td>4208</td><td>1180</td>
+          <td>variant 1</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>2219.2</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>253</td><td></td></tr><tr data-map="groundZero" data-run="ppo" data-gen="1180">
+          <td>ppo</td><td>4209</td><td>1180</td>
+          <td>variant 2</td><td>Ground Zero</td><td>80%</td>
+          <td class="loss">loss</td><td data-v="9">9/10</td>
+          <td>0%</td><td>1306.1</td>
+          <td data-v="1939.9476029323928">1,940</td><td>18.8</td><td>250</td><td></td></tr><tr data-map="groundZero" data-run="ppo-run1" data-gen="0">
           <td>ppo-run1</td><td>1</td><td>0</td>
           <td>variant 3</td><td>Ground Zero</td><td>30%</td>
           <td class="loss">loss</td><td data-v="3">3/10</td>
