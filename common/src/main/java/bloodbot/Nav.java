@@ -101,10 +101,11 @@ public class Nav{
         for(Tile f : footprint){
             for(Point2 d : D4){
                 Tile n = f.nearby(d.x, d.y);
-                if(n != null && free(n.x, n.y, line) && !starts.contains(n)) starts.add(n);
+                if(n != null && n.build == null && free(n.x, n.y, line) && !starts.contains(n)) starts.add(n);
             }
         }
-        Seq<Tile> path = bfs(starts, goal, t -> free(t.x, t.y, line), 3000);
+        // Empty tiles only: a route laid over a conveyor, router or junction would cut the line that's already there.
+        Seq<Tile> path = bfs(starts, goal, t -> t.build == null && free(t.x, t.y, line), 3000);
         if(path == null) return null;
 
         Seq<Builder.Plan> plans = new Seq<>();

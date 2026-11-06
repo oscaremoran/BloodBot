@@ -1,5 +1,6 @@
 package bloodbot;
 
+import arc.struct.Seq;
 import mindustry.Vars;
 import mindustry.content.Items;
 import mindustry.game.Team;
@@ -21,7 +22,7 @@ public class Vision{
         "wall", "liquid floor", "copper ore", "lead ore", "sand", "coal", "titanium", "scrap/thorium",
         "own buildings", "own turrets", "own transport", "own production", "own power", "own walls",
         "enemy buildings", "enemy turrets", "enemy cores", "own units", "enemy units", "enemy spawns",
-        "own core", "destroyed (rebuildable)", "own ship"
+        "own core", "destroyed (rebuildable)", "own ship", "enemy route"
     };
     static final int C = LAYERS.length;
     /** Minimap layers, then close-up layers. */
@@ -34,6 +35,8 @@ public class Vision{
     final float[] grid = new float[CHANNELS * G * G];
     /** Bottom-left tile of the close-up window, for whoever needs to know where it is. */
     int closeX, closeY;
+    /** The ground route enemies walk to the core; see {@link #route}. */
+    Seq<Tile> route;
 
     Vision(){
         width = Vars.world.width();
@@ -55,6 +58,26 @@ public class Vision{
             else if(drop == Items.scrap || drop == Items.thorium) terrain[7 * G * G + c] += per;
         }
         for(int c = 0; c < G * G; c++) usable[c] = open[c] >= 0.1f;
+    }
+
+    /**
+     * The route from each enemy spawn and enemy core to this team's core, worked out once per game (2026-11-06). It only looks at
+     * the terrain, so the bot's own blocks don't bend it. A player sees this by looking at the map; the bot gets it as a layer.
+     */
+    Seq<Tile> route(Team team){
+        if(route != null) return route;
+        CoreBuild core = team.core();
+        if(core == null) return new Seq<>();
+        Seq<Tile> found = new Seq<>(), starts = new Seq<>(Vars.spawner.getSpawns());
+        for(var data : Vars.state.teams.getActive()){
+            if(data.team != team) for(CoreBuild enemy : data.cores) starts.add(enemy.tile);
+        }
+        for(Tile start : starts){
+            Seq<Tile> path = Nav.bfs(Seq.with(start), t -> t.build == core,
+                t -> t.build != null || (!t.solid() && !t.floor().isDeep()), Integer.MAX_VALUE);
+            if(path != null) found.addAll(path);
+        }
+        return route = found;
     }
 
     int index(int tileX, int tileY){
@@ -90,6 +113,7 @@ public class Vision{
             add(u.team == team ? 17 : 18, index(u.tileX(), u.tileY()), 0.25f);
         }
         for(Tile s : Vars.spawner.getSpawns()) add(19, index(s.x, s.y), 1f);
+        for(Tile t : route(team)) add(23, index(t.x, t.y), 1f);
         for(var plan : team.data().plans) add(21, index(plan.x, plan.y), plan.block.size * plan.block.size * per);
         if(ship != null) add(22, index(ship.tileX(), ship.tileY()), 1f);
         seeClose(team, ship);
@@ -137,6 +161,7 @@ public class Vision{
             addClose(u.team == team ? 17 : 18, u.tileX(), u.tileY(), 0.5f);
         }
         for(Tile s : Vars.spawner.getSpawns()) addClose(19, s.x, s.y, 1f);
+        for(Tile t : route(team)) addClose(23, t.x, t.y, 1f);
         for(var plan : team.data().plans) addClose(21, plan.x, plan.y, 1f);
         if(ship != null) addClose(22, ship.tileX(), ship.tileY(), 1f);
     }

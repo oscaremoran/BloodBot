@@ -87,6 +87,18 @@ def add_closeup(old: dict) -> dict:
     return sd
 
 
+@torch.no_grad()
+def add_route(old: dict) -> dict:
+    """46 map layers -> 48 (2026-11-06): the enemy route goes last in each view, with zero weights, so the brain plays
+    exactly as before and learns to use it."""
+    sd = {k: v.clone() for k, v in old.items()}
+    w = old["c1.weight"]
+    half = w.shape[1] // 2
+    pad = torch.zeros_like(w[:, :1])
+    sd["c1.weight"] = torch.cat([w[:, :half], pad, w[:, half:], pad], 1)
+    return sd
+
+
 def split(d: Dims, logits, masks):
     """Masked logits per head. masks: dict of bool tensors type, block, cell, mine, deliver."""
     o = 0

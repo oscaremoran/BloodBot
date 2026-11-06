@@ -87,7 +87,7 @@ public class ShipAI extends AIController{
 
         // Build first, but only when the core can pay for it; otherwise construction would stall forever
         // with the ship hovering beside it. Like a player, it gets on with its task (e.g. mining) meanwhile.
-        boolean build = unit.plans.size > 0 && canAfford(unit.buildPlan(), core);
+        boolean build = unit.plans.size > 0 && canAfford(unit.buildPlan(), core) && !miningForPlan(core);
         // The game won't let a unit mine while it counts as building, so building is switched off during other tasks.
         unit.updateBuilding(build);
         if(build){
@@ -111,6 +111,17 @@ public class ShipAI extends AIController{
             case DELIVER -> updateDelivery(core);
         }
         if(target != null) unit.lookAt(target);
+    }
+
+    /** Told to mine with the core nearly out of what the next plan needs: finish the trip instead of darting back for each trickle. */
+    boolean miningForPlan(CoreBuild core){
+        if(task != Task.MINE || item == null || core.items.get(item) >= unit.type.itemCapacity) return false;
+        var plan = unit.buildPlan();
+        if(plan.breaking || plan.block == null) return false;
+        for(var stack : plan.block.requirements){
+            if(stack.item == item) return true;
+        }
+        return false;
     }
 
     /** Removals are free; a placement needs at least one of each of its materials in the core to make progress. */
@@ -139,12 +150,18 @@ public class ShipAI extends AIController{
             return;
         }
         Tile ore = unit.mineTile();
-        if(ore == null || !unit.validMine(ore) || ore.drop() != item){
+        if(ore == null || !unit.validMine(ore) || ore.drop() != item || !handMineable(ore)){
             ore = Vars.indexer.findClosestOre(unit, item);
+            if(ore != null && !handMineable(ore)) ore = null;
             unit.mineTile(ore);
         }
         if(ore == null){ task = Task.GUARD; return; }
         moveTo(ore, unit.type.mineRange * 0.6f);
+    }
+
+    /** Players can't mine floors flagged playerUnmineable (sand, dark sand) by hand, only ore overlays; drills still can. */
+    static boolean handMineable(Tile t){
+        return !t.floor().playerUnmineable || t.overlay().itemDrop != null;
     }
 
     /** Take a load of an item from the core and drop it into a building (e.g. ammo into a turret). */

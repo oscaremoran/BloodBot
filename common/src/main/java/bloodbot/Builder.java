@@ -109,7 +109,8 @@ public class Builder{
     boolean done(Plan p, Tile tile){
         if(tile == null) return true;
         if(p.breaking) return tile.build == null && !tile.block().isStatic() && tile.block() == mindustry.content.Blocks.air;
-        return tile.build != null && tile.build.block == p.block && tile.build.team == team && tile.build.tile == tile;
+        return tile.build != null && tile.build.block == p.block && tile.build.team == team && tile.build.tile == tile
+            && (!p.block.rotate || tile.build.rotation == p.rotation); // a conveyor facing the wrong way isn't finished
     }
 
     boolean possible(Plan p, Tile tile){

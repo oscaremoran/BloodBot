@@ -33,6 +33,7 @@ public class Practice{
             j.put("hit", ints(agent.hitTurrets));
             j.put("fed", ints(agent.fedTurrets));
             j.put("routerFed", ints(agent.routerFedTurrets));
+            j.put("linkedDrills", ints(agent.linkedDrills));
             j.put("drillToConveyor", agent.drillToConveyor);
             j.put("conveyorToCore", agent.conveyorToCore);
             j.put("conveyorToTurret", agent.conveyorToTurret);
@@ -72,6 +73,9 @@ public class Practice{
         fill(agent.hitTurrets, j.get("hit"));
         fill(agent.fedTurrets, j.get("fed"));
         fill(agent.routerFedTurrets, j.get("routerFed"));
+        fill(agent.linkedDrills, j.get("linkedDrills"));
+        agent.waveTurretsPaid = true; // the wave 8 bonus is for bases built in this game
+        agent.builder.builtPos.each(agent.routeTurrets::add); // so is the route bonus: saved turrets never pay
         agent.drillToConveyor = j.getBool("drillToConveyor", false);
         agent.conveyorToCore = j.getBool("conveyorToCore", false);
         agent.conveyorToTurret = j.getBool("conveyorToTurret", false);

@@ -8,11 +8,26 @@ Insane is the newest brain. With fewer snapshots than levels, levels share a bra
 
 Usage: python3 -m bloodbot.pick_brains [runs/ppo]
 """
-import shutil
+import struct
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def upgrade_bin(raw: bytes) -> bytes:
+    """A brain file from before the enemy route (46 map layers) -> 48, with zero weights for the new layers."""
+    (n,) = struct.unpack(">i", raw[:4])
+    shape = list(struct.unpack(f">{n}i", raw[4:4 + 4 * n]))
+    if shape[0] != 46:
+        return raw
+    c, k1, off, cell = shape[0], shape[2], 4 + 4 * n, 9 * 4  # 3x3 floats per input layer
+    parts, pad = [], bytes(cell)
+    for o in range(k1):
+        row = raw[off + o * c * cell:off + (o + 1) * c * cell]
+        parts += [row[:c // 2 * cell], pad, row[c // 2 * cell:], pad]
+    shape[0] = c + 2
+    return struct.pack(f">{1 + n}i", n, *shape) + b"".join(parts) + raw[off + k1 * c * cell:]
 
 
 def main(run_dir):
@@ -29,7 +44,7 @@ def main(run_dir):
     out = ROOT / "mod" / "brains"
     out.mkdir(parents=True, exist_ok=True)
     for name, src in {"easy": at(1 / 3), "normal": at(2 / 3), "hard": at(0.9), "insane": latest}.items():
-        shutil.copy(src, out / f"{name}.bin")
+        (out / f"{name}.bin").write_bytes(upgrade_bin(src.read_bytes()))
         print(f"{name:7s} <- {src.parent.parent.name}/{src.name}")
 
 

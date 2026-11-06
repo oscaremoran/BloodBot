@@ -27,7 +27,7 @@ import numpy as np
 import torch
 
 from bloodbot import export_ppo
-from bloodbot.ppo import Dims, Net, act, gae, ppo_update, widen, add_closeup
+from bloodbot.ppo import Dims, Net, act, gae, ppo_update, widen, add_closeup, add_route
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "runs" / os.environ.get("BLOODBOT_RUN", "ppo")
@@ -147,6 +147,10 @@ class Trainer:
                     data["net"] = add_closeup(data["net"])
                     data.pop("opt")
                     print(f"added the close-up view: {old_dims[0]} -> {dims.C} map layers")
+                elif [dims.C] + dims.as_list()[1:] == [old_dims[0] + 2] + old_dims[1:]:
+                    data["net"] = add_route(data["net"])
+                    data.pop("opt", None)
+                    print(f"added the enemy route: {old_dims[0]} -> {dims.C} map layers")
                 else:
                     raise SystemExit("checkpoint was trained with different game sizes; start a new runs/ppo")
             if data["net"]["d1.weight"].shape != self.net.d1.weight.shape:
@@ -176,6 +180,8 @@ class Trainer:
                     self.window = [(r["outcome"] == "win", int(r["wave"]) / max(1, int(r["winWave"])))
                                    for r in csv.DictReader(f) if r["map"] == LADDER[self.state["rung"]][0] and not r.get("start")
                                    and abs(float(r["difficulty"]) - DIFFICULTY[self.state["level"]]) < 1e-6][-BEST_WINDOW:]
+            # Being past Ground Zero 30% means it was beaten; log.csv may no longer hold those games.
+            self.any_ammo = self.any_ammo or self.state["rung"] > 0 or self.state["level"] > 0
             print(f"resumed: {self.state['games']} games, {self.state['updates']} updates, "
                   f"map {LADDER[self.state['rung']][0]} at {int(DIFFICULTY[self.state['level']] * 100)}%")
         else:
@@ -183,7 +189,7 @@ class Trainer:
         if self.args.outlast:
             data = torch.load(OUT / "rival.pt", map_location="cpu", weights_only=False)
             self.rival = Net(dims)
-            self.rival.load_state_dict(data["net"])
+            self.rival.load_state_dict(add_route(data["net"]) if data["dims"][0] + 2 == dims.C else data["net"])
             print(f"outlast on {self.args.outlast}: rival from game {data['state']['games']}", flush=True)
 
     def save(self):
@@ -299,7 +305,7 @@ class Trainer:
         print(f"game {game}: {'RIVAL, ' if rival else ''}{'PRACTICE from wave 8, ' if practice else ''}{result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
               f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
               + (f" | chain drill>conv {'Y' if result['drillToConveyor'] else 'n'} conv>core {'Y' if result['conveyorToCore'] else 'n'}"
-                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} unused {result['unused']}"
+                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} wave8 turrets {result.get('waveTurrets', '?')} route turrets {result.get('routeTurrets', '?')} unused {result['unused']}"
                  if 'drillToConveyor' in result else ""), flush=True)
         if self.args.games and self.games_this_run >= self.args.games:
             self.stop = True
@@ -320,6 +326,8 @@ class Trainer:
             return
         s["best"] = {"rung": s["rung"], "level": s["level"], "key": key, "game": game}
         torch.save({"net": self.net.state_dict(), "state": dict(s), "dims": self.dims.as_list()}, OUT / "best.pt")
+        # best.pt follows the current level; this copy stays, so a new level never replaces an old level's champion.
+        shutil.copy2(OUT / "best.pt", OUT / f"best_{LADDER[s['rung']][0]}_{round(DIFFICULTY[s['level']] * 100)}.pt")
         export_ppo.export(OUT / "best.pt", OUT / "brains" / "best.bin")
         print(f"best brain kept: game {game}, last {BEST_WINDOW} games {wins} wins, "
               f"avg wave {sum(f for _, f in self.window) / len(self.window) * LADDER[s['rung']][1]:.1f}", flush=True)

@@ -14,6 +14,7 @@ from pathlib import Path
 import torch
 
 from bloodbot.export_ppo import LAYERS
+from bloodbot.pick_brains import upgrade_bin
 
 ROOT = Path(__file__).resolve().parent.parent
 CKPT = ROOT / "runs" / "ppo" / "checkpoint.pt"
@@ -21,7 +22,7 @@ CKPT = ROOT / "runs" / "ppo" / "checkpoint.pt"
 
 def main(snapshot: Path):
     data = torch.load(CKPT, weights_only=False)
-    raw = snapshot.read_bytes()
+    raw = upgrade_bin(snapshot.read_bytes())
     (n,) = struct.unpack(">i", raw[:4])
     off = 4 + 4 * n
     floats = torch.tensor(struct.unpack(f">{(len(raw) - off) // 4}f", raw[off:]))

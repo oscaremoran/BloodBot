@@ -78,7 +78,7 @@ public class Agent{
     static final Category[] CATEGORIES = {Category.turret, Category.production, Category.distribution, Category.liquid,
         Category.power, Category.defense, Category.crafting, Category.units, Category.effect, Category.logic};
 
-    static final int DECIDE_TICKS = 60, MAX_QUEUE = 6, HIDDEN = 64;
+    static final int DECIDE_TICKS = 60, MAX_QUEUE = 6, MAX_SUPPLY_QUEUE = 60, HIDDEN = 64;
 
     /** Every block the bot could ever build, in a fixed order so brains stay compatible across maps. */
     static Seq<Block> catalog;
@@ -249,7 +249,8 @@ public class Agent{
                 }
             }
         }
-        Building next = c.next();
+        // The field, not c.next(): that method only returns the next conveyor, so a core or turret never matched (fixed 2026-11-06).
+        Building next = c.next;
         if(next == null || next.team != team) return;
         if(!conveyorToCore && next instanceof CoreBuild){
             conveyorToCore = true;
@@ -259,6 +260,49 @@ public class Agent{
             && t.ammo.contains(e -> e instanceof ItemTurret.ItemEntry ie && ie.item == Items.copper)){
             conveyorToTurret = true;
             addPoints(CHAIN_BONUS);
+        }
+    }
+
+    /**
+     * Wave 8 rule (the user's, 2026-11-06): +20 once per game for each bot-built turret that has ammo and has hit an enemy
+     * when wave 8 arrives, because games with 15+ fed turrets at the mace win far more. Never paid in practice games.
+     */
+    static final int TURRET_CHECK_WAVE = 8;
+    static final float WAVE_TURRET_BONUS = 20f;
+    boolean waveTurretsPaid;
+    int waveTurrets;
+
+    void checkWaveTurrets(){
+        if(waveTurretsPaid || Vars.state.wave < TURRET_CHECK_WAVE) return;
+        waveTurretsPaid = true;
+        for(Building b : ownBuildings()){
+            if(b instanceof ItemTurret.ItemTurretBuild t && builder.builtPos.contains(t.pos())
+                && hitTurrets.contains(t.pos()) && t.totalAmmo > 0) waveTurrets++;
+        }
+        addPoints(WAVE_TURRET_BONUS * waveTurrets);
+    }
+
+    /**
+     * Route rule (the user's, 2026-11-06): +30 once for each bot-built turret that has ammo and the enemy route in range, for at
+     * most 10 turrets a game. It pays before any enemy arrives, so the bot can learn to build on the lane from the route layer.
+     */
+    static final float ROUTE_TURRET_BONUS = 30f;
+    static final int ROUTE_TURRET_CAP = 10;
+    final IntSet routeTurrets = new IntSet();
+    int routeTurretsPaid;
+
+    void checkRouteTurrets(){
+        if(routeTurretsPaid >= ROUTE_TURRET_CAP) return;
+        Seq<Tile> route = vision.route(team);
+        for(Building b : ownBuildings()){
+            if(!(b instanceof ItemTurret.ItemTurretBuild t) || t.totalAmmo <= 0 || !builder.builtPos.contains(t.pos())
+                || routeTurrets.contains(t.pos())) continue;
+            float range = t.range();
+            if(!route.contains(r -> r.within(t, range))) continue;
+            routeTurrets.add(t.pos());
+            routeTurretsPaid++;
+            addPoints(ROUTE_TURRET_BONUS);
+            if(routeTurretsPaid >= ROUTE_TURRET_CAP) return;
         }
     }
 
@@ -314,14 +358,18 @@ public class Agent{
             if(hp < lastCoreHealth) addPoints(-CORE_DAMAGE_PENALTY * (lastCoreHealth - hp));
             lastCoreHealth = hp;
         }
-        if(Vars.state.updateId % 60 == 30 && builder.core() != null) checkTurretAmmo();
+        if(Vars.state.updateId % 60 == 30 && builder.core() != null){
+            checkTurretAmmo();
+            checkWaveTurrets();
+            checkRouteTurrets();
+        }
         if(Vars.state.updateId % 10 == 5 && builder.core() != null) checkUsed();
         if(Vars.state.updateId % 10 == 0 && builder.core() != null){
             int copper = builder.core().items.get(Items.copper);
             if(copper > lastCopper) copperIn += copper - lastCopper;
             lastCopper = copper;
         }
-        if(builder.core() == null || Vars.state.updateId % DECIDE_TICKS != 0 || builder.queue.size >= MAX_QUEUE) return;
+        if(builder.core() == null || Vars.state.updateId % DECIDE_TICKS != 0) return;
         if(policy != null) execute(policy.decide(this));
         else act(brain.forward(vision.see(team, builder.ship), scalarFeatures()));
     }
@@ -410,7 +458,7 @@ public class Agent{
         for(Building b : ownBuildings()){
             if(!(b instanceof CoreBuild)){ removable = true; nonCore = true; }
             if(output(b) != null) producer = true;
-            if(needsItems(b) && !supplied.contains(b.pos() * 3)) itemConsumer = true;
+            if(needsItems(b) && openForItems(b)) itemConsumer = true;
             if(b.block.outputsPower && !b.block.consumesPower) powerSource = true;
             if(needsPower(b) && !supplied.contains(b.pos() * 3 + 1)) powerConsumer = true;
             if(b.block instanceof Pump || (b.block instanceof GenericCrafter c && c.outputLiquid != null)) liquidSource = true;
@@ -447,6 +495,10 @@ public class Agent{
         ok[LOGIC_WRITE] = processor;
         ok[PAYLOAD_PICKUP] = payloadUnits;
         ok[PAYLOAD_DROP] = payloadUnits;
+        // A full build list only stops single placements; the bot keeps deciding, so with no copper it can still mine and supply
+        // (2026-11-06). Supply lines have their own, higher limit so the list can't grow without end.
+        if(builder.queue.size >= MAX_QUEUE) ok[BUILD] = ok[REMOVE] = ok[REBUILD] = false;
+        if(builder.queue.size >= MAX_SUPPLY_QUEUE) ok[SUPPLY_ITEMS] = ok[SUPPLY_POWER] = ok[SUPPLY_LIQUID] = false;
         return ok;
     }
 
@@ -462,7 +514,7 @@ public class Agent{
         if(oreOnMap == null){
             oreOnMap = new boolean[ORES.length];
             for(Tile t : Vars.world.tiles){
-                for(int k = 0; k < ORES.length; k++) if(t.drop() == ORES[k]) oreOnMap[k] = true;
+                for(int k = 0; k < ORES.length; k++) if(t.drop() == ORES[k] && ShipAI.handMineable(t)) oreOnMap[k] = true;
             }
         }
         return oreOnMap[i] && builder.ship != null && builder.ship.canMine(ORES[i]);
@@ -750,7 +802,8 @@ public class Agent{
         Building consumer = null;
         float bestDst = Float.MAX_VALUE;
         for(Building b : ownBuildings()){
-            if(supplied.contains(b.pos() * 3 + kind) || b.dst(tile) > 10 * Vars.tilesize) continue;
+            if(b.dst(tile) > 10 * Vars.tilesize) continue;
+            if(kind == 0 ? !openForItems(b) : supplied.contains(b.pos() * 3 + kind)) continue;
             boolean needs = kind == 0 ? needsItems(b) : kind == 1 ? needsPower(b) : needsLiquid(b);
             if(!needs) continue;
             float d = b.dst2(tile);
@@ -759,6 +812,21 @@ public class Agent{
         if(consumer == null) return;
         boolean ok = kind == 0 ? supplyItems(consumer) : kind == 1 ? supplyPower(consumer) : supplyLiquid(consumer);
         if(ok) supplied.add(consumer.pos() * 3 + kind);
+    }
+
+    /** Drills that already have a line from the supply action. */
+    final IntSet linkedDrills = new IntSet();
+    static final int SUPPLY_RANGE = 35;
+
+    /** Each building gets one item line, except the core, which stays open while a drill in reach has no line yet (2026-11-06). */
+    boolean openForItems(Building b){
+        if(!(b instanceof CoreBuild)) return !supplied.contains(b.pos() * 3);
+        return ownBuildings().contains(d -> freeProducer(d, b));
+    }
+
+    boolean freeProducer(Building p, Building core){
+        return !linkedDrills.contains(p.pos()) && output(p) != null && p.dst(core) < SUPPLY_RANGE * Vars.tilesize
+            && core.acceptItem(p, output(p));
     }
 
     static boolean needsItems(Building b){
@@ -784,13 +852,15 @@ public class Agent{
 
     boolean supplyItems(Building consumer){
         Seq<Building> producers = ownBuildings().select(b -> b != consumer && output(b) != null
-            && b.dst(consumer) < 35 * Vars.tilesize && consumer.acceptItem(b, output(b)));
+            && b.dst(consumer) < SUPPLY_RANGE * Vars.tilesize && consumer.acceptItem(b, output(b))
+            && !(consumer instanceof CoreBuild && linkedDrills.contains(b.pos())));
         producers.sort(b -> b.dst2(consumer));
         for(Building p : producers){
             nav.reserved.clear();
             Seq<Builder.Plan> route = nav.route(p.tile.getLinkedTiles(new Seq<>()), t -> t.build == consumer, Blocks.conveyor);
             if(route == null) continue;
             route.each(builder::enqueue);
+            linkedDrills.add(p.pos());
             return true;
         }
         return false;
