@@ -2608,3 +2608,206 @@ game,generation,member,map,difficulty,outcome,wave,winWave,coreHealth,fitness,ga
 4846,1348,1,frozenForest,0.3,loss,6,15,0.0,-41.66,842,48.2,157,wait=31;build=40;remove=7;rebuild=60;supply items=690;supply power=10;ship guard=2;ship mine=2;ship fight=1,
 4847,1348,2,frozenForest,0.3,loss,7,15,0.0,-471.07,947,53.3,142,wait=556;build=77;remove=5;supply items=300;ship guard=1;ship mine=2;ship deliver=7,
 4848,1348,1,frozenForest,0.3,loss,4,15,0.0,-1051.75,570,28.7,212,wait=5;build=74;remove=4;rebuild=39;supply items=360;configure=83;ship guard=1;ship mine=1;ship fight=1;ship deliver=3,
+4849,1348,1,frozenForest,0.3,loss,6,15,0.0,-163.24,815,37.1,96,wait=17;build=40;remove=2;rebuild=170;supply items=206;configure=374;ship guard=2;ship mine=1;ship fight=2;ship deliver=2,
+4850,1348,2,frozenForest,0.3,loss,6,15,0.0,75.13,845,38.7,112,wait=25;build=59;supply items=748;ship guard=1;ship mine=2;ship deliver=11,
+4851,1349,2,frozenForest,0.3,loss,3,15,0.0,-1062.4,515,26.4,37,wait=25;build=27;supply items=461;ship guard=1;ship fight=2,
+4852,1349,1,frozenForest,0.3,loss,8,15,0.0,609.99,1079,52.3,192,wait=46;build=63;remove=1;rebuild=188;supply items=268;configure=505;ship guard=2;ship mine=2;ship deliver=5,
+4853,1349,2,frozenForest,0.3,loss,4,15,0.0,-1449.47,599,28.7,194,wait=264;build=50;remove=2;rebuild=28;supply items=253;ship guard=1;ship mine=2,
+4854,1349,2,frozenForest,0.3,loss,8,15,0.0,-77.68,61,3.5,0,wait=9;remove=1;rebuild=16;supply items=5;supply power=7;configure=23;ship fight=1,wave8
+4855,1350,1,frozenForest,0.3,loss,3,15,0.0,-1055.27,509,31.8,67,wait=4;build=69;remove=5;supply items=429;ship guard=1;ship mine=1;ship fight=1,
+4856,1350,1,frozenForest,0.3,loss,8,15,0.0,-938.1,39,2.2,0,wait=17;rebuild=1;supply items=17;ship fight=1;ship deliver=4,wave8
+4857,1350,2,frozenForest,0.3,loss,6,15,0.0,-904.39,835,45.1,89,wait=15;build=50;remove=1;rebuild=132;supply items=243;configure=386;ship guard=1;ship mine=2;ship deliver=6,
+4858,1351,1,frozenForest,0.3,loss,6,15,0.0,-1295.18,821,39.6,137,wait=562;build=46;supply items=203;ship guard=1;ship mine=1;ship deliver=9,
+4859,1351,2,frozenForest,0.3,loss,4,15,0.0,-1439.03,530,26.3,172,wait=206;build=56;rebuild=55;supply items=211;ship guard=1;ship mine=2,
+4860,1351,2,frozenForest,0.3,loss,8,15,0.0,-1078.78,59,2.7,0,wait=13;rebuild=2;supply items=39;ship fight=1;ship deliver=5,wave8
+4861,1351,2,frozenForest,0.3,loss,4,15,0.0,-1172.26,569,24.5,94,wait=5;build=25;remove=1;rebuild=3;supply items=119;supply power=44;configure=370;ship guard=1;ship mine=2,
+4862,1352,1,frozenForest,0.3,loss,8,15,0.0,241.42,1101,51.2,93,wait=389;build=71;remove=1;rebuild=133;supply items=502;ship guard=3;ship mine=1;ship fight=2,
+4863,1352,1,frozenForest,0.3,loss,4,15,0.0,-1430.35,570,24.9,60,wait=424;build=35;supply items=109;ship guard=1;ship fight=2,
+4864,1352,1,frozenForest,0.3,loss,8,15,0.0,-692.88,46,2.1,0,wait=2;rebuild=1;supply items=6;configure=37;ship deliver=1,wave8
+4865,1352,2,frozenForest,0.3,loss,8,15,0.0,438.61,1080,50.8,187,wait=176;build=71;remove=3;rebuild=66;supply items=759;ship guard=2;ship mine=3;ship fight=1,
+4866,1353,1,frozenForest,0.3,loss,4,15,0.0,-1076.42,559,27.8,250,wait=8;build=79;remove=2;rebuild=37;supply items=428;ship guard=1;ship mine=1;ship deliver=4,
+4867,1353,2,frozenForest,0.3,loss,6,15,0.0,-918.49,825,39.4,66,wait=54;build=39;supply items=723;ship guard=1;ship fight=1;ship deliver=8,
+4868,1354,2,frozenForest,0.3,loss,4,15,0.0,-999.08,562,28.1,82,wait=3;build=63;remove=1;rebuild=9;supply items=329;configure=154;ship guard=1;ship mine=1;ship fight=1;ship deliver=1,
+4869,1354,1,frozenForest,0.3,loss,8,15,0.0,1878.25,1100,51.9,181,wait=561;build=74;remove=1;rebuild=8;supply items=447;ship guard=2;ship mine=1;ship fight=2;ship deliver=5,
+4870,1355,1,frozenForest,0.3,loss,4,15,0.0,-439.0,570,27.9,195,wait=9;build=44;remove=6;rebuild=144;supply items=364;ship guard=1;ship fight=2;ship deliver=1,
+4871,1355,2,frozenForest,0.3,loss,6,15,0.0,-867.98,814,38.4,17,wait=1;build=23;remove=2;rebuild=368;supply items=124;configure=283;ship guard=1;ship mine=1;ship fight=1;ship deliver=11,
+4872,1355,2,frozenForest,0.3,loss,8,15,0.0,-460.91,43,2.0,12,wait=3;build=7;rebuild=12;supply items=21;ship mine=1,wave8
+4873,1355,2,frozenForest,0.3,loss,4,15,0.0,-957.42,587,25.3,231,wait=335;build=40;remove=1;supply items=209;ship guard=1;ship mine=1;ship fight=1,
+4874,1356,1,frozenForest,0.3,loss,8,15,0.0,363.97,1072,50.1,293,wait=94;build=42;remove=3;rebuild=82;supply items=847;ship guard=2;ship mine=2;ship fight=1,
+4875,1356,1,frozenForest,0.3,loss,4,15,0.0,-917.84,563,24.5,45,wait=5;build=22;remove=1;supply items=533;ship guard=1;ship fight=2,
+4876,1356,2,frozenForest,0.3,loss,8,15,0.0,-281.47,1071,50.5,206,wait=60;build=58;remove=3;rebuild=227;supply items=698;ship guard=1;ship mine=1;ship deliver=24,
+4877,1357,1,frozenForest,0.3,loss,4,15,0.0,-1014.03,530,26.1,50,wait=12;build=30;remove=2;supply items=484;ship guard=1;ship fight=2,
+4878,1357,1,frozenForest,0.3,loss,4,15,0.0,-1134.95,563,24.4,110,wait=4;build=32;remove=1;rebuild=32;supply items=492;ship guard=1;ship mine=1;ship fight=1,
+4879,1357,2,frozenForest,0.3,loss,7,15,0.0,-411.25,949,44.6,122,wait=469;build=48;rebuild=12;supply items=416;ship guard=2;ship mine=1;ship fight=2,
+4880,1357,2,frozenForest,0.3,loss,8,15,0.0,-794.3,39,1.8,0,wait=7;rebuild=1;supply items=29;ship deliver=3,wave8
+4881,1358,2,frozenForest,0.3,loss,4,15,0.0,-934.82,569,27.9,70,wait=3;build=25;remove=2;rebuild=53;supply items=484;ship guard=1;ship mine=1;ship fight=1,
+4882,1358,1,frozenForest,0.3,loss,8,15,0.0,446.1,1094,50.8,126,wait=9;build=40;remove=2;rebuild=107;supply items=357;configure=567;ship guard=1;ship mine=1;ship fight=1;ship deliver=10,
+4883,1358,2,frozenForest,0.3,loss,4,15,0.0,-1106.99,600,26.0,39,wait=16;build=33;rebuild=38;supply items=475;configure=30;ship guard=1;ship mine=2;ship deliver=6,
+4884,1359,1,frozenForest,0.3,loss,4,15,0.0,-1772.6,585,29.0,67,wait=293;build=47;remove=1;supply items=242;ship guard=1;ship mine=1;ship fight=1,
+4885,1359,2,frozenForest,0.3,loss,4,15,0.0,-1131.52,530,26.5,31,wait=13;build=39;remove=2;rebuild=200;supply items=274;ship guard=1;ship mine=1;ship fight=1,
+4886,1359,1,frozenForest,0.3,loss,4,15,0.0,-978.1,585,25.3,102,wait=1;build=36;remove=2;rebuild=31;supply items=473;configure=40;ship guard=1;ship mine=1;ship fight=1,
+4887,1359,2,frozenForest,0.3,loss,4,15,0.0,-723.05,568,24.6,224,wait=11;build=51;remove=3;rebuild=133;supply items=368;ship guard=1;ship mine=1;ship fight=1,
+4888,1360,2,frozenForest,0.3,loss,8,15,0.0,-865.36,37,5.2,0,wait=8;rebuild=1;supply items=27;ship deliver=2,wave8
+4889,1360,1,frozenForest,0.3,loss,5,15,0.0,-972.07,718,34.8,36,wait=23;build=20;remove=1;supply items=640;ship guard=1;ship fight=2;ship deliver=32,
+4890,1360,2,frozenForest,0.3,loss,6,15,0.0,-860.75,833,36.5,182,wait=8;build=65;remove=2;rebuild=110;supply items=312;configure=333;ship guard=1;ship mine=1;ship deliver=2,
+4891,1361,1,frozenForest,0.3,loss,5,15,0.0,-813.06,722,34.8,47,wait=11;build=22;remove=1;rebuild=221;supply items=436;ship guard=1;ship mine=1;ship fight=1;ship deliver=29,
+4892,1361,2,frozenForest,0.3,loss,7,15,0.0,258.06,954,44.9,45,wait=17;build=24;remove=3;rebuild=147;supply items=645;configure=88;ship guard=1;ship mine=1;ship fight=1;ship deliver=28,
+4893,1361,1,frozenForest,0.3,loss,4,15,0.0,-1041.98,564,24.5,27,build=29;remove=1;rebuild=209;supply items=323;ship guard=1;ship mine=1;ship fight=1,
+4894,1362,2,frozenForest,0.3,loss,10,15,0.0,247.73,314,17.8,0,wait=30;rebuild=15;supply items=33;supply power=82;configure=152;ship deliver=3,wave8
+4895,1362,2,frozenForest,0.3,loss,5,15,0.0,-909.58,715,31.7,71,wait=11;build=50;rebuild=128;supply items=522;ship guard=1;ship mine=2;ship deliver=2,
+4896,1362,1,frozenForest,0.3,loss,7,15,0.0,1238.85,998,47.9,281,wait=137;build=74;remove=2;rebuild=16;supply items=765;ship guard=2;ship mine=2;ship fight=1,
+4897,1362,1,frozenForest,0.3,loss,8,15,0.0,-1047.87,59,2.7,0,wait=4;rebuild=1;supply items=50;ship fight=1;ship deliver=4,wave8
+4898,1363,1,frozenForest,0.3,loss,4,15,0.0,-311.81,570,28.4,215,wait=1;build=51;remove=1;rebuild=43;supply items=417;configure=55;ship guard=1;ship mine=2,
+4899,1363,2,frozenForest,0.3,loss,6,15,0.0,-1015.42,835,39.9,72,wait=27;build=60;remove=2;rebuild=28;supply items=357;configure=357;ship guard=1;ship mine=1;ship deliver=3,
+4900,1364,1,frozenForest,0.3,loss,4,15,0.0,-968.95,572,28.1,137,wait=7;build=48;remove=1;rebuild=37;supply items=226;configure=250;ship guard=1;ship mine=1;ship deliver=2,
+4901,1364,2,frozenForest,0.3,loss,4,15,0.0,-938.18,570,28.0,174,wait=10;build=44;rebuild=181;supply items=333;ship guard=1;ship mine=1;ship fight=1,
+4902,1364,1,frozenForest,0.3,loss,4,15,0.0,-983.24,584,25.2,61,wait=5;build=34;rebuild=37;supply items=506;ship guard=1;ship mine=1;ship fight=1,
+4903,1364,2,frozenForest,0.3,loss,6,15,0.0,-947.2,822,35.6,24,wait=5;build=27;remove=8;rebuild=387;supply items=224;configure=167;ship guard=1;ship mine=2;ship deliver=2,
+4904,1365,1,frozenForest,0.3,loss,3,15,0.0,-1060.37,507,25.3,20,build=28;remove=2;rebuild=183;supply items=292;ship guard=1;ship mine=1;ship fight=1,
+4905,1365,2,frozenForest,0.3,loss,4,15,0.0,-1189.03,530,26.5,44,wait=22;build=47;remove=4;rebuild=65;supply items=390;ship guard=1;ship mine=1;ship fight=1,
+4906,1366,1,frozenForest,0.3,loss,7,15,0.0,703.56,966,46.1,205,wait=173;build=37;remove=1;supply items=748;ship guard=2;ship mine=2;ship fight=1;ship deliver=3,
+4907,1366,2,frozenForest,0.3,loss,5,15,0.0,-896.96,700,34.5,112,wait=1;build=60;remove=1;rebuild=46;supply items=388;configure=194;ship guard=1;ship mine=1;ship deliver=9,
+4908,1366,1,frozenForest,0.3,loss,6,15,0.0,-706.25,827,36.1,160,wait=7;build=55;remove=3;rebuild=217;supply items=351;configure=185;ship guard=1;ship mine=1;ship deliver=7,
+4909,1366,2,frozenForest,0.3,loss,5,15,0.0,-1130.87,718,31.4,73,wait=27;build=67;remove=4;rebuild=100;supply items=512;ship guard=1;ship mine=1;ship fight=1;ship deliver=6,
+4910,1367,2,frozenForest,0.3,loss,4,15,0.0,-1050.82,591,29.2,68,wait=3;build=40;remove=3;rebuild=1;supply items=542;ship guard=1;ship mine=1;ship fight=1,
+4911,1367,2,frozenForest,0.3,loss,8,15,0.0,-905.03,37,1.7,0,wait=11;rebuild=1;supply items=24;ship fight=1;ship deliver=1,wave8
+4912,1367,2,frozenForest,0.3,loss,8,15,0.0,-982.3,62,2.8,0,rebuild=1;supply items=11;configure=35;ship deliver=16,wave8
+4913,1367,1,frozenForest,0.3,loss,6,15,0.0,-883.71,816,39.2,67,wait=25;build=41;remove=1;supply items=745;ship guard=1;ship mine=1;ship deliver=3,
+4914,1368,2,frozenForest,0.3,loss,4,15,0.0,-946.92,601,29.9,56,wait=8;build=26;remove=1;supply items=564;ship guard=1;ship fight=2,
+4915,1368,2,frozenForest,0.3,loss,4,15,0.0,-1277.17,570,25.1,67,wait=10;build=29;remove=4;rebuild=164;supply items=313;configure=43;ship guard=1;ship mine=2;ship deliver=5,
+4916,1368,1,frozenForest,0.3,loss,8,15,0.0,-95.73,1081,51.2,122,wait=797;build=48;remove=4;supply items=216;ship guard=1;ship mine=1;ship deliver=15,
+4917,1368,2,frozenForest,0.3,loss,8,15,0.0,-1073.0,60,2.7,0,wait=9;rebuild=1;supply items=49;ship deliver=1,wave8
+4918,1369,2,frozenForest,0.3,loss,5,15,0.0,-856.47,715,34.9,86,wait=4;build=41;rebuild=370;supply items=287;ship guard=1;ship mine=1;ship fight=1;ship deliver=11,
+4919,1369,1,frozenForest,0.3,loss,7,15,0.0,-536.91,943,45.1,248,wait=133;build=77;remove=1;rebuild=81;supply items=641;ship guard=1;ship mine=2;ship deliver=8,
+4920,1370,2,frozenForest,0.3,loss,4,15,0.0,-1068.12,570,28.3,34,build=40;remove=1;rebuild=132;supply items=395;ship guard=1;ship mine=1;ship fight=1,
+4921,1370,1,frozenForest,0.3,loss,6,15,0.0,-883.53,843,40.3,119,wait=16;build=54;remove=2;rebuild=22;supply items=291;configure=445;ship guard=1;ship mine=1;ship deliver=12,
+4922,1370,1,frozenForest,0.3,loss,8,15,0.0,-1007.73,62,2.8,0,wait=9;rebuild=2;supply items=51;ship fight=1,wave8
+4923,1370,2,frozenForest,0.3,loss,4,15,0.0,-1506.92,562,24.8,64,wait=326;build=46;supply items=188;ship guard=1;ship mine=1;ship fight=1,
+4924,1370,1,frozenForest,0.3,loss,8,15,0.0,-971.32,60,3.1,0,wait=10;rebuild=2;supply items=48;ship fight=1,wave8
+4925,1370,1,frozenForest,0.3,loss,8,15,0.0,-1063.85,43,2.1,0,wait=8;rebuild=1;supply items=34;ship fight=1,wave8
+4926,1371,2,frozenForest,0.3,loss,6,15,0.0,-1084.26,820,42.1,53,wait=29;build=61;rebuild=154;supply items=572;ship guard=2;ship mine=3,
+4927,1371,1,frozenForest,0.3,loss,6,15,0.0,-873.26,835,42.5,161,wait=15;build=61;remove=1;rebuild=61;supply items=250;configure=436;ship guard=1;ship mine=1;ship deliver=9,
+4928,1371,2,frozenForest,0.3,loss,4,15,0.0,-1031.77,586,27.1,61,wait=3;build=35;remove=1;rebuild=30;supply items=135;configure=365;ship guard=1;ship mine=1;ship deliver=16,
+4929,1372,1,frozenForest,0.3,loss,6,15,0.0,25.23,832,42.3,133,wait=29;build=50;remove=1;supply items=739;ship guard=1;ship mine=1;ship fight=1;ship deliver=11,
+4930,1372,2,frozenForest,0.3,loss,6,15,0.0,-906.07,815,40.8,25,wait=2;build=26;remove=4;rebuild=237;supply items=526;ship guard=1;ship fight=1;ship deliver=19,
+4931,1373,1,frozenForest,0.3,loss,6,15,0.0,-916.46,822,40.3,83,wait=3;build=46;remove=2;rebuild=126;supply items=224;configure=411;ship guard=1;ship fight=1;ship deliver=9,
+4932,1373,1,frozenForest,0.3,loss,8,15,0.0,-648.99,47,2.2,0,wait=4;rebuild=1;supply items=42;ship fight=1,wave8
+4933,1373,2,frozenForest,0.3,loss,6,15,0.0,-995.25,818,40.2,178,wait=123;build=60;remove=2;rebuild=2;supply items=620;ship guard=1;ship mine=1;ship deliver=10,
+4934,1373,1,frozenForest,0.3,loss,4,15,0.0,-1461.47,531,24.2,38,wait=125;build=53;remove=2;rebuild=161;supply items=188;ship guard=1;ship mine=2,
+4935,1374,1,frozenForest,0.3,loss,4,15,0.0,-994.38,564,30.0,41,wait=2;build=42;remove=1;rebuild=116;supply items=401;ship guard=1;ship mine=1;ship fight=1,
+4936,1374,2,frozenForest,0.3,loss,7,15,0.0,-18.22,945,46.3,83,wait=12;build=17;supply items=254;configure=560;ship guard=1;ship mine=1;ship fight=1;ship deliver=100,
+4937,1374,1,frozenForest,0.3,loss,6,15,0.0,-1349.94,820,44.3,95,wait=244;build=56;rebuild=13;supply items=501;ship guard=1;ship mine=1;ship deliver=5,
+4938,1375,2,frozenForest,0.3,loss,6,15,0.0,-437.0,819,49.8,54,wait=8;build=27;remove=1;rebuild=25;supply items=240;configure=507;ship guard=1;ship fight=1;ship deliver=10,
+4939,1375,1,frozenForest,0.3,loss,4,15,0.0,-1328.99,566,36.7,158,wait=40;build=32;rebuild=45;supply items=446;ship guard=2;ship mine=1;ship fight=1,
+4940,1376,2,frozenForest,0.3,loss,6,15,0.0,-1020.72,813,47.5,48,wait=18;build=39;remove=3;rebuild=171;supply items=570;ship guard=1;ship mine=1;ship deliver=11,
+4941,1376,1,frozenForest,0.3,loss,6,15,0.0,-884.46,820,41.6,60,wait=11;build=29;rebuild=62;supply items=181;configure=520;ship guard=1;ship mine=1;ship deliver=16,
+4942,1377,1,frozenForest,0.3,loss,5,15,0.0,-919.62,715,43.0,53,wait=4;build=34;rebuild=77;supply items=238;configure=337;ship guard=1;ship mine=1;ship fight=1;ship deliver=23,
+4943,1377,2,frozenForest,0.3,loss,8,15,0.0,541.82,1072,59.3,199,wait=79;build=44;remove=4;rebuild=327;supply items=598;ship guard=1;ship mine=1;ship fight=1;ship deliver=18,
+4944,1377,1,frozenForest,0.3,loss,4,15,0.0,-1020.23,566,26.8,120,wait=6;build=73;remove=8;rebuild=2;supply items=475;ship guard=1;ship mine=2,
+4945,1377,2,frozenForest,0.3,loss,4,15,0.0,-1051.48,531,25.0,18,wait=1;build=24;remove=5;rebuild=1;supply items=81;configure=416;ship guard=1;ship mine=2;ship deliver=1,
+4946,1378,2,frozenForest,0.3,loss,6,15,0.0,-719.74,841,45.0,134,wait=7;build=40;remove=1;rebuild=32;supply items=254;configure=493;ship guard=1;ship mine=2;ship deliver=12,
+4947,1378,1,frozenForest,0.3,loss,7,15,0.0,-632.72,962,50.3,72,wait=71;build=70;remove=3;rebuild=28;supply items=776;ship guard=1;ship mine=1;ship deliver=12,
+4948,1378,1,frozenForest,0.3,loss,10,15,0.0,-151.54,313,16.1,3,wait=25;rebuild=13;supply items=58;configure=211;ship deliver=7,wave8
+4949,1379,2,frozenForest,0.3,loss,8,15,0.0,96.58,1070,54.4,67,wait=38;build=44;remove=1;supply items=947;ship guard=1;ship fight=1;ship deliver=39,
+4950,1379,1,frozenForest,0.3,loss,6,15,0.0,-335.65,815,41.3,56,wait=2;build=37;remove=3;rebuild=140;supply items=239;configure=379;ship guard=1;ship fight=1;ship deliver=14,
+4951,1380,1,frozenForest,0.3,loss,4,15,0.0,-1089.63,589,33.0,29,wait=7;build=46;supply items=534;ship guard=1;ship fight=2,
+4952,1380,1,frozenForest,0.3,loss,8,15,0.0,-932.25,62,3.9,0,wait=8;rebuild=2;supply items=52;ship fight=1,wave8
+4953,1380,2,frozenForest,0.3,loss,8,15,0.0,616.8,1082,57.5,159,wait=32;build=75;remove=3;rebuild=31;supply items=920;ship guard=1;ship mine=1;ship deliver=20,
+4954,1380,2,frozenForest,0.3,loss,8,15,0.0,-874.08,67,3.3,0,wait=2;rebuild=1;supply items=17;configure=45;ship deliver=3,wave8
+4955,1380,1,frozenForest,0.3,loss,8,15,0.0,-1107.37,44,2.8,0,wait=7;rebuild=1;supply items=36;ship deliver=1,wave8
+4956,1380,2,frozenForest,0.3,loss,4,15,0.0,383.57,578,26.8,133,wait=1;build=63;remove=1;rebuild=57;supply items=454;ship guard=1;ship mine=1;ship fight=1,
+4957,1380,1,frozenForest,0.3,loss,4,15,0.0,573.92,592,27.1,279,wait=4;build=74;remove=3;rebuild=39;supply items=470;ship guard=1;ship mine=2,
+4958,1380,1,frozenForest,0.3,loss,8,15,0.0,-1121.2,66,3.2,0,rebuild=1;supply items=7;configure=46;ship deliver=13,wave8
+4959,1381,2,frozenForest,0.3,loss,6,15,0.0,-622.23,820,41.1,157,wait=51;build=48;remove=4;rebuild=96;supply items=591;ship guard=1;ship fight=1;ship deliver=29,
+4960,1381,1,frozenForest,0.3,loss,6,15,0.0,1219.55,833,42.2,367,wait=108;build=72;rebuild=165;supply items=484;ship guard=2;ship mine=2;ship fight=1,
+4961,1381,2,frozenForest,0.3,loss,4,15,0.0,-383.92,592,27.2,286,wait=26;build=66;remove=3;rebuild=21;supply items=474;ship guard=1;ship mine=2,
+4962,1382,1,frozenForest,0.3,loss,6,15,0.0,-1208.29,814,42.7,201,wait=14;build=73;remove=1;rebuild=31;supply items=349;configure=329;ship guard=1;ship mine=1;ship deliver=16,
+4963,1382,1,frozenForest,0.3,loss,4,15,0.0,-1160.62,615,27.9,32,wait=10;build=43;remove=1;rebuild=133;supply items=426;ship guard=1;ship fight=2,
+4964,1382,2,frozenForest,0.3,loss,8,15,0.0,840.31,1078,54.5,117,wait=75;build=46;remove=3;rebuild=69;supply items=822;ship guard=1;ship fight=1;ship deliver=62,
+4965,1383,1,frozenForest,0.3,loss,7,15,0.0,-1777.39,941,49.0,73,wait=756;build=18;supply items=139;ship guard=1;ship fight=1;ship deliver=27,
+4966,1384,2,frozenForest,0.3,loss,8,15,0.0,2206.27,1099,61.1,214,wait=15;build=61;rebuild=34;supply items=464;configure=501;ship guard=2;ship mine=2;ship fight=1;ship deliver=20,
+4967,1384,2,frozenForest,0.3,loss,4,15,0.0,-1306.53,590,26.7,105,wait=4;build=75;remove=3;rebuild=31;supply items=472;ship guard=1;ship mine=1;ship deliver=4,
+4968,1384,1,frozenForest,0.3,loss,6,15,0.0,-1275.66,833,42.8,165,wait=41;build=75;remove=2;rebuild=53;supply items=324;configure=328;ship guard=1;ship mine=2;ship deliver=8,
+4969,1384,1,frozenForest,0.3,loss,8,15,0.0,-763.2,39,1.7,0,wait=11;rebuild=1;supply items=18;ship fight=1;ship deliver=9,wave8
+4970,1385,1,frozenForest,0.3,loss,5,15,0.0,-1172.59,711,34.2,132,wait=7;build=54;remove=5;rebuild=65;supply items=229;configure=340;ship guard=1;ship mine=1;ship deliver=10,
+4971,1385,2,frozenForest,0.3,loss,6,15,0.0,-41.11,812,38.6,208,wait=102;build=76;remove=19;rebuild=15;supply items=591;ship guard=1;ship mine=1;ship deliver=8,
+4972,1385,2,frozenForest,0.3,loss,4,15,0.0,-1104.04,530,24.6,95,wait=8;build=81;remove=4;rebuild=7;supply items=428;ship guard=1;ship mine=1;ship deliver=1,
+4973,1386,1,frozenForest,0.3,loss,6,15,0.0,-222.28,844,44.2,284,wait=29;build=65;remove=4;rebuild=125;supply items=617;ship guard=2;ship mine=2;ship fight=1,
+4974,1386,2,frozenForest,0.3,loss,4,15,0.0,345.89,576,31.2,122,wait=2;build=73;remove=3;rebuild=20;supply items=472;ship guard=1;ship mine=2;ship deliver=4,
+4975,1386,2,frozenForest,0.3,loss,10,15,0.0,390.69,314,15.1,3,wait=35;rebuild=14;supply items=47;configure=215;ship mine=1;ship deliver=3,wave8
+4976,1387,1,frozenForest,0.3,loss,8,15,0.0,2566.67,1070,54.4,213,wait=274;build=60;remove=2;rebuild=86;supply items=640;ship guard=2;ship mine=2;ship deliver=5,
+4977,1387,1,frozenForest,0.3,loss,8,15,0.0,-1083.64,43,2.1,0,wait=12;rebuild=1;supply items=28;ship deliver=3,wave8
+4978,1387,2,frozenForest,0.3,loss,7,15,0.0,874.73,942,48.5,154,wait=86;build=89;remove=7;rebuild=38;supply items=701;ship guard=1;ship mine=1;ship fight=1;ship deliver=19,
+4979,1387,2,frozenForest,0.3,loss,8,15,0.0,-899.55,62,2.9,0,wait=7;rebuild=1;supply items=54;ship fight=1,wave8
+4980,1388,2,frozenForest,0.3,loss,4,15,0.0,-1148.12,587,31.9,141,wait=1;build=54;remove=5;rebuild=43;supply items=478;ship guard=1;ship mine=1;ship deliver=4,
+4981,1388,1,frozenForest,0.3,loss,8,15,0.0,943.73,1095,56.2,84,wait=716;build=39;remove=2;rebuild=50;supply items=251;ship deliver=38,
+4982,1388,1,frozenForest,0.3,loss,4,15,0.0,-1042.32,586,26.2,127,wait=2;build=54;remove=2;rebuild=46;supply items=472;ship guard=1;ship mine=1;ship deliver=9,
+4983,1389,2,frozenForest,0.3,loss,6,15,0.0,-1253.15,822,42.5,64,wait=7;build=30;remove=1;rebuild=22;supply items=187;configure=565;ship guard=1;ship fight=1;ship deliver=9,
+4984,1389,2,frozenForest,0.3,loss,4,15,0.0,-1604.97,591,27.8,19,wait=546;build=42;remove=1;ship guard=1;ship fight=2,
+4985,1389,1,frozenForest,0.3,loss,6,15,0.0,-1247.43,823,44.0,93,wait=36;build=49;remove=5;rebuild=123;supply items=591;ship guard=1;ship mine=1;ship deliver=18,
+4986,1390,1,frozenForest,0.3,loss,4,15,0.0,-329.38,563,29.8,209,wait=2;build=64;remove=8;rebuild=3;supply items=480;ship guard=1;ship mine=1;ship deliver=5,
+4987,1390,1,frozenForest,0.3,loss,8,15,0.0,-1034.45,36,1.9,0,wait=1;rebuild=1;supply items=25;ship deliver=9,wave8
+4988,1390,2,frozenForest,0.3,loss,6,15,0.0,-343.44,821,41.7,34,wait=52;build=38;remove=2;supply items=725;ship guard=2;ship fight=3,
+4989,1391,1,frozenForest,0.3,loss,6,15,0.0,1869.19,849,43.7,157,wait=1;build=46;remove=3;rebuild=263;supply items=234;configure=295;ship guard=1;ship mine=1;ship deliver=6,
+4990,1391,1,frozenForest,0.3,loss,8,15,0.0,-1076.02,59,2.9,13,wait=6;remove=1;rebuild=4;supply items=48;ship mine=1,wave8
+4991,1391,1,frozenForest,0.3,loss,8,15,0.0,-1025.6,58,2.9,0,wait=8;rebuild=1;supply items=46;ship deliver=4,wave8
+4992,1391,2,frozenForest,0.3,loss,6,15,0.0,765.48,829,43.5,253,wait=13;build=89;remove=6;rebuild=169;supply items=544;ship guard=1;ship mine=2;ship deliver=6,
+4993,1391,2,frozenForest,0.3,loss,4,15,0.0,-1105.9,562,26.8,53,wait=1;build=26;remove=1;rebuild=10;supply items=244;configure=276;ship guard=1;ship mine=1;ship deliver=3,
+4994,1392,1,frozenForest,0.3,loss,6,15,0.0,-1182.69,823,42.8,19,wait=8;build=23;remove=2;supply items=132;configure=651;ship guard=1;ship mine=2;ship deliver=5,
+4995,1392,2,frozenForest,0.3,loss,10,15,0.0,83.73,310,18.5,0,wait=104;rebuild=1;supply items=198;ship deliver=8,wave8
+4996,1392,2,frozenForest,0.3,loss,8,15,0.0,751.9,61,3.2,0,remove=1;rebuild=17;supply items=1;supply power=14;configure=26;ship fight=1;ship deliver=2,wave8
+4997,1392,1,frozenForest,0.3,loss,6,15,0.0,-923.65,825,38.1,108,wait=4;build=42;remove=5;rebuild=70;supply items=254;configure=443;ship guard=1;ship mine=1;ship deliver=6,
+4998,1393,2,frozenForest,0.3,loss,7,15,0.0,400.38,963,49.4,235,wait=50;build=106;remove=22;rebuild=68;supply items=702;ship guard=1;ship mine=1;ship deliver=14,
+4999,1393,1,frozenForest,0.3,loss,4,15,0.0,196.42,588,31.7,211,build=54;remove=5;rebuild=33;supply items=489;ship guard=1;ship mine=1;ship deliver=5,
+5000,1393,1,frozenForest,0.3,loss,8,15,0.0,-860.45,59,3.1,0,wait=11;rebuild=1;supply items=47;ship fight=1,wave8
+5001,1394,2,frozenForest,0.3,loss,6,15,0.0,-1286.89,822,42.9,143,wait=4;build=68;remove=7;rebuild=135;supply items=504;configure=90;ship guard=1;ship mine=1;ship deliver=13,
+5002,1394,2,frozenForest,0.3,loss,8,15,0.0,-1121.21,67,3.3,0,wait=1;rebuild=1;supply items=9;configure=53;ship deliver=4,wave8
+5003,1394,2,frozenForest,0.3,loss,8,15,0.0,-704.43,47,2.4,0,wait=1;rebuild=1;supply items=6;configure=39;ship deliver=1,wave8
+5004,1394,1,frozenForest,0.3,loss,6,15,0.0,-1235.81,823,42.4,33,wait=3;build=18;remove=7;rebuild=268;supply items=126;configure=367;ship guard=1;ship mine=1;ship deliver=33,
+5005,1394,2,frozenForest,0.3,loss,4,15,0.0,-1174.31,593,27.8,30,wait=6;build=44;remove=3;rebuild=130;supply items=408;ship guard=1;ship fight=2,
+5006,1394,2,frozenForest,0.3,loss,8,15,0.0,-1036.82,43,2.1,0,wait=7;rebuild=1;supply items=26;ship fight=1;ship deliver=9,wave8
+5007,1394,2,frozenForest,0.3,loss,8,15,0.0,-672.84,47,2.4,0,wait=1;rebuild=1;supply items=38;ship deliver=7,wave8
+5008,1394,1,frozenForest,0.3,loss,4,15,0.0,-1101.6,562,26.6,22,wait=1;build=28;remove=6;rebuild=5;supply items=80;configure=431;ship guard=1;ship mine=2;ship deliver=9,
+5009,1394,1,frozenForest,0.3,loss,8,15,0.0,-1045.52,45,2.2,0,wait=9;rebuild=1;supply items=33;ship deliver=3,wave8
+5010,1395,2,frozenForest,0.3,loss,5,15,0.0,-1112.76,731,39.2,41,wait=17;build=41;remove=2;rebuild=126;supply items=454;ship guard=1;ship fight=2;ship deliver=89,
+5011,1395,1,frozenForest,0.3,loss,6,15,0.0,-838.71,824,43.7,219,wait=50;build=55;remove=2;rebuild=28;supply items=665;ship guard=1;ship mine=1;ship deliver=23,
+5012,1395,1,frozenForest,0.3,loss,8,15,0.0,-712.87,39,1.9,0,wait=9;rebuild=1;supply items=28;ship deliver=2,wave8
+5013,1396,2,frozenForest,0.3,loss,4,15,0.0,-1056.51,530,28.4,56,wait=5;build=58;remove=6;rebuild=114;supply items=345;ship guard=1;ship mine=1;ship fight=1,
+5014,1396,1,frozenForest,0.3,loss,10,15,0.0,74.52,312,18.9,0,wait=262;rebuild=1;supply items=33;ship deliver=17,wave8
+5015,1396,1,frozenForest,0.3,loss,8,15,0.0,-1107.73,37,1.9,0,wait=10;rebuild=1;supply items=26;ship deliver=1,wave8
+5016,1396,2,frozenForest,0.3,loss,4,15,0.0,-1145.15,584,27.7,88,wait=7;build=43;rebuild=31;supply items=260;configure=237;ship guard=1;ship mine=1;ship deliver=5,
+5017,1396,2,frozenForest,0.3,loss,8,15,0.0,-1083.37,37,1.9,0,wait=2;rebuild=1;supply items=31;ship deliver=4,wave8
+5018,1396,1,frozenForest,0.3,loss,4,15,0.0,-1677.63,562,26.9,110,wait=296;build=46;remove=4;supply items=214;ship guard=1;ship mine=1;ship fight=1,
+5019,1397,1,frozenForest,0.3,loss,6,15,0.0,-1124.55,825,42.1,128,build=40;remove=1;rebuild=49;supply items=263;configure=444;ship guard=1;ship mine=1;ship deliver=27,
+5020,1397,2,frozenForest,0.3,loss,6,15,0.0,-450.93,832,42.5,193,wait=101;build=86;remove=9;rebuild=19;supply items=613;ship guard=1;ship mine=2;ship deliver=2,
+5021,1397,2,frozenForest,0.3,loss,3,15,0.0,-1127.28,517,24.6,99,wait=11;build=30;remove=6;rebuild=17;supply items=70;configure=379;ship guard=1;ship mine=2;ship deliver=2,
+5022,1398,2,frozenForest,0.3,loss,8,15,0.0,-675.3,40,5.6,0,wait=2;rebuild=1;supply items=20;ship deliver=17,wave8
+5023,1398,1,frozenForest,0.3,loss,6,15,0.0,-900.63,819,42.6,211,wait=85;build=61;remove=5;rebuild=11;supply items=633;ship guard=1;ship mine=1;ship deliver=23,
+5024,1398,2,frozenForest,0.3,loss,4,15,0.0,-1281.44,532,25.2,60,wait=1;build=25;remove=5;rebuild=120;supply items=121;configure=246;ship guard=1;ship mine=2;ship deliver=11,
+5025,1399,2,frozenForest,0.3,loss,4,15,0.0,-1066.86,562,30.0,101,wait=2;build=53;remove=4;rebuild=28;supply items=472;ship guard=1;ship mine=1;ship deliver=2,
+5026,1399,1,frozenForest,0.3,loss,7,15,0.0,-258.47,947,48.4,81,wait=7;build=35;remove=2;rebuild=143;supply items=190;configure=560;ship guard=1;ship fight=1;ship deliver=9,
+5027,1399,1,frozenForest,0.3,loss,4,15,0.0,-1045.91,586,26.9,159,wait=10;build=60;rebuild=4;supply items=510;ship guard=1;ship mine=1;ship deliver=1,
+5028,1399,1,frozenForest,0.3,loss,8,15,0.0,-781.07,39,1.9,0,wait=2;rebuild=1;supply items=25;ship deliver=12,wave8
+5029,1399,2,frozenForest,0.3,loss,6,15,0.0,715.64,843,38.6,214,wait=5;build=37;remove=1;rebuild=107;supply items=448;configure=208;ship guard=1;ship mine=1;ship deliver=36,
+5030,1400,2,frozenForest,0.3,loss,4,15,0.0,64.83,566,29.5,199,wait=3;build=46;remove=3;rebuild=107;supply items=405;ship guard=1;ship mine=1;ship fight=1,
+5031,1400,2,frozenForest,0.3,loss,8,15,0.0,-975.18,58,2.9,0,rebuild=1;supply items=5;configure=49;ship deliver=4,wave8
+5032,1400,1,frozenForest,0.3,loss,7,15,0.0,725.75,947,47.1,107,wait=42;build=39;remove=4;rebuild=217;supply items=638;ship guard=1;ship fight=1;ship deliver=6,
+5033,1401,2,frozenForest,0.3,loss,4,15,0.0,-1096.09,583,30.4,30,wait=7;build=30;remove=1;supply items=542;ship guard=1;ship mine=1;ship fight=1;ship deliver=1,
+5034,1401,1,frozenForest,0.3,loss,5,15,0.0,-1204.22,707,36.3,31,build=36;remove=4;rebuild=153;supply items=500;ship guard=1;ship fight=2;ship deliver=12,
+5035,1401,2,frozenForest,0.3,loss,6,15,0.0,-292.23,813,37.5,199,wait=29;build=74;remove=10;rebuild=15;supply items=673;ship guard=1;ship mine=1;ship deliver=11,
+5036,1402,1,frozenForest,0.3,loss,6,15,0.0,-1812.43,823,42.3,56,wait=301;build=29;remove=7;supply items=469;ship guard=1;ship fight=1;ship deliver=16,
+5037,1402,2,frozenForest,0.3,loss,5,15,0.0,-1159.88,691,40.4,80,wait=4;build=32;remove=1;rebuild=24;supply items=365;configure=251;ship guard=1;ship mine=1;ship deliver=13,
+5038,1403,1,frozenForest,0.3,loss,6,15,0.0,-1208.9,838,47.2,76,wait=29;build=35;rebuild=73;supply items=508;configure=182;ship guard=1;ship fight=1;ship deliver=10,
+5039,1403,2,frozenForest,0.3,loss,4,15,0.0,-1287.7,584,30.9,73,wait=2;build=35;remove=3;supply items=539;ship guard=1;ship fight=1;ship deliver=4,
+5040,1403,1,frozenForest,0.3,loss,4,15,0.0,-1122.88,570,25.8,26,wait=7;build=34;remove=2;rebuild=2;supply items=523;ship guard=1;ship fight=2,
+5041,1403,2,frozenForest,0.3,loss,6,15,0.0,-1257.53,835,38.6,108,wait=3;build=38;remove=6;rebuild=107;supply items=170;configure=499;ship guard=1;ship mine=1;ship deliver=11,
+5042,1404,1,frozenForest,0.3,loss,5,15,0.0,-1192.48,717,38.2,46,wait=13;build=30;remove=2;rebuild=126;supply items=301;configure=201;ship guard=1;ship mine=1;ship fight=1;ship deliver=42,
+5043,1404,2,frozenForest,0.3,loss,6,15,0.0,-1311.1,806,41.6,82,wait=42;build=44;remove=3;rebuild=1;supply items=694;ship guard=1;ship mine=1;ship deliver=21,
+5044,1405,1,frozenForest,0.3,loss,6,15,0.0,-1343.86,818,41.2,121,wait=8;build=60;remove=8;rebuild=57;supply items=179;configure=500;ship guard=1;ship mine=1;ship deliver=5,
+5045,1405,2,frozenForest,0.3,loss,5,15,0.0,-1232.73,701,36.7,108,wait=5;build=77;remove=11;rebuild=19;supply items=563;ship guard=1;ship mine=1;ship deliver=25,
+5046,1405,1,frozenForest,0.3,loss,4,15,0.0,-1054.58,572,27.7,69,wait=10;build=41;remove=2;rebuild=207;supply items=310;ship guard=1;ship fight=2,
+5047,1406,2,frozenForest,0.3,loss,8,15,0.0,737.41,1081,55.0,110,wait=62;build=36;remove=1;rebuild=222;supply items=720;ship guard=1;ship fight=1;ship deliver=39,
+5048,1406,1,frozenForest,0.3,loss,6,15,0.0,-1471.19,818,42.1,92,wait=9;build=68;remove=15;rebuild=36;supply items=679;ship guard=1;ship mine=1;ship deliver=9,
+5049,1407,2,frozenForest,0.3,loss,6,15,0.0,-1277.81,822,42.1,46,wait=6;build=35;remove=7;rebuild=250;supply items=508;ship guard=1;ship fight=1;ship deliver=15,
+5050,1407,1,frozenForest,0.3,loss,7,15,0.0,308.17,948,48.6,304,wait=30;build=53;remove=7;rebuild=159;supply items=688;ship guard=1;ship mine=1;ship deliver=10,
+5051,1407,1,frozenForest,0.3,loss,4,15,0.0,-1182.0,589,28.9,65,wait=8;build=30;remove=2;rebuild=42;supply items=146;configure=352;ship guard=1;ship mine=1;ship deliver=8,

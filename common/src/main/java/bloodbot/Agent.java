@@ -125,6 +125,18 @@ public class Agent{
         addPoints(damage / MACE_DAMAGE_PER_POINT * forward(x, y));
     }
 
+    /**
+     * Ship rule (the user's, 2026-11-06): -25 for each enemy the ship's gun finishes off, so turrets do the defending. It stays
+     * below the cost of core damage, so shooting still beats letting the core die.
+     */
+    static final float SHIP_KILL_PENALTY = 25f;
+    int shipKills;
+
+    void shipKilled(){
+        shipKills++;
+        addPoints(-SHIP_KILL_PENALTY);
+    }
+
     void maceKilled(float x, float y){
         maceKills++;
         addPoints(MACE_BONUS * forward(x, y));
@@ -178,8 +190,8 @@ public class Agent{
     /** +5 per hit landed by one of the bot's turrets on an enemy, +50 more for a bot-built turret's first hit
      * (the user's rules); called from game events. A turret where enemies never go earns nothing. */
     void turretHit(Building turret, float x, float y){
-        addPoints(5f * forward(x, y));
-        if(builder.builtPos.contains(turret.pos()) && hitTurrets.add(turret.pos())) addPoints(50f);
+        addPoints(10f * forward(x, y)); // doubled 2026-11-06 (the user): 5 -> 10, first hit 50 -> 100
+        if(builder.builtPos.contains(turret.pos()) && hitTurrets.add(turret.pos())) addPoints(100f);
     }
 
     /** Blocks the bot built that have ever carried items or ammo (the user's unused-block rule, 2026-10-30). */
@@ -268,7 +280,7 @@ public class Agent{
      * when wave 8 arrives, because games with 15+ fed turrets at the mace win far more. Never paid in practice games.
      */
     static final int TURRET_CHECK_WAVE = 8;
-    static final float WAVE_TURRET_BONUS = 20f;
+    static final float WAVE_TURRET_BONUS = 40f; // 20 until the user doubled turret rewards, 2026-11-06
     boolean waveTurretsPaid;
     int waveTurrets;
 
@@ -286,7 +298,7 @@ public class Agent{
      * Route rule (the user's, 2026-11-06): +30 once for each bot-built turret that has ammo and the enemy route in range, for at
      * most 10 turrets a game. It pays before any enemy arrives, so the bot can learn to build on the lane from the route layer.
      */
-    static final float ROUTE_TURRET_BONUS = 30f;
+    static final float ROUTE_TURRET_BONUS = 60f; // 30 until the user doubled turret rewards, 2026-11-06
     static final int ROUTE_TURRET_CAP = 10;
     final IntSet routeTurrets = new IntSet();
     int routeTurretsPaid;

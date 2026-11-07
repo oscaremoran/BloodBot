@@ -80,13 +80,16 @@ public class BloodBotPlugin extends Plugin{
             if(trainer != null && trainer.agent != null && !trainer.loading && e.unit.team != trainer.agent.team) trainer.agent.kills++;
             if(ppo != null && ppo.agent != null && !ppo.loading && e.unit.team != ppo.agent.team){
                 ppo.agent.kills++;
-                if(e.unit.type == mindustry.content.UnitTypes.mace) ppo.agent.maceKilled(e.unit.x, e.unit.y);
+                boolean byShip = lastHitByShip.remove(e.unit.id);
+                if(byShip) ppo.agent.shipKilled();
+                else if(e.unit.type == mindustry.content.UnitTypes.mace) ppo.agent.maceKilled(e.unit.x, e.unit.y);
             }
         });
 
         // +5 per turret hit on an enemy, +50 for each turret's first hit (the user's rules), for the PPO bot.
         Events.on(UnitDamageEvent.class, e -> {
             turretHit(e.bullet, e.unit.team, e.unit.x, e.unit.y);
+            noteShipHit(e.bullet, e.unit);
             if(e.unit.type == mindustry.content.UnitTypes.mace) maceHit(e.bullet, e.unit);
         });
         Events.on(BuildDamageEvent.class, e -> {
@@ -170,6 +173,15 @@ public class BloodBotPlugin extends Plugin{
         handler.register("bbstopafter", "<games>", "Stop training (and the server) after N more games.", args -> {
             if(trainer != null) trainer.stopAfter = Integer.parseInt(args[0]);
         });
+    }
+
+    /** Enemies whose last hit came from the bot's ship, so a kill can be credited to the ship or to the turrets. */
+    final arc.struct.IntSet lastHitByShip = new arc.struct.IntSet();
+
+    void noteShipHit(mindustry.gen.Bullet bullet, mindustry.gen.Unit victim){
+        if(ppo == null || ppo.agent == null || ppo.loading || bullet == null || victim.team == ppo.agent.team) return;
+        if(bullet.owner == ppo.agent.builder.ship) lastHitByShip.add(victim.id);
+        else lastHitByShip.remove(victim.id);
     }
 
     /** Enemy fire landing on one of the bot's walls (the wall-soak reward). */

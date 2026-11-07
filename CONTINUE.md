@@ -50,6 +50,8 @@ had only ~30 games before stopping: judge them first next session (watch "wall s
 
 **Route turret rule (2026-11-06):** +30 once per bot-built turret with ammo and the enemy route in range, at most 10 a game (`Agent.checkRouteTurrets`; logged as "route turrets"; saved practice turrets never pay). Frozen Forest picks one of 3 spawns per game, about (168,180), (117,170), (80,175); in 14 games the two close ones all ended at wave 2. Not done: reward ship hits near the core (+5 per hit idea), since the ship gives no fight orders there.
 
+**Turrets over the ship (user, 2026-11-06):** at game 4947 the bot was reaching wave 5.5 on Frozen Forest with 70 blocks and 1 fed turret, parking the ship at the core and shooting. Turret rewards doubled (hit +10, first hit +100, route turret +60, wave 8 turret +40). Each enemy the ship finishes off is -25 and pays no mace bonus; kept below core damage (-10 per 1%) so shooting still beats losing the core. `BloodBotPlugin.lastHitByShip` tracks who hit last; logged as "ship kills".
+
 Open ideas, not done:
 - **(TODO, user asked 2026-11-01) Highlight reel GIF** of its best wins (2131 with 60% core, game 1397's 1,047 blocks, the first win): niced, only when no training is running.
 - **Race the bot (2026-11-01):** user plays Ground Zero at 80% with the bot's rules (copper duos, 50 copper, no ship gun); add the result to the scoreboard as a human data point.
