@@ -14,6 +14,8 @@ TYPE_NAMES = ["wait", "build", "remove", "rebuild", "supply items", "supply powe
               "army move", "army attack", "ship guard", "ship mine", "ship fight", "ship deliver",
               "logic link", "logic write", "payload pick up", "payload drop"]
 SHIP_MINE, SHIP_DELIVER = 11, 13
+# Actions that need a target (Agent.TARGETED): the map cell is chosen after the action, among the cells where it can work.
+TARGETED = [2, 4, 5, 6, 7, 13]
 HEADS = ["block", "cell", "fx", "fy", "rot", "arg"]
 _PLACE = {"cell", "fx", "fy"}
 RELEVANT = [set(), set(HEADS), _PLACE, _PLACE, _PLACE, _PLACE, _PLACE, _PLACE | {"rot", "arg"},
@@ -116,7 +118,7 @@ def split(d: Dims, logits, masks):
         m = m.clone()
         m[~m.any(1)] = True  # nothing possible: leave unmasked (the head is irrelevant then anyway)
         return x.masked_fill(~m, neg)
-    return {"type": mask(t, masks["type"]), "block": mask(b, masks["block"]), "cell": mask(cell, masks["cell"]),
+    return {"type": mask(t, masks["type"]), "block": mask(b, masks["block"]), "cell": mask(cell, masks["cell"]), "cell_raw": cell,
             "fx": fx, "fy": fy, "rot": rot, "arg_mine": mask(arg, masks["mine"]), "arg_deliver": mask(arg, masks["deliver"]),
             "arg": arg}
 
@@ -130,6 +132,18 @@ def arg_logits(heads, types):
     return a
 
 
+def cell_logits(heads, masks, types):
+    """The cell head's mask depends on the action type (2026-11-06). Replays saved before this have no "cells"."""
+    if "cells" not in masks:
+        return heads["cell"]
+    m = masks["cell"].clone()
+    for i, t in enumerate(TARGETED):
+        rows = types == t
+        m[rows] = masks["cells"][rows, i]
+    m[~m.any(1)] = True
+    return heads["cell_raw"].masked_fill(~m, -1e9)
+
+
 def relevance(types):
     """[B, len(HEADS)] float: which heads count for each action's type."""
     table = torch.tensor([[1.0 if h in RELEVANT[t] else 0.0 for h in HEADS] for t in range(len(TYPE_NAMES))])
@@ -141,7 +155,7 @@ def evaluate(net, grid, scalars, masks, actions):
     logits, value = net(grid, scalars)
     heads = split(net.d, logits, masks)
     types = actions[:, 0]
-    dists = {"block": heads["block"], "cell": heads["cell"], "fx": heads["fx"], "fy": heads["fy"],
+    dists = {"block": heads["block"], "cell": cell_logits(heads, masks, types), "fx": heads["fx"], "fy": heads["fy"],
              "rot": heads["rot"], "arg": arg_logits(heads, types)}
     cols = {"block": 1, "cell": 2, "fx": 3, "fy": 4, "rot": 5, "arg": 6}
     rel = relevance(types)
@@ -162,6 +176,7 @@ def act(net, grid, scalars, masks):
     heads = split(net.d, logits, masks)
     t = torch.distributions.Categorical(logits=heads["type"]).sample()
     heads["arg"] = arg_logits(heads, t)
+    heads["cell"] = cell_logits(heads, masks, t)
     a = [t]
     for h in HEADS:
         a.append(torch.distributions.Categorical(logits=heads[h]).sample())

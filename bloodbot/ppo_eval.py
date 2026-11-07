@@ -21,7 +21,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from bloodbot.ppo import Dims, Net, act
+from bloodbot.ppo import Dims, Net, act, TARGETED
 from bloodbot.ppo_train import M, ROOT, recv_exact, recv_float, recv_int, recv_utf, send_utf
 
 OUT = ROOT / "runs" / "eval"
@@ -83,13 +83,15 @@ class Eval:
                     brain, game = self.next_game()
                 send_utf(sock, 2, json.dumps(game))
                 continue
-            raw = recv_exact(sock, 4 * (grid_n + d.S) + d.T + nb + d.G * d.G + 2 * d.ARGS)
+            raw = recv_exact(sock, 4 * (grid_n + d.S) + d.T + nb + d.G * d.G * (1 + len(TARGETED)) + 2 * d.ARGS)
             floats = np.frombuffer(raw[:4 * (grid_n + d.S)], ">f4").astype(np.float32)
             b = np.frombuffer(raw[4 * (grid_n + d.S):], np.uint8).astype(bool)
             g = torch.from_numpy(floats[:grid_n].reshape(d.C, d.G, d.G))[None]
             sc = torch.from_numpy(floats[grid_n:])[None]
             masks = {"type": b[:d.T], "block": b[d.T:d.T + nb], "cell": b[d.T + nb:d.T + nb + d.G * d.G],
-                     "mine": b[d.T + nb + d.G * d.G:d.T + nb + d.G * d.G + d.ARGS], "deliver": b[-d.ARGS:]}
+                     "mine": b[d.T + nb + d.G * d.G:d.T + nb + d.G * d.G + d.ARGS],
+                     "deliver": b[d.T + nb + d.G * d.G + d.ARGS:d.T + nb + d.G * d.G + 2 * d.ARGS],
+                     "cells": b[d.T + nb + d.G * d.G + 2 * d.ARGS:].reshape(len(TARGETED), d.G * d.G)}
             masks = {k: torch.from_numpy(v)[None] for k, v in masks.items()}
             with self.lock, torch.no_grad():
                 action, _, _ = act(self.nets[brain], g, sc, masks)

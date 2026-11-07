@@ -11,6 +11,7 @@ import mindustry.type.Item;
 import mindustry.world.Tile;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
+import mindustry.world.blocks.storage.StorageBlock;
 
 /**
  * Flies the bot's core ship (alpha) with the same abilities a player has. Building always comes first:
@@ -31,8 +32,8 @@ public class ShipAI extends AIController{
     static final boolean GUN = !"false".equals(System.getProperty("bloodbot.shipGun"));
 
     /**
-     * Enemies neither target nor hit the ship. Training turns this on with -Dbloodbot.shipUntouchable=true
-     * (the user's choice, 2026-10-30); the mod never sets it.
+     * Enemies neither target nor hit the ship with -Dbloodbot.shipUntouchable=true (the user's choice 2026-10-30; off by
+     * default since 2026-11-06, because a player's ship can be shot down); the mod never sets it.
      */
     static final boolean UNTOUCHABLE = Boolean.getBoolean("bloodbot.shipUntouchable");
 
@@ -164,20 +165,46 @@ public class ShipAI extends AIController{
         return !t.floor().playerUnmineable || t.overlay().itemDrop != null;
     }
 
-    /** Take a load of an item from the core and drop it into a building (e.g. ammo into a turret). */
+    /** A container or vault that isn't linked to the core, so its items are its own. */
+    static boolean freeStorage(Building b){
+        return b instanceof StorageBlock.StorageBuild s && s.linkedCore == null;
+    }
+
+    /** The nearest place holding the item: the core or a container, as a player can take from either (2026-11-06). */
+    Building pickup(CoreBuild core){
+        Building best = core.items.get(item) > 0 ? core : null;
+        float bestDst = best == null ? Float.MAX_VALUE : unit.dst2(core);
+        for(Building b : unit.team.data().buildings){
+            if(!freeStorage(b) || b.items.get(item) <= 0 || unit.dst2(b) >= bestDst) continue;
+            best = b;
+            bestDst = unit.dst2(b);
+        }
+        return best;
+    }
+
+    /** Take a load of an item from the core or a container and drop it into a building (e.g. ammo into a turret). */
     void updateDelivery(CoreBuild core){
         unit.mineTile(null);
         if(deliverTo == null || !deliverTo.isValid() || item == null){ task = Task.GUARD; return; }
         if(!unit.hasItem() || unit.stack.item != item){
-            if(unit.within(core, Vars.itemTransferRange)){
-                if(unit.hasItem()) core.handleStack(unit.stack.item, core.acceptStack(unit.stack.item, unit.stack.amount, unit), unit);
-                unit.clearItem();
-                int amount = Math.min(core.items.get(item), unit.type.itemCapacity);
+            if(unit.hasItem()){ // carrying something else: drop it at the core first
+                if(unit.within(core, Vars.itemTransferRange)){
+                    core.handleStack(unit.stack.item, core.acceptStack(unit.stack.item, unit.stack.amount, unit), unit);
+                    unit.clearItem();
+                }else{
+                    moveTo(core, Vars.itemTransferRange * 0.5f);
+                }
+                return;
+            }
+            Building source = pickup(core);
+            if(source == null){ task = Task.GUARD; return; }
+            if(unit.within(source, Vars.itemTransferRange)){
+                int amount = Math.min(source.items.get(item), unit.type.itemCapacity);
                 if(amount <= 0){ task = Task.GUARD; return; }
-                core.items.remove(item, amount);
+                source.removeStack(item, amount);
                 unit.addItem(item, amount);
             }else{
-                moveTo(core, Vars.itemTransferRange * 0.5f);
+                moveTo(source, Vars.itemTransferRange * 0.5f);
             }
             return;
         }

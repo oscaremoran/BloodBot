@@ -114,7 +114,7 @@ public class Builder{
     }
 
     boolean possible(Plan p, Tile tile){
-        if(p.breaking) return tile.build != null && tile.build.team == team;
+        if(p.breaking) return tile.build != null && (tile.build.team == team || tile.build.team == Team.derelict);
         if(tile.build instanceof ConstructBuild cb && cb.current == p.block) return true; // under construction
         return Build.validPlace(p.block, team, p.x, p.y, p.rotation);
     }

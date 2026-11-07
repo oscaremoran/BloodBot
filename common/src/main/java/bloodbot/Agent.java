@@ -126,10 +126,10 @@ public class Agent{
     }
 
     /**
-     * Ship rule (the user's, 2026-11-06): -25 for each enemy the ship's gun finishes off, so turrets do the defending. It stays
+     * Ship rule (the user's, 2026-11-06; raised from -25 the same day): -100 for each enemy the ship's gun finishes off, so turrets do the defending. It stays
      * below the cost of core damage, so shooting still beats letting the core die.
      */
-    static final float SHIP_KILL_PENALTY = 25f;
+    static final float SHIP_KILL_PENALTY = 100f;
     int shipKills;
 
     void shipKilled(){
@@ -465,6 +465,7 @@ public class Agent{
         TeamData data = team.data();
         CoreBuild core = builder.core();
         Seq<Block> cat = catalog();
+        findTargets();
         boolean producer = false, itemConsumer = false, powerSource = false, powerConsumer = false, liquidSource = false,
             liquidConsumer = false, configurable = false, processor = false, removable = false, nonCore = false;
         for(Building b : ownBuildings()){
@@ -475,8 +476,7 @@ public class Agent{
             if(needsPower(b) && !supplied.contains(b.pos() * 3 + 1)) powerConsumer = true;
             if(b.block instanceof Pump || (b.block instanceof GenericCrafter c && c.outputLiquid != null)) liquidSource = true;
             if(needsLiquid(b) && !supplied.contains(b.pos() * 3 + 2)) liquidConsumer = true;
-            if(b.block instanceof UnitFactory || b.block instanceof ItemBridge || b.block instanceof PowerNode
-                || b.block.configurations.containsKey(Item.class)) configurable = true;
+            if(configurable(b.block)) configurable = true;
             if(b instanceof mindustry.world.blocks.logic.LogicBlock.LogicBuild) processor = true;
         }
         boolean army = false, payloadUnits = false;
@@ -491,7 +491,7 @@ public class Agent{
 
         ok[WAIT] = true;
         for(int i = 0; i < cat.size && !ok[BUILD]; i++) ok[BUILD] = allowed[i] && core.items.has(cat.get(i).requirements);
-        ok[REMOVE] = removable;
+        ok[REMOVE] = removable || !Team.derelict.data().buildings.isEmpty();
         ok[REBUILD] = !data.plans.isEmpty();
         ok[SUPPLY_ITEMS] = producer && itemConsumer;
         ok[SUPPLY_POWER] = powerSource && powerConsumer;
@@ -502,7 +502,7 @@ public class Agent{
         ok[SHIP_GUARD] = shipReady && ship.task != ShipAI.Task.GUARD;
         ok[SHIP_MINE] = shipReady && mineableOre(ship) >= 0;
         ok[SHIP_FIGHT] = shipReady;
-        ok[SHIP_DELIVER] = shipReady && nonCore && core.items.total() > 0;
+        ok[SHIP_DELIVER] = shipReady && nonCore && anyDelivery();
         ok[LOGIC_LINK] = processor;
         ok[LOGIC_WRITE] = processor;
         ok[PAYLOAD_PICKUP] = payloadUnits;
@@ -511,6 +511,7 @@ public class Agent{
         // (2026-11-06). Supply lines have their own, higher limit so the list can't grow without end.
         if(builder.queue.size >= MAX_QUEUE) ok[BUILD] = ok[REMOVE] = ok[REBUILD] = false;
         if(builder.queue.size >= MAX_SUPPLY_QUEUE) ok[SUPPLY_ITEMS] = ok[SUPPLY_POWER] = ok[SUPPLY_LIQUID] = false;
+        for(int i = 0; i < TARGETED.length; i++) if(!any(targetCells[i])) ok[TARGETED[i]] = false;
         return ok;
     }
 
@@ -548,6 +549,41 @@ public class Agent{
         return m;
     }
 
+    /** Whether the ship could pick this item up: from the core or a container. */
+    boolean hasItem(Item item){
+        return builder.core().items.get(item) > 0 || ownBuildings().contains(b -> ShipAI.freeStorage(b) && b.items.get(item) > 0);
+    }
+
+    /** An item the ship can get hold of and some building (not the core) will take: no coal into duos (2026-11-06). */
+    boolean canDeliver(Item item){
+        return hasItem(item) && ownBuildings().contains(b -> accepts(b, item));
+    }
+
+    boolean anyDelivery(){
+        for(Item item : ITEMS) if(canDeliver(item)) return true;
+        return false;
+    }
+
+    boolean accepts(Building b, Item item){
+        return !(b instanceof CoreBuild) && b.acceptStack(item, 1, builder.ship) > 0;
+    }
+
+    /** The nearest building around the tile that will take the item, or null. */
+    Building deliveryTarget(Tile tile, Item item){
+        Building best = null;
+        float bestDst = Float.MAX_VALUE;
+        int r = reach();
+        for(int dx = -r; dx <= r; dx++){
+            for(int dy = -r; dy <= r; dy++){
+                Building b = Vars.world.build(tile.x + dx, tile.y + dy);
+                if(b == null || b.team != team || b.block.privileged || !accepts(b, item)) continue;
+                float d = b.dst2(tile);
+                if(d < bestDst){ bestDst = d; best = b; }
+            }
+        }
+        return best;
+    }
+
     boolean[] mineArgMask(){
         boolean[] m = new boolean[ARGS];
         ShipAI ship = builder.shipAI();
@@ -557,7 +593,7 @@ public class Agent{
 
     boolean[] deliverArgMask(){
         boolean[] m = new boolean[ARGS];
-        for(int i = 0; i < ARGS; i++) m[i] = builder.core().items.get(ITEMS[i]) > 0;
+        for(int i = 0; i < ARGS; i++) m[i] = canDeliver(ITEMS[i]);
         return m;
     }
 
@@ -568,7 +604,7 @@ public class Agent{
         boolean[] possible = possibleTypes();
         int type = sample(out, o, TYPES, i -> possible[i]); o += TYPES;
         int blockIndex = sample(out, o, cat.size, i -> allowed[i] && builder.core().items.has(cat.get(i).requirements)); o += cat.size;
-        int cellIndex = sampleCell(out, o, o + Vision.G); o += 2 * Vision.G;
+        int cellIndex = sampleCell(out, o, o + Vision.G, cellsFor(type)); o += 2 * Vision.G;
         int cx = cellIndex % Vision.G, cy = cellIndex / Vision.G;
         int fx = sample(out, o, FINE, null); o += FINE;
         int fy = sample(out, o, FINE, null); o += FINE;
@@ -576,7 +612,7 @@ public class Agent{
         ShipAI shipAI = builder.shipAI();
         // For ship orders the extra choice is an item: only ores the ship can mine here, or items the core actually has.
         IntCheck argMask = type == SHIP_MINE && shipAI != null ? i -> oreUsable(shipAI, i % ORES.length)
-            : type == SHIP_DELIVER ? i -> builder.core().items.get(ITEMS[i]) > 0 : null;
+            : type == SHIP_DELIVER ? i -> canDeliver(ITEMS[i]) : null;
         int arg = sample(out, o, ARGS, argMask);
         return new int[]{type, blockIndex, cellIndex, fx, fy, rotation, arg};
     }
@@ -587,7 +623,7 @@ public class Agent{
         if(type < 0 || type >= TYPES) return;
         float waitPenalty = type == WAIT ? Math.min(2.5f, WAIT_PENALTY_CAP - waitPenaltyPoints) : 0f;
         waitPenaltyPoints += waitPenalty;
-        addPoints((type == REMOVE ? -5f : 0f) - waitPenalty);
+        addPoints(-waitPenalty);
         lastType = type;
         actionCounts[type]++;
 
@@ -611,7 +647,7 @@ public class Agent{
             case SHIP_GUARD -> { if(ship != null) ship.guard(); }
             case SHIP_MINE -> { if(ship != null) ship.mine(ORES[arg % ORES.length]); }
             case SHIP_FIGHT -> { if(ship != null) ship.fight(tile); }
-            case SHIP_DELIVER -> { if(ship != null){ Building b = ownBuildingNear(tile, 4); if(b != null) ship.deliver(ITEMS[arg], b); } }
+            case SHIP_DELIVER -> { if(ship != null){ Building b = deliveryTarget(tile, ITEMS[arg]); if(b != null) ship.deliver(ITEMS[arg], b); else wasted++; } }
             case LOGIC_LINK -> logicLink(tile);
             case LOGIC_WRITE -> logicWrite(tile, rotation, arg);
             case PAYLOAD_PICKUP -> payload(arg % GROUPS, tile, arg < 8 ? mindustry.ai.UnitCommand.loadBlocksCommand : mindustry.ai.UnitCommand.loadUnitsCommand);
@@ -626,11 +662,11 @@ public class Agent{
      * Picks a map cell, only among cells with usable ground (like a player, it can't click inside walls or the void).
      * A cell's preference is its column output plus its row output.
      */
-    int sampleCell(float[] out, int xs, int ys){
+    int sampleCell(float[] out, int xs, int ys, boolean[] allowed){
         int g = Vision.G, best = -1;
         float bestV = 0;
         for(int c = 0; c < g * g; c++){
-            if(!vision.usable[c]) continue;
+            if(!allowed[c]) continue;
             float v = out[xs + c % g] + out[ys + c / g];
             if(best < 0 || v > bestV){ best = c; bestV = v; }
         }
@@ -639,7 +675,7 @@ public class Agent{
         double[] w = new double[g * g];
         double total = 0;
         for(int c = 0; c < g * g; c++){
-            if(!vision.usable[c]) continue;
+            if(!allowed[c]) continue;
             w[c] = Math.exp((out[xs + c % g] + out[ys + c / g] - bestV) / temperature);
             total += w[c];
         }
@@ -689,8 +725,36 @@ public class Agent{
 
     void remove(Tile tile){
         Building b = tile.build;
-        if(b == null || b.team != team || b instanceof CoreBuild || b.block.privileged) return;
+        if(b == null || b.team != team || b instanceof CoreBuild || b.block.privileged) b = removableNear(tile, reach());
+        if(b == null){ wasted++; return; }
+        addPoints(-5f); // only for a real removal (the user's rule; no-ops stopped paying it 2026-11-06)
         builder.enqueue(Builder.Plan.remove(b.tile));
+    }
+
+    /** The nearest block around the tile the bot may remove: its own (not the core) or a derelict one, as a player can. */
+    Building removableNear(Tile tile, int radius){
+        for(int r = 0; r <= radius; r++){
+            for(Point2 d : Nav.ring(r)){
+                Building b = Vars.world.build(tile.x + d.x, tile.y + d.y);
+                if(b != null && (b.team == team || b.team == Team.derelict) && !(b instanceof CoreBuild) && !b.block.privileged) return b;
+            }
+        }
+        return null;
+    }
+
+    static boolean configurable(Block block){
+        return block instanceof UnitFactory || block instanceof ItemBridge || block instanceof PowerNode
+            || block.configurations.containsKey(Item.class);
+    }
+
+    Building configurableNear(Tile tile, int radius){
+        for(int r = 0; r <= radius; r++){
+            for(Point2 d : Nav.ring(r)){
+                Building b = Vars.world.build(tile.x + d.x, tile.y + d.y);
+                if(b != null && b.team == team && !b.block.privileged && configurable(b.block)) return b;
+            }
+        }
+        return null;
     }
 
     /** Re-queue destroyed blocks (the game remembers them as ghosts) nearest to the tile. */
@@ -709,8 +773,8 @@ public class Agent{
 
     /** Set what a block does: sorter/unloader item, bridge link, unit type, or power node link. */
     void configure(Tile tile, int rotation, int arg){
-        Building b = ownBuildingNear(tile, 1);
-        if(b == null) return;
+        Building b = configurableNear(tile, reach());
+        if(b == null){ wasted++; return; }
         if(b.block instanceof UnitFactory factory && !factory.plans.isEmpty()){
             b.configureAny(arg % factory.plans.size);
         }else if(b.block instanceof ItemBridge bridge){
@@ -811,20 +875,81 @@ public class Agent{
 
     /** Feed the nearest unsupplied building around the tile: 0 = items by conveyor, 1 = power nodes, 2 = liquid by conduit. */
     void supply(Tile tile, int kind){
+        Seq<Building> sources = ownBuildings().select(b -> output(b) != null);
         Building consumer = null;
         float bestDst = Float.MAX_VALUE;
         for(Building b : ownBuildings()){
-            if(b.dst(tile) > 10 * Vars.tilesize) continue;
-            if(kind == 0 ? !openForItems(b) : supplied.contains(b.pos() * 3 + kind)) continue;
+            if(b.dst(tile) > Math.max(10, reach()) * Vars.tilesize) continue;
+            if(kind == 0 ? !openForItems(b) || !hasSource(b, sources) : supplied.contains(b.pos() * 3 + kind)) continue;
             boolean needs = kind == 0 ? needsItems(b) : kind == 1 ? needsPower(b) : needsLiquid(b);
             if(!needs) continue;
             float d = b.dst2(tile);
             if(d < bestDst){ bestDst = d; consumer = b; }
         }
-        if(consumer == null) return;
+        if(consumer == null){ wasted++; return; }
         boolean ok = kind == 0 ? supplyItems(consumer) : kind == 1 ? supplyPower(consumer) : supplyLiquid(consumer);
         if(ok) supplied.add(consumer.pos() * 3 + kind);
+        else{
+            wasted++;
+            if(kind == 0) noRouteUntil.put(consumer.pos(), Vars.state.updateId + NO_ROUTE_REST);
+        }
     }
+
+    /** Actions that had nothing to act on (logged; 2026-11-06). */
+    int wasted;
+
+    /** Actions that need something to act on. The bot picks the action first, then a map cell where it can work (2026-11-06). */
+    static final int[] TARGETED = {REMOVE, SUPPLY_ITEMS, SUPPLY_POWER, SUPPLY_LIQUID, CONFIGURE, SHIP_DELIVER};
+    final boolean[][] targetCells = new boolean[TARGETED.length][Vision.G * Vision.G];
+
+    /** Whether this building wants items and has a source in range that it would really take from. */
+    boolean hasSource(Building c, Seq<Building> sources){
+        for(Building p : sources){
+            if(p != c && p.dst(c) < SUPPLY_RANGE * Vars.tilesize && c.acceptItem(p, output(p))
+                && !(c instanceof CoreBuild && linkedDrills.contains(p.pos()))) return true;
+        }
+        return false;
+    }
+
+    /** Marks, per targeted action, the map cells that hold something it can act on. */
+    void findTargets(){
+        for(boolean[] cells : targetCells) java.util.Arrays.fill(cells, false);
+        Seq<Building> own = ownBuildings(), sources = own.select(b -> output(b) != null);
+        Seq<Item> carried = new Seq<>();
+        for(Item item : ITEMS) if(hasItem(item)) carried.add(item);
+        for(Building b : own){
+            int c = vision.index(b.tile.x, b.tile.y);
+            if(!(b instanceof CoreBuild)) targetCells[0][c] = true;
+            if(needsItems(b) && openForItems(b) && hasSource(b, sources)) targetCells[1][c] = true;
+            if(needsPower(b) && !supplied.contains(b.pos() * 3 + 1)) targetCells[2][c] = true;
+            if(needsLiquid(b) && !supplied.contains(b.pos() * 3 + 2)) targetCells[3][c] = true;
+            if(configurable(b.block)) targetCells[4][c] = true;
+            if(carried.contains(item -> accepts(b, item))) targetCells[5][c] = true;
+        }
+        for(Building b : Team.derelict.data().buildings){
+            if(!b.block.privileged) targetCells[0][vision.index(b.tile.x, b.tile.y)] = true;
+        }
+    }
+
+    /** Where this action can be aimed: its targets, or any usable ground if it doesn't need one. */
+    boolean[] cellsFor(int type){
+        for(int i = 0; i < TARGETED.length; i++) if(TARGETED[i] == type) return targetCells[i];
+        return vision.usable;
+    }
+
+    static boolean any(boolean[] cells){
+        for(boolean c : cells) if(c) return true;
+        return false;
+    }
+
+    /** How far from the chosen tile a target can be: a cell's width, so any tile in the target's cell reaches it. */
+    int reach(){
+        return Math.max(4, vision.cell + 1);
+    }
+
+    /** Buildings no conveyor route could reach: left alone for 30 seconds instead of being retried every turn (2026-11-06). */
+    static final long NO_ROUTE_REST = 1800;
+    final arc.struct.IntMap<Long> noRouteUntil = new arc.struct.IntMap<>();
 
     /** Drills that already have a line from the supply action. */
     final IntSet linkedDrills = new IntSet();
@@ -832,6 +957,7 @@ public class Agent{
 
     /** Each building gets one item line, except the core, which stays open while a drill in reach has no line yet (2026-11-06). */
     boolean openForItems(Building b){
+        if(Vars.state.updateId < noRouteUntil.get(b.pos(), 0L)) return false;
         if(!(b instanceof CoreBuild)) return !supplied.contains(b.pos() * 3);
         return ownBuildings().contains(d -> freeProducer(d, b));
     }

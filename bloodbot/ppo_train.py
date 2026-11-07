@@ -27,7 +27,7 @@ import numpy as np
 import torch
 
 from bloodbot import export_ppo
-from bloodbot.ppo import Dims, Net, act, gae, ppo_update, widen, add_closeup, add_route
+from bloodbot.ppo import Dims, Net, TARGETED, act, gae, ppo_update, widen, add_closeup, add_route
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "runs" / os.environ.get("BLOODBOT_RUN", "ppo")
@@ -305,7 +305,7 @@ class Trainer:
         print(f"game {game}: {'RIVAL, ' if rival else ''}{'PRACTICE from wave 8, ' if practice else ''}{result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
               f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
               + (f" | chain drill>conv {'Y' if result['drillToConveyor'] else 'n'} conv>core {'Y' if result['conveyorToCore'] else 'n'}"
-                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} wave8 turrets {result.get('waveTurrets', '?')} route turrets {result.get('routeTurrets', '?')} ship kills {result.get('shipKills', '?')} unused {result['unused']}"
+                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} wave8 turrets {result.get('waveTurrets', '?')} route turrets {result.get('routeTurrets', '?')} ship kills {result.get('shipKills', '?')} wasted {result.get('wasted', '?')} unused {result['unused']}"
                  if 'drillToConveyor' in result else ""), flush=True)
         if self.args.games and self.games_this_run >= self.args.games:
             self.stop = True
@@ -373,12 +373,14 @@ class Trainer:
                     return
                 continue
 
-            raw = recv_exact(sock, 4 * (grid_n + d.S) + d.T + nb + d.G * d.G + 2 * d.ARGS)
+            raw = recv_exact(sock, 4 * (grid_n + d.S) + d.T + nb + d.G * d.G * (1 + len(TARGETED)) + 2 * d.ARGS)
             floats = np.frombuffer(raw[:4 * (grid_n + d.S)], ">f4").astype(np.float32)
             b = np.frombuffer(raw[4 * (grid_n + d.S):], np.uint8).astype(bool)
             obs = {"grid": floats[:grid_n].reshape(d.C, d.G, d.G), "scalars": floats[grid_n:],
                    "type": b[:d.T], "block": b[d.T:d.T + nb], "cell": b[d.T + nb:d.T + nb + d.G * d.G],
-                   "mine": b[d.T + nb + d.G * d.G:d.T + nb + d.G * d.G + d.ARGS], "deliver": b[-d.ARGS:]}
+                   "mine": b[d.T + nb + d.G * d.G:d.T + nb + d.G * d.G + d.ARGS],
+                   "deliver": b[d.T + nb + d.G * d.G + d.ARGS:d.T + nb + d.G * d.G + 2 * d.ARGS],
+                   "cells": b[d.T + nb + d.G * d.G + 2 * d.ARGS:].reshape(len(TARGETED), d.G * d.G)}
 
             with self.lock:
                 # Enough decisions collected: pause here until the learning update is done.
@@ -390,7 +392,7 @@ class Trainer:
                         self.update_ready.wait()
                 g = torch.from_numpy(obs["grid"])[None]
                 sc = torch.from_numpy(obs["scalars"])[None]
-                masks = {k: torch.from_numpy(obs[k])[None] for k in ("type", "block", "cell", "mine", "deliver")}
+                masks = {k: torch.from_numpy(obs[k])[None] for k in ("type", "block", "cell", "mine", "deliver", "cells")}
                 if rival:  # the rival only plays: nothing it does is learned from
                     with torch.no_grad():
                         action, _, _ = act(self.rival, g, sc, masks)
@@ -425,7 +427,7 @@ class Trainer:
 
     def update(self):
         grids, scalars, actions, logps, advs, rets = [], [], [], [], [], []
-        masks = {k: [] for k in ("type", "block", "cell", "mine", "deliver")}
+        masks = {k: [] for k in ("type", "block", "cell", "mine", "deliver", "cells")}
         for worker, buf in self.buffers.items():
             if not buf:
                 continue

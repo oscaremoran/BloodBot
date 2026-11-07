@@ -44,6 +44,6 @@ fi
 nice -n "$NICE" java \
     -XX:ActiveProcessorCount=2 -XX:CICompilerCount=2 -XX:ParallelGCThreads=1 \
     -Xms256m -Xmx1g -Djava.awt.headless=true \
-    -Dbloodbot.maxSpeed="$SPEED" -Dbloodbot.startingCopper="${BLOODBOT_START_COPPER:-200}" -Dbloodbot.exitWhenDone=true -Dbloodbot.worker="$WORKER" -Dbloodbot.workers="$WORKERS" -Dbloodbot.debug="${BLOODBOT_DEBUG:-false}" -Dbloodbot.shipGun="${BLOODBOT_SHIP_GUN:-true}" -Dbloodbot.shipUntouchable="${BLOODBOT_SHIP_UNTOUCHABLE:-true}" \
+    -Dbloodbot.maxSpeed="$SPEED" -Dbloodbot.startingCopper="${BLOODBOT_START_COPPER:-200}" -Dbloodbot.exitWhenDone=true -Dbloodbot.worker="$WORKER" -Dbloodbot.workers="$WORKERS" -Dbloodbot.debug="${BLOODBOT_DEBUG:-false}" -Dbloodbot.shipGun="${BLOODBOT_SHIP_GUN:-true}" -Dbloodbot.shipUntouchable="${BLOODBOT_SHIP_UNTOUCHABLE:-false}" \
     "-Dbloodbot.run=$COMMANDS" \
     -jar server-release.jar

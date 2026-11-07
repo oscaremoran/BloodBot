@@ -106,6 +106,8 @@ public class Vision{
                 add(14, c, v);
                 if(b.block.category == Category.turret) add(15, c, v);
                 if(b instanceof CoreBuild) add(16, c, 1f);
+            }else{
+                add(0, c, v); // derelict blocks are in the way like walls, and can be removed
             }
         }
         for(var u : Groups.unit){
@@ -153,6 +155,8 @@ public class Vision{
                     grid[base + 14 * G * G + c] = 1f;
                     if(b.block.category == Category.turret) grid[base + 15 * G * G + c] = 1f;
                     if(b instanceof CoreBuild) grid[base + 16 * G * G + c] = 1f;
+                }else{
+                    grid[base + c] = 1f;
                 }
             }
         }
