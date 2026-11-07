@@ -381,6 +381,12 @@ public class Agent{
             if(copper > lastCopper) copperIn += copper - lastCopper;
             lastCopper = copper;
         }
+        ShipAI miner = builder.shipAI();
+        if(miner != null && miner.minedIn > 0){
+            mined += miner.minedIn;
+            addPoints(miner.minedIn / MINED_PER_POINT);
+            miner.minedIn = 0;
+        }
         if(builder.core() == null || Vars.state.updateId % DECIDE_TICKS != 0) return;
         if(policy != null) execute(policy.decide(this));
         else act(brain.forward(vision.see(team, builder.ship), scalarFeatures()));
@@ -621,7 +627,7 @@ public class Agent{
         Seq<Block> cat = catalog();
         int type = a[0], blockIndex = a[1], cx = a[2] % Vision.G, cy = a[2] / Vision.G, fx = a[3], fy = a[4], rotation = a[5], arg = a[6];
         if(type < 0 || type >= TYPES) return;
-        float waitPenalty = type == WAIT ? Math.min(2.5f, WAIT_PENALTY_CAP - waitPenaltyPoints) : 0f;
+        float waitPenalty = type == WAIT ? 2.5f : 0f; // no cap since 2026-11-07 (user: fix the waiting); was 500 a game
         waitPenaltyPoints += waitPenalty;
         addPoints(-waitPenalty);
         lastType = type;
@@ -775,6 +781,24 @@ public class Agent{
     void configure(Tile tile, int rotation, int arg){
         Building b = configurableNear(tile, reach());
         if(b == null){ wasted++; return; }
+        Object before = b.config();
+        applyConfig(b, rotation, arg);
+        // Configure rule (user, 2026-11-07): a configure that changes nothing, or redoes the same block within 30 s,
+        // costs the same as a wait, so it's no cheaper than doing nothing. The first change to a block is free.
+        long now = Vars.state.updateId;
+        if(java.util.Objects.deepEquals(before, b.config())){
+            wasted++;
+            addPoints(-2.5f);
+        }else if(now < lastConfigured.get(b.pos(), Long.MIN_VALUE / 2) + RECONFIGURE_WINDOW){
+            addPoints(-2.5f);
+        }
+        lastConfigured.put(b.pos(), now);
+    }
+
+    static final long RECONFIGURE_WINDOW = 1800;
+    final arc.struct.IntMap<Long> lastConfigured = new arc.struct.IntMap<>();
+
+    void applyConfig(Building b, int rotation, int arg){
         if(b.block instanceof UnitFactory factory && !factory.plans.isEmpty()){
             b.configureAny(arg % factory.plans.size);
         }else if(b.block instanceof ItemBridge bridge){
@@ -894,6 +918,10 @@ public class Agent{
             if(kind == 0) noRouteUntil.put(consumer.pos(), Vars.state.updateId + NO_ROUTE_REST);
         }
     }
+
+    /** Mining rule (user, 2026-11-07): +1 point per 10 items the ship mines, counted as they enter its hold, so mining pays at once. */
+    static final float MINED_PER_POINT = 10f;
+    int mined;
 
     /** Actions that had nothing to act on (logged; 2026-11-06). */
     int wasted;

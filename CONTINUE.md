@@ -60,6 +60,16 @@ had only ~30 games before stopping: judge them first next session (watch "wall s
 
 **Action picks its spot (2026-11-06):** the map cell now depends on the action. Agent.TARGETED lists actions that need a target; `findTargets` marks the cells where each can work and the game sends them after the other masks; `ppo.cell_logits` masks the cell by the chosen type (same pattern as the arg head). The network shape is unchanged. Keep TARGETED in Agent.java and ppo.py in the same order.
 
+**Waiting (user, 2026-11-07):** with only valid actions left, the bot waited about 575 times a game, and the old -2.5 wait penalty stopped at 500 points (200 waits), so most waits were free. The cap is gone: every wait is -2.5. If waves drop, bring back a higher cap rather than none.
+
+**Configure spam (user, 2026-11-07):** with waits now costing every time, one game did 910 configures. A configure that changes nothing (counted as wasted) or redoes the same block within 30 s now costs 2.5, like a wait; the first change to each block is free.
+
+**Exploration 0.02 (user, 2026-11-07):** after the wait and configure costs, entropy fell from about 10-12 to 3.5 while the bot still waited about 450 times a game, so it was settling on a bad habit. Training now runs with --ent-coef 0.03 (0.02 from 11:58, raised at 12:15 when the ship order fix still left the bot not mining and entropy dipped to 1.7; 0.01 before; 0.005 had made it timid).
+
+**Ship order lock bug (2026-11-07):** ShipAI's 10-second lock between ship orders used Vars.state.tick, which runs about 14x slower than game time under training (a game ends around tick 2,500), so it lasted about 2 minutes and the ship got about 1 order a game. Measured: the bot was at zero copper for 56% of decisions, and ship mine was offered in 1% of those. Now timed with Vars.state.updateId. The time-of-game input (scalar 20) still uses state.tick; left as is because the brain learned it that way.
+
+**Mining reward (user, 2026-11-07):** even with ship mine offered about 18% of the time and exploration 0.03, the bot gave about 0.4 mine orders a game. Now +1 point per 10 items the ship mines, counted as each item enters its hold (`ShipAI.minedIn`, collected in Agent.update; logged as "mined"). Paying at drop-off never fired: in 8 games, about 2 mine orders gave 0 items, likely because a 30-item trip outlasts the 10 s order lock.
+
 Open ideas, not done:
 - **(TODO, user asked 2026-11-01) Highlight reel GIF** of its best wins (2131 with 60% core, game 1397's 1,047 blocks, the first win): niced, only when no training is running.
 - **Race the bot (2026-11-01):** user plays Ground Zero at 80% with the bot's rules (copper duos, 50 copper, no ship gun); add the result to the scoreboard as a human data point.

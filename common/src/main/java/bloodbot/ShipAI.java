@@ -49,28 +49,32 @@ public class ShipAI extends AIController{
     }
 
     /** A new order only replaces the current one after it has run this long (about how fast a person re-tasks a ship). */
-    static final float COMMIT_TICKS = 600;
+    static final long COMMIT_TICKS = 600;
 
     Task task = Task.GUARD;
-    float committedAt = -COMMIT_TICKS;
+    /** Items mined into the hold since the agent last collected them (for the mining reward). */
+    int minedIn, lastStack;
+    // Timed with updateId, not state.tick: under training state.tick runs about 14x slower than game time, which made this
+    // 10-second lock last about 2 minutes, so the ship got almost no orders (found 2026-11-07).
+    long committedAt = -COMMIT_TICKS;
     Item item;
     Vec2 spot = new Vec2();
     Building deliverTo;
 
     /** Whether a new order would be accepted now (no side effects). */
     boolean ready(){
-        return Vars.state.tick - committedAt >= COMMIT_TICKS;
+        return Vars.state.updateId - committedAt >= COMMIT_TICKS;
     }
 
     boolean canChange(){
-        if(Vars.state.tick - committedAt < COMMIT_TICKS) return false;
-        committedAt = (float)Vars.state.tick;
+        if(Vars.state.updateId - committedAt < COMMIT_TICKS) return false;
+        committedAt = Vars.state.updateId;
         return true;
     }
 
     void guard(){ if(canChange()) task = Task.GUARD; }
 
-    void mine(Item ore){ if(canChange()){ task = Task.MINE; item = ore; } }
+    void mine(Item ore){ if(canChange()){ task = Task.MINE; item = ore; lastStack = unit.hasItem() && unit.stack.item == ore ? unit.stack.amount : 0; } }
 
     void fight(Tile at){ if(canChange()){ task = Task.FIGHT; spot.set(at.worldx(), at.worldy()); } }
 
@@ -141,15 +145,19 @@ public class ShipAI extends AIController{
         if(full){
             unit.mineTile(null);
             if(unit.within(core, Vars.mineTransferRange)){
-                if(core.acceptStack(unit.stack.item, unit.stack.amount, unit) > 0){
-                    core.handleStack(unit.stack.item, core.acceptStack(unit.stack.item, unit.stack.amount, unit), unit);
-                }
+                int accepted = core.acceptStack(unit.stack.item, unit.stack.amount, unit);
+                if(accepted > 0) core.handleStack(unit.stack.item, accepted, unit);
                 unit.clearItem();
+                lastStack = 0;
             }else{
                 moveTo(core, Vars.mineTransferRange * 0.5f);
             }
             return;
         }
+        // Credit each item as it lands in the hold, not at drop-off: a full trip outlasts the 10 s order lock (2026-11-07).
+        int held = unit.hasItem() && unit.stack.item == item ? unit.stack.amount : 0;
+        if(held > lastStack) minedIn += held - lastStack;
+        lastStack = held;
         Tile ore = unit.mineTile();
         if(ore == null || !unit.validMine(ore) || ore.drop() != item || !handMineable(ore)){
             ore = Vars.indexer.findClosestOre(unit, item);
