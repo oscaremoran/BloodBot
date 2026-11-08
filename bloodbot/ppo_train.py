@@ -481,7 +481,7 @@ def main():
     p.add_argument("--bonuses", action=argparse.BooleanOptionalAction, default=True,
                    help="one-time rewards for first block built and first copper (the user's rule)")
     p.add_argument("--record-all", action="store_true")
-    p.add_argument("--broke", type=float, default=0.2, help="share of non-practice games started with 0 core copper, so mining is the only way in (2026-11-07); kept out of the ladder and best-wave")
+    p.add_argument("--broke", type=float, default=0, help="share of non-practice games started with 0 core copper, so mining is the only way in (2026-11-07); kept out of the ladder and best-wave")
     p.add_argument("--practice", type=float, default=0.2, help="share of games started from the bot's own wave-8 saves (0 = off; 0.5 made normal games weaker, 2026-11-02)")
     p.add_argument("--outlast", default="", help="map in maps/campaign for an outlast run against runs/<run>/rival.pt")
     p.add_argument("--outlast-difficulty", type=float, default=1.0, help="enemy strength in an outlast run")
