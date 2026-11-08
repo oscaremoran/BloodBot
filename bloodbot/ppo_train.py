@@ -217,6 +217,8 @@ class Trainer:
         if len(pool) >= PRACTICE_MIN and random.random() < self.args.practice:
             weights = [LOSS_WEIGHT if p.stem.endswith("_loss") else 1 for p in pool]
             game["practice"] = str(random.choices(pool, weights)[0])
+        elif random.random() < self.args.broke:
+            game["broke"] = True
         return game
 
     def practice_dir(self, map_name=None, difficulty=None):
@@ -260,13 +262,14 @@ class Trainer:
         game = s["games"]
         won = result["outcome"] == "win"
         practice = bool(result.get("practice"))
+        broke = bool(result.get("broke"))
         beaten = won  # the user's rule (2026-10-30): any win counts toward the climb, whatever core is left
         with open(OUT / "log.csv", "a", newline="") as f:
             csv.writer(f).writerow([game, s["updates"], result["worker"] + 1, result["map"], result["difficulty"],
                                     result["outcome"], result["wave"], result["winWave"], result["coreHealth"],
                                     result["fitness"], result["gameSeconds"], result["realSeconds"],
                                     result["blocksBuilt"], result["actions"],
-                                    "rival" if rival else "wave8" if practice else ""])
+                                    "rival" if rival else "wave8" if practice else "broke" if broke else ""])
         if self.args.outlast:
             self.score_outlast(result, rival)
         self.keep_practice(result, game)
@@ -275,7 +278,7 @@ class Trainer:
         if won and result["map"] == "groundZero" and abs(result["difficulty"] - 0.3) < 1e-6 and not self.any_ammo:
             self.any_ammo = True
             print("Ground Zero beaten at 30%: any ammo now counts as fed", flush=True)
-        new_best = not practice and not rival and result["wave"] > self.best_wave.get(result["map"], 0)
+        new_best = not practice and not broke and not rival and result["wave"] > self.best_wave.get(result["map"], 0)
         if new_best:
             self.best_wave[result["map"]] = result["wave"]
             print(f"new best wave on {result['map']}: {result['wave']} (game {game}, recorded)", flush=True)
@@ -288,7 +291,7 @@ class Trainer:
             if first_win:
                 s["firstWin"].append(result["map"])
         # Same climb as before: half of the last 10 games at this level beaten -> harder; at 100% -> next map.
-        if not practice and result["map"] == LADDER[s["rung"]][0] and abs(result["difficulty"] - DIFFICULTY[s["level"]]) < 1e-6:
+        if not practice and not broke and result["map"] == LADDER[s["rung"]][0] and abs(result["difficulty"] - DIFFICULTY[s["level"]]) < 1e-6:
             s["recent"] = (s["recent"] + [beaten])[-10:]
             if len(s["recent"]) == 10 and sum(s["recent"]) >= 5:
                 s["recent"] = []
@@ -302,10 +305,10 @@ class Trainer:
                 self.window = (self.window + [(won, result["wave"] / max(1, result["winWave"]))])[-BEST_WINDOW:]
                 self.keep_if_best(game)
         self.games_this_run += 1
-        print(f"game {game}: {'RIVAL, ' if rival else ''}{'PRACTICE from wave 8, ' if practice else ''}{result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
+        print(f"game {game}: {'RIVAL, ' if rival else ''}{'PRACTICE from wave 8, ' if practice else ''}{'BROKE START, ' if broke else ''}{result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
               f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
               + (f" | chain drill>conv {'Y' if result['drillToConveyor'] else 'n'} conv>core {'Y' if result['conveyorToCore'] else 'n'}"
-                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} wave8 turrets {result.get('waveTurrets', '?')} route turrets {result.get('routeTurrets', '?')} ship kills {result.get('shipKills', '?')} wasted {result.get('wasted', '?')} mined {result.get('mined', '?')} unused {result['unused']}"
+                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} wave8 turrets {result.get('waveTurrets', '?')} route turrets {result.get('routeTurrets', '?')} ship kills {result.get('shipKills', '?')} wasted {result.get('wasted', '?')} mined {result.get('mined', '?')} copper fed {result.get('copperFed', '?')} unused {result['unused']}"
                  if 'drillToConveyor' in result else ""), flush=True)
         if self.args.games and self.games_this_run >= self.args.games:
             self.stop = True
@@ -478,6 +481,7 @@ def main():
     p.add_argument("--bonuses", action=argparse.BooleanOptionalAction, default=True,
                    help="one-time rewards for first block built and first copper (the user's rule)")
     p.add_argument("--record-all", action="store_true")
+    p.add_argument("--broke", type=float, default=0.2, help="share of non-practice games started with 0 core copper, so mining is the only way in (2026-11-07); kept out of the ladder and best-wave")
     p.add_argument("--practice", type=float, default=0.2, help="share of games started from the bot's own wave-8 saves (0 = off; 0.5 made normal games weaker, 2026-11-02)")
     p.add_argument("--outlast", default="", help="map in maps/campaign for an outlast run against runs/<run>/rival.pt")
     p.add_argument("--outlast-difficulty", type=float, default=1.0, help="enemy strength in an outlast run")

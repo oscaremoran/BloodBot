@@ -381,6 +381,7 @@ public class Agent{
             if(copper > lastCopper) copperIn += copper - lastCopper;
             lastCopper = copper;
         }
+        if(Vars.state.updateId % 10 == 0) checkCopperFed();
         ShipAI miner = builder.shipAI();
         if(miner != null && miner.minedIn > 0){
             mined += miner.minedIn;
@@ -921,6 +922,22 @@ public class Agent{
 
     /** Mining rule (user, 2026-11-07): +1 point per 10 items the ship mines, counted as they enter its hold, so mining pays at once. */
     static final float MINED_PER_POINT = 10f;
+
+    /** Copper-income rule (2026-11-07): +1 point per 10 copper that conveyors/drills hand to the core. Uses the game's own
+     *  core item counter, which only counts handleItem (blocks), never the ship's drop-offs. Why: on Frozen Forest the
+     *  nearest copper is 20+ tiles out; the bot fed the core ~9.5 copper/min vs ~109 on Ground Zero, spending ~47. */
+    static final float COPPER_FED_PER_POINT = 10f;
+    int copperFed, lastFedCount = -1;
+
+    void checkCopperFed(){
+        int count = Vars.state.stats.coreItemCount.get(Items.copper, 0);
+        if(lastFedCount < 0 || count < lastFedCount){ lastFedCount = count; return; }
+        if(count > lastFedCount){
+            copperFed += count - lastFedCount;
+            addPoints((count - lastFedCount) / COPPER_FED_PER_POINT);
+            lastFedCount = count;
+        }
+    }
     int mined;
 
     /** Actions that had nothing to act on (logged; 2026-11-06). */

@@ -40,6 +40,8 @@ public class PpoClient implements Agent.Policy{
     /** Mace practice: the save this game started from (null = a normal game), and where this game saved its own base. */
     String practice, practiceSaved;
     float difficulty, lastPotential;
+    /** Broke start (2026-11-07): this game began with the core's copper set to 0, so mining is the only way to get going. */
+    boolean broke;
     boolean buildRewarded, copperRewarded, crashed;
     long realStart;
     // The finished game, kept until Python says whether to save its replay.
@@ -99,11 +101,21 @@ public class PpoClient implements Agent.Policy{
             bonuses = msg.getBool("bonuses", false);
             anyAmmo = msg.getBool("anyAmmo", false);
             String practiceSave = msg.has("practice") ? msg.getString("practice") : null;
-            Core.app.post(() -> startGame(path, winWave, allBlocks, practiceSave));
+            boolean brokeStart = msg.getBool("broke", false);
+            Core.app.post(() -> { broke = false; startGame(path, winWave, allBlocks, practiceSave); if(brokeStart && practice == null) startBroke(); });
         }catch(Exception e){
             Log.err("[bloodbot] PPO connection lost; stopping", e);
             Core.app.post(() -> System.exit(1));
         }
+    }
+
+    /** Broke start: empty the core's copper (map loadout and the 200 starting copper). Other items are left alone. */
+    void startBroke(){
+        var core = Vars.state.rules.defaultTeam.core();
+        if(core == null) return;
+        core.items.set(mindustry.content.Items.copper, 0);
+        broke = true;
+        agent.lastCopper = 0;
     }
 
     void startGame(String path, int winWave, boolean allBlocks, String practiceSave){
@@ -159,7 +171,7 @@ public class PpoClient implements Agent.Policy{
         recorder.update(plugin.ticks, agent.builder);
 
         boolean over = Vars.state.gameOver || plugin.winner != null;
-        if(!over && practice == null && practiceSaved == null && Vars.state.wave >= Practice.SAVE_WAVE){
+        if(!over && practice == null && !broke && practiceSaved == null && Vars.state.wave >= Practice.SAVE_WAVE){
             Fi f = Core.files.absolute(new java.io.File("practice/worker-" + worker + ".msav").getAbsolutePath());
             f.parent().mkdirs();
             Practice.save(agent, f);
@@ -193,11 +205,11 @@ public class PpoClient implements Agent.Policy{
         lastResult = String.format(
             "{\"map\":\"%s\",\"outcome\":\"%s\",\"gameSeconds\":%d,\"realSeconds\":%.1f,\"wave\":%d,\"winWave\":%d,\"coreHealth\":%.3f," +
             "\"fitness\":%.2f,\"blocksBuilt\":%d,\"difficulty\":%.2f,\"actions\":\"%s\",\"worker\":%d," +
-            "\"drillToConveyor\":%b,\"conveyorToCore\":%b,\"conveyorToTurret\":%b,\"routerToTurret\":%b,\"fedTurrets\":%d,\"hitTurrets\":%d,\"maceKills\":%d,\"maceDamage\":%.0f,\"wallSoak\":%.0f,\"routerFed\":%d,\"waveTurrets\":%d,\"routeTurrets\":%d,\"shipKills\":%d,\"wasted\":%d,\"mined\":%d,\"unused\":%d,\"practice\":%b,\"practiceSave\":\"%s\"}",
+            "\"drillToConveyor\":%b,\"conveyorToCore\":%b,\"conveyorToTurret\":%b,\"routerToTurret\":%b,\"fedTurrets\":%d,\"hitTurrets\":%d,\"maceKills\":%d,\"maceDamage\":%.0f,\"wallSoak\":%.0f,\"routerFed\":%d,\"waveTurrets\":%d,\"routeTurrets\":%d,\"shipKills\":%d,\"wasted\":%d,\"mined\":%d,\"copperFed\":%d,\"unused\":%d,\"practice\":%b,\"broke\":%b,\"practiceSave\":\"%s\"}",
             mapName, outcome, plugin.ticks / 60, (Time.nanos() - realStart) / 1e9, Vars.state.wave, Vars.state.rules.winWave,
             coreHealth, fitness, agent.builder.built, difficulty, actions, worker,
-            agent.drillToConveyor, agent.conveyorToCore, agent.conveyorToTurret, agent.routerToTurret, agent.fedTurrets.size, agent.hitTurrets.size, agent.maceKills, agent.maceDamage, agent.wallSoakPoints, agent.routerFedTurrets.size, agent.waveTurrets, agent.routeTurretsPaid, agent.shipKills, agent.wasted, agent.mined, unused,
-            practice != null, practiceSaved == null ? "" : practiceSaved);
+            agent.drillToConveyor, agent.conveyorToCore, agent.conveyorToTurret, agent.routerToTurret, agent.fedTurrets.size, agent.hitTurrets.size, agent.maceKills, agent.maceDamage, agent.wallSoakPoints, agent.routerFedTurrets.size, agent.waveTurrets, agent.routeTurretsPaid, agent.shipKills, agent.wasted, agent.mined, agent.copperFed, unused,
+            practice != null, broke, practiceSaved == null ? "" : practiceSaved);
         lastRecorder = recorder;
         lastBuilder = agent.builder;
         lastTicks = plugin.ticks;
