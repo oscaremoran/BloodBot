@@ -110,7 +110,7 @@ async function route() {
 async function load() {
     try {
         const readme = await (await fetch('blog/README.md')).text();
-        entries = [...readme.matchAll(/^\|\s*([\d-]+)\s*\|\s*\[([^\]]+)\]\(([^)]+\.md)\)/gm)]
+        entries = [...readme.matchAll(/^\|\s*([^|]*?\d[^|]*?)\s*\|\s*\[([^\]]+)\]\(([^)]+\.md)\)/gm)]
             .map(m => ({ date: m[1], title: m[2], file: m[3], id: m[3].replace(/\.md$/, '') }));
         entries.reverse();  // README lists newest first; show oldest first
     } catch (err) {
