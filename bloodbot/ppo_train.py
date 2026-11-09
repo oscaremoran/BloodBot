@@ -27,13 +27,20 @@ import numpy as np
 import torch
 
 from bloodbot import export_ppo
-from bloodbot.ppo import Dims, Net, TARGETED, act, gae, ppo_update, widen, add_closeup, add_route
+from bloodbot.ppo import Dims, Net, TARGETED, act, gae, ppo_update, widen, add_closeup, add_route, upgrade_dims
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "runs" / os.environ.get("BLOODBOT_RUN", "ppo")
 M = ROOT / "maps" / "campaign"
 LADDER = [("groundZero", 10), ("frozenForest", 15), ("crateredBattleground", 20), ("fungalPass", 0), ("ussIowa", 0)]
 DIFFICULTY = [0.3, 0.55, 0.8, 1.0]
+# Extra easy rung for some maps (user, 2026-11-08): Frozen Forest at 30% had 0 wins in ~900 games, so nothing to learn
+# from. Games below 30% never count toward the evolution metric (gallery.evolution).
+EASY_RUNGS = {"frozenForest": [0.15]}
+
+
+def levels(rung):
+    return EASY_RUNGS.get(LADDER[rung][0], []) + DIFFICULTY
 BEST_WINDOW = 20  # games judged together when deciding whether to keep the best brain
 FRAME_EVERY = 8  # save every 8th observation of recorded games (frames.npz, for bloodbot.attention)
 LOG_COLUMNS = ["game", "generation", "member", "map", "difficulty", "outcome", "wave", "winWave", "coreHealth",
@@ -151,6 +158,10 @@ class Trainer:
                     data["net"] = add_route(data["net"])
                     data.pop("opt", None)
                     print(f"added the enemy route: {old_dims[0]} -> {dims.C} map layers")
+                elif (up := upgrade_dims(data["net"], old_dims, dims.as_list())) is not None:
+                    data["net"] = up[0]
+                    data.pop("opt", None)
+                    print(f"upgraded the brain: dims {old_dims} -> {dims.as_list()} (new action type)")
                 else:
                     raise SystemExit("checkpoint was trained with different game sizes; start a new runs/ppo")
             if data["net"]["d1.weight"].shape != self.net.d1.weight.shape:
@@ -174,22 +185,22 @@ class Trainer:
                 with open(log, newline="") as f:
                     here = [r["outcome"] == "win" for r in csv.DictReader(f)
                             if r["map"] == LADDER[self.state["rung"]][0] and not r.get("start")
-                            and abs(float(r["difficulty"]) - DIFFICULTY[self.state["level"]]) < 1e-6]
+                            and abs(float(r["difficulty"]) - levels(self.state["rung"])[self.state["level"]]) < 1e-6]
                 self.state["recent"] = here[-10:]
                 with open(log, newline="") as f:
                     self.window = [(r["outcome"] == "win", int(r["wave"]) / max(1, int(r["winWave"])))
                                    for r in csv.DictReader(f) if r["map"] == LADDER[self.state["rung"]][0] and not r.get("start")
-                                   and abs(float(r["difficulty"]) - DIFFICULTY[self.state["level"]]) < 1e-6][-BEST_WINDOW:]
+                                   and abs(float(r["difficulty"]) - levels(self.state["rung"])[self.state["level"]]) < 1e-6][-BEST_WINDOW:]
             # Being past Ground Zero 30% means it was beaten; log.csv may no longer hold those games.
             self.any_ammo = self.any_ammo or self.state["rung"] > 0 or self.state["level"] > 0
             print(f"resumed: {self.state['games']} games, {self.state['updates']} updates, "
-                  f"map {LADDER[self.state['rung']][0]} at {int(DIFFICULTY[self.state['level']] * 100)}%")
+                  f"map {LADDER[self.state['rung']][0]} at {int(levels(self.state['rung'])[self.state['level']] * 100)}%")
         else:
             print(f"new run: {sum(p.numel() for p in self.net.parameters())} parameters")
         if self.args.outlast:
             data = torch.load(OUT / "rival.pt", map_location="cpu", weights_only=False)
             self.rival = Net(dims)
-            self.rival.load_state_dict(add_route(data["net"]) if data["dims"][0] + 2 == dims.C else data["net"])
+            self.rival.load_state_dict(data["net"] if data["dims"] == dims.as_list() else upgrade_dims(data["net"], data["dims"], dims.as_list())[0])
             print(f"outlast on {self.args.outlast}: rival from game {data['state']['games']}", flush=True)
 
     def save(self):
@@ -211,7 +222,7 @@ class Trainer:
                     "difficulty": self.args.outlast_difficulty, "bonuses": self.args.bonuses, "allBlocks": False,
                     "anyAmmo": True, "rival": self.outlast_games % OUTLAST_EVERY == 0}
         name, wave = LADDER[self.state["rung"]]
-        game = {"map": str(M / f"{name}.msav"), "winWave": wave, "difficulty": DIFFICULTY[self.state["level"]],
+        game = {"map": str(M / f"{name}.msav"), "winWave": wave, "difficulty": levels(self.state["rung"])[self.state["level"]],
                 "bonuses": self.args.bonuses, "allBlocks": False, "anyAmmo": self.any_ammo}
         pool = sorted(self.practice_dir().glob("game_*.msav"))
         if len(pool) >= PRACTICE_MIN and random.random() < self.args.practice:
@@ -223,7 +234,7 @@ class Trainer:
 
     def practice_dir(self, map_name=None, difficulty=None):
         name = map_name or LADDER[self.state["rung"]][0]
-        diff = DIFFICULTY[self.state["level"]] if difficulty is None else difficulty
+        diff = levels(self.state["rung"])[self.state["level"]] if difficulty is None else difficulty
         return OUT / "practice" / f"{name}_{round(diff * 100)}"
 
     def keep_practice(self, result, game):
@@ -291,11 +302,11 @@ class Trainer:
             if first_win:
                 s["firstWin"].append(result["map"])
         # Same climb as before: half of the last 10 games at this level beaten -> harder; at 100% -> next map.
-        if not practice and not broke and result["map"] == LADDER[s["rung"]][0] and abs(result["difficulty"] - DIFFICULTY[s["level"]]) < 1e-6:
+        if not practice and not broke and result["map"] == LADDER[s["rung"]][0] and abs(result["difficulty"] - levels(s["rung"])[s["level"]]) < 1e-6:
             s["recent"] = (s["recent"] + [beaten])[-10:]
             if len(s["recent"]) == 10 and sum(s["recent"]) >= 5:
                 s["recent"] = []
-                if s["level"] + 1 < len(DIFFICULTY):
+                if s["level"] + 1 < len(levels(s["rung"])):
                     s["level"] += 1
                 elif s["rung"] + 1 < len(LADDER):
                     s["rung"] += 1
@@ -308,7 +319,7 @@ class Trainer:
         print(f"game {game}: {'RIVAL, ' if rival else ''}{'PRACTICE from wave 8, ' if practice else ''}{'BROKE START, ' if broke else ''}{result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
               f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
               + (f" | chain drill>conv {'Y' if result['drillToConveyor'] else 'n'} conv>core {'Y' if result['conveyorToCore'] else 'n'}"
-                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} wave8 turrets {result.get('waveTurrets', '?')} route turrets {result.get('routeTurrets', '?')} ship kills {result.get('shipKills', '?')} wasted {result.get('wasted', '?')} mined {result.get('mined', '?')} copper fed {result.get('copperFed', '?')} unused {result['unused']}"
+                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} wave8 turrets {result.get('waveTurrets', '?')} route turrets {result.get('routeTurrets', '?')} ship kills {result.get('shipKills', '?')} wasted {result.get('wasted', '?')} mined {result.get('mined', '?')} copper fed {result.get('copperFed', '?')} mine orders {result.get('mineOrders', '?')} drills paid {result.get('drillsPaid', '?')} lines {result.get('lines', '?')}/{result.get('linePlans', '?')} unused {result['unused']}"
                  if 'drillToConveyor' in result else ""), flush=True)
         if self.args.games and self.games_this_run >= self.args.games:
             self.stop = True
@@ -330,7 +341,7 @@ class Trainer:
         s["best"] = {"rung": s["rung"], "level": s["level"], "key": key, "game": game}
         torch.save({"net": self.net.state_dict(), "state": dict(s), "dims": self.dims.as_list()}, OUT / "best.pt")
         # best.pt follows the current level; this copy stays, so a new level never replaces an old level's champion.
-        shutil.copy2(OUT / "best.pt", OUT / f"best_{LADDER[s['rung']][0]}_{round(DIFFICULTY[s['level']] * 100)}.pt")
+        shutil.copy2(OUT / "best.pt", OUT / f"best_{LADDER[s['rung']][0]}_{round(levels(s['rung'])[s['level']] * 100)}.pt")
         export_ppo.export(OUT / "best.pt", OUT / "brains" / "best.bin")
         print(f"best brain kept: game {game}, last {BEST_WINDOW} games {wins} wins, "
               f"avg wave {sum(f for _, f in self.window) / len(self.window) * LADDER[s['rung']][1]:.1f}", flush=True)
@@ -456,14 +467,15 @@ class Trainer:
                  "actions": torch.tensor(actions), "logp": torch.tensor(logps),
                  "adv": torch.tensor(np.array(advs)), "returns": torch.tensor(np.array(rets))}
         t = time.time()
-        stats = ppo_update(self.net, self.opt, batch, epochs=self.args.epochs, ent_coef=self.args.ent_coef)
+        stats = ppo_update(self.net, self.opt, batch, epochs=self.args.epochs, ent_coef=self.args.ent_coef,
+                           target_kl=self.args.target_kl)
         self.state["updates"] += 1
         self.buffers = {}
         self.pending = {}
         self.steps = 0
         self.save()
         print(f"update {self.state['updates']}: {len(actions)} decisions, policy {stats['policy_loss']:.3f} "
-              f"value {stats['value_loss']:.3f} entropy {stats['entropy']:.2f} ({time.time() - t:.1f}s)", flush=True)
+              f"value {stats['value_loss']:.3f} entropy {stats['entropy']:.2f} kl {stats['kl']:.4f} epochs {stats['epochs']} ({time.time() - t:.1f}s)", flush=True)
 
 
 def main():
@@ -474,6 +486,7 @@ def main():
     p.add_argument("--minutes", type=float, default=0, help="stop after this many minutes (0 = no limit)")
     p.add_argument("--steps", type=int, default=2048, help="decisions per learning update")
     p.add_argument("--epochs", type=int, default=4)
+    p.add_argument("--target-kl", type=float, default=0.02, help="stop an update's epochs early past 1.5x this KL (0 = off; 2026-11-08)")
     p.add_argument("--lr", type=float, default=3e-4)
     p.add_argument("--ent-coef", type=float, default=0.01, help="exploration bonus (higher = stays random longer)")
     p.add_argument("--gamma", type=float, default=0.995)

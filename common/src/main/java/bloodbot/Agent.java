@@ -1,5 +1,6 @@
 package bloodbot;
 
+import arc.math.geom.Geometry;
 import arc.math.geom.Point2;
 import arc.math.geom.Vec2;
 import arc.struct.IntSet;
@@ -19,6 +20,7 @@ import mindustry.gen.Unit;
 import mindustry.type.Category;
 import mindustry.type.Item;
 import mindustry.world.Block;
+import mindustry.world.Build;
 import mindustry.world.Tile;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.distribution.Junction;
@@ -50,10 +52,10 @@ public class Agent{
     // ---- action types ----
     static final String[] TYPE_NAMES = {"wait", "build", "remove", "rebuild", "supply items", "supply power", "supply liquid",
         "configure", "army move", "army attack", "ship guard", "ship mine", "ship fight", "ship deliver",
-        "logic link", "logic write", "payload pick up", "payload drop"};
+        "logic link", "logic write", "payload pick up", "payload drop", "build line"};
     static final int WAIT = 0, BUILD = 1, REMOVE = 2, REBUILD = 3, SUPPLY_ITEMS = 4, SUPPLY_POWER = 5, SUPPLY_LIQUID = 6,
         CONFIGURE = 7, ARMY_MOVE = 8, ARMY_ATTACK = 9, SHIP_GUARD = 10, SHIP_MINE = 11, SHIP_FIGHT = 12, SHIP_DELIVER = 13,
-        LOGIC_LINK = 14, LOGIC_WRITE = 15, PAYLOAD_PICKUP = 16, PAYLOAD_DROP = 17;
+        LOGIC_LINK = 14, LOGIC_WRITE = 15, PAYLOAD_PICKUP = 16, PAYLOAD_DROP = 17, BUILD_LINE = 18;
 
     /**
      * Real Mindustry logic instructions the bot can append to a processor's program, one per action.
@@ -225,6 +227,11 @@ public class Agent{
     void checkUsed(){
         for(Building b : ownBuildings()){
             if(!usedBlocks.contains(b.pos()) && judged(b) && inUse(b)) usedBlocks.add(b.pos());
+            if(b instanceof Drill.DrillBuild d && builder.builtPos.contains(d.pos()) && !paidDrills.contains(d.pos())
+                && (d.items.any() || usedBlocks.contains(d.pos()))){
+                paidDrills.add(d.pos());
+                addPoints(DRILL_BONUS);
+            }
             if(b instanceof Conveyor.ConveyorBuild c && builder.builtPos.contains(c.pos()) && c.items.has(Items.copper)) checkChain(c);
             if(b instanceof Router.RouterBuild r && builder.builtPos.contains(r.pos())
                 && (r.lastItem == Items.copper || r.items.has(Items.copper))) checkRouter(r);
@@ -384,6 +391,7 @@ public class Agent{
         if(Vars.state.updateId % 10 == 0) checkCopperFed();
         ShipAI miner = builder.shipAI();
         if(miner != null && miner.minedIn > 0){
+            if(mineOrderPending){ mineOrderPending = false; mineOrders++; if(MINE_ORDER_REWARD) addPoints(MINE_ORDER_BONUS); }
             mined += miner.minedIn;
             addPoints(miner.minedIn / MINED_PER_POINT);
             miner.minedIn = 0;
@@ -516,7 +524,8 @@ public class Agent{
         ok[PAYLOAD_DROP] = payloadUnits;
         // A full build list only stops single placements; the bot keeps deciding, so with no copper it can still mine and supply
         // (2026-11-06). Supply lines have their own, higher limit so the list can't grow without end.
-        if(builder.queue.size >= MAX_QUEUE) ok[BUILD] = ok[REMOVE] = ok[REBUILD] = false;
+        ok[BUILD_LINE] = ok[BUILD];
+        if(builder.queue.size >= MAX_QUEUE) ok[BUILD] = ok[BUILD_LINE] = ok[REMOVE] = ok[REBUILD] = false;
         if(builder.queue.size >= MAX_SUPPLY_QUEUE) ok[SUPPLY_ITEMS] = ok[SUPPLY_POWER] = ok[SUPPLY_LIQUID] = false;
         for(int i = 0; i < TARGETED.length; i++) if(!any(targetCells[i])) ok[TARGETED[i]] = false;
         return ok;
@@ -643,6 +652,7 @@ public class Agent{
 
         switch(type){
             case BUILD -> { if(blockIndex >= 0 && blockIndex < cat.size) build(cat.get(blockIndex), tile, rotation, arg); }
+            case BUILD_LINE -> { if(blockIndex >= 0 && blockIndex < cat.size) buildLine(cat.get(blockIndex), tile, rotation, arg); }
             case REMOVE -> remove(tile);
             case REBUILD -> rebuild(tile);
             case SUPPLY_ITEMS -> supply(tile, 0);
@@ -652,7 +662,11 @@ public class Agent{
             case ARMY_MOVE -> armyMove(arg % GROUPS, tile);
             case ARMY_ATTACK -> armyAttack(arg % GROUPS, tile);
             case SHIP_GUARD -> { if(ship != null) ship.guard(); }
-            case SHIP_MINE -> { if(ship != null) ship.mine(ORES[arg % ORES.length]); }
+            case SHIP_MINE -> { if(ship != null){
+                boolean was = ship.task == ShipAI.Task.MINE;
+                ship.mine(ORES[arg % ORES.length]);
+                if(!was && ship.task == ShipAI.Task.MINE) mineOrderPending = true;
+            } }
             case SHIP_FIGHT -> { if(ship != null) ship.fight(tile); }
             case SHIP_DELIVER -> { if(ship != null){ Building b = deliveryTarget(tile, ITEMS[arg]); if(b != null) ship.deliver(ITEMS[arg], b); else wasted++; } }
             case LOGIC_LINK -> logicLink(tile);
@@ -728,6 +742,37 @@ public class Agent{
         if(block instanceof UnitFactory factory && !factory.plans.isEmpty()) config = arg % factory.plans.size;
         else if(block.configurations.containsKey(Item.class)) config = ITEMS[arg];
         builder.enqueue(new Builder.Plan(block, spot.x, spot.y, rotation, config));
+    }
+
+    /**
+     * Drag line (user, 2026-11-08): what a player gets from one drag with the game's own line placement, straight or
+     * L-shaped, no pathfinding. Starts at the chosen tile and heads in the rotation's direction; arg / 4 picks the first
+     * leg's length, arg % 4 the shape: straight, turn left, turn right (second leg as long as the first), or a straight
+     * half-length line. Blocks step by their size; each points along the line, so conveyors carry items from start to end.
+     * Tiles where the block can't go are skipped, as in the game.
+     */
+    static final int[] LINE_LENGTHS = {4, 8, 16, 24};
+    int linesBuilt, linePlans;
+
+    void buildLine(Block block, Tile start, int rotation, int arg){
+        int len = LINE_LENGTHS[(arg / 4) % LINE_LENGTHS.length], shape = arg % 4, step = Math.max(1, block.size);
+        int dir1 = rotation & 3, dir2 = shape == 1 ? (dir1 + 1) & 3 : shape == 2 ? (dir1 + 3) & 3 : dir1;
+        int leg1 = shape == 3 ? len / 2 : len, leg2 = shape == 1 || shape == 2 ? len : 0;
+        int x = start.x, y = start.y, placed = 0;
+        for(int i = 0; i < leg1 + leg2; i += step){
+            boolean first = i + step <= leg1 || leg2 == 0;
+            int dir = first ? dir1 : dir2;
+            Tile t = Vars.world.tile(x, y);
+            if(t != null && !builder.claimed(x, y) && Build.validPlace(block, team, x, y, dir)){
+                builder.enqueue(new Builder.Plan(block, x, y, dir, null));
+                placed++;
+            }
+            x += Geometry.d4x(dir) * step;
+            y += Geometry.d4y(dir) * step;
+        }
+        if(placed == 0){ wasted++; return; }
+        linesBuilt++;
+        linePlans += placed;
     }
 
     void remove(Tile tile){
@@ -923,10 +968,22 @@ public class Agent{
     /** Mining rule (user, 2026-11-07): +1 point per 10 items the ship mines, counted as they enter its hold, so mining pays at once. */
     static final float MINED_PER_POINT = 10f;
 
+    /** Mining and drill rule (the user's, 2026-11-08): +50 each time a ship order switches it to mining, paid when the first
+     *  ore lands in its hold (re-ordering mine while already mining pays nothing); +50 per bot-built drill, paid when it
+     *  first holds or passes on an item, so drills placed off ore earn nothing. */
+    static final float MINE_ORDER_BONUS = 50f, DRILL_BONUS = 50f;
+    /** Off from 2026-11-08 (user OK): mine orders went 1.6 -> 8.7 a game and deaths by wave 4 15% -> 54%; the ship can't build while mining. Still counted. */
+    static final boolean MINE_ORDER_REWARD = false;
+    boolean mineOrderPending;
+    int mineOrders;
+    final IntSet paidDrills = new IntSet();
+
     /** Copper-income rule (2026-11-07): +1 point per 10 copper that conveyors/drills hand to the core. Uses the game's own
      *  core item counter, which only counts handleItem (blocks), never the ship's drop-offs. Why: on Frozen Forest the
      *  nearest copper is 20+ tiles out; the bot fed the core ~9.5 copper/min vs ~109 on Ground Zero, spending ~47. */
     static final float COPPER_FED_PER_POINT = 10f;
+    /** Off from 2026-11-08 (user): every Frozen Forest slide after a rollback happened with it on. Still counted and logged. */
+    static final boolean COPPER_FED_REWARD = false;
     int copperFed, lastFedCount = -1;
 
     void checkCopperFed(){
@@ -934,7 +991,7 @@ public class Agent{
         if(lastFedCount < 0 || count < lastFedCount){ lastFedCount = count; return; }
         if(count > lastFedCount){
             copperFed += count - lastFedCount;
-            addPoints((count - lastFedCount) / COPPER_FED_PER_POINT);
+            if(COPPER_FED_REWARD) addPoints((count - lastFedCount) / COPPER_FED_PER_POINT);
             lastFedCount = count;
         }
     }

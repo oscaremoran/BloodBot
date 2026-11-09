@@ -85,6 +85,8 @@ def evolution(g):
     """Evolution shown by one game."""
     if g["map"] not in EVO_LADDER or g.get("practice"):  # practice games start at wave 8: not a real result
         return None
+    if g["difficulty"] < EVO_LEVELS[0] - 1e-6:  # easy rungs below 30% (2026-11-08) prove nothing on the ladder
+        return None
     m = EVO_LADDER.index(g["map"])
     level = min(range(4), key=lambda i: abs(EVO_LEVELS[i] - g["difficulty"]))
     if g["outcome"] == "win":

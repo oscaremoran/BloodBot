@@ -16,7 +16,41 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def upgrade_bin(raw: bytes) -> bytes:
-    """A brain file from before the enemy route (46 map layers) -> 48, with zero weights for the new layers."""
+    """Old brain files -> the current layout: enemy route (46 -> 48 map layers, 2026-11-06), then the "build line"
+    action type (69 -> 70 scalars, one more output, 2026-11-08). New parts get zero weights (see ppo.add_type)."""
+    return add_type_bin(add_route_bin(raw))
+
+
+OLD_SCALARS, OLD_TYPES = 69, 18
+
+
+def add_type_bin(raw: bytes) -> bytes:
+    (n,) = struct.unpack(">i", raw[:4])
+    shape = list(struct.unpack(f">{n}i", raw[4:4 + 4 * n]))
+    if shape[5] != OLD_SCALARS:
+        return raw
+    c, g, k1, k2, k3, sc, h, out = shape
+    off = 4 + 4 * n
+    p = list(struct.unpack(f">{(len(raw) - off) // 4}f", raw[off:]))
+    i = k1 * c * 9 + k1 + k2 * k1 * 9 + k2 + k3 * k2 * 9 + k3
+    inp = k3 * (g // 8) ** 2 + sc
+    d1 = [p[i + r * inp:i + (r + 1) * inp] for r in range(h)]
+    head = p[:i]
+    d1 = [row[:inp - 1] + [0.0] + row[inp - 1:] for row in d1]
+    i += h * inp
+    rest = p[i:i + h + h * h + h]  # d1 bias, d2 weight, d2 bias
+    i += h + h * h + h
+    ow = [p[i + r * h:i + (r + 1) * h] for r in range(out)]
+    i += out * h
+    ob = p[i:i + out]
+    ow = ow[:OLD_TYPES] + [[0.0] * h] + ow[OLD_TYPES:]
+    ob = ob[:OLD_TYPES] + [sum(ob[:OLD_TYPES]) / OLD_TYPES] + ob[OLD_TYPES:]
+    shape[5], shape[7] = sc + 1, out + 1
+    params = head + [x for row in d1 for x in row] + rest + [x for row in ow for x in row] + ob
+    return struct.pack(f">{1 + n}i", n, *shape) + struct.pack(f">{len(params)}f", *params)
+
+
+def add_route_bin(raw: bytes) -> bytes:
     (n,) = struct.unpack(">i", raw[:4])
     shape = list(struct.unpack(f">{n}i", raw[4:4 + 4 * n]))
     if shape[0] != 46:

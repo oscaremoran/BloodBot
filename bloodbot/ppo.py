@@ -12,7 +12,7 @@ import torch.nn.functional as F
 # Action types, in the game's order (Agent.TYPE_NAMES).
 TYPE_NAMES = ["wait", "build", "remove", "rebuild", "supply items", "supply power", "supply liquid", "configure",
               "army move", "army attack", "ship guard", "ship mine", "ship fight", "ship deliver",
-              "logic link", "logic write", "payload pick up", "payload drop"]
+              "logic link", "logic write", "payload pick up", "payload drop", "build line"]
 SHIP_MINE, SHIP_DELIVER = 11, 13
 # Actions that need a target (Agent.TARGETED): the map cell is chosen after the action, among the cells where it can work.
 TARGETED = [2, 4, 5, 6, 7, 13]
@@ -20,7 +20,7 @@ HEADS = ["block", "cell", "fx", "fy", "rot", "arg"]
 _PLACE = {"cell", "fx", "fy"}
 RELEVANT = [set(), set(HEADS), _PLACE, _PLACE, _PLACE, _PLACE, _PLACE, _PLACE | {"rot", "arg"},
             _PLACE | {"arg"}, _PLACE | {"arg"}, set(), {"arg"}, _PLACE, _PLACE | {"arg"},
-            _PLACE, _PLACE | {"rot", "arg"}, _PLACE | {"arg"}, _PLACE | {"arg"}]
+            _PLACE, _PLACE | {"rot", "arg"}, _PLACE | {"arg"}, _PLACE | {"arg"}, set(HEADS)]
 
 
 class Dims:
@@ -99,6 +99,30 @@ def add_route(old: dict) -> dict:
     pad = torch.zeros_like(w[:, :1])
     sd["c1.weight"] = torch.cat([w[:, :half], pad, w[:, half:], pad], 1)
     return sd
+
+
+@torch.no_grad()
+def add_type(old: dict, s_old: int, t_old: int) -> dict:
+    """One more action type (2026-11-08: "build line", appended last). Its type output gets zero weights and the
+    average type bias; its slot in the last-action input (just before the bias input) gets zero weights, so the
+    brain plays as before apart from now and then trying the new action."""
+    sd = {k: v.clone() for k, v in old.items()}
+    w, b = old["out.weight"], old["out.bias"]
+    sd["out.weight"] = torch.cat([w[:t_old], torch.zeros_like(w[:1]), w[t_old:]], 0)
+    sd["out.bias"] = torch.cat([b[:t_old], b[:t_old].mean().reshape(1), b[t_old:]], 0)
+    d1 = old["d1.weight"]
+    col = d1.shape[1] - 1  # the bias input is the last scalar; the new last-action slot goes right before it
+    sd["d1.weight"] = torch.cat([d1[:, :col], torch.zeros_like(d1[:, :1]), d1[:, col:]], 1)
+    return sd
+
+
+def upgrade_dims(net: dict, dims: list, want: list):
+    """Bring a saved brain (state dict + dims list) up to the game's dims, or return None if it can't be."""
+    if dims[0] + 2 == want[0]:
+        net, dims = add_route(net), [dims[0] + 2] + dims[1:]
+    if dims[4] + 1 == want[4] and dims[2] + 1 == want[2]:
+        net, dims = add_type(net, dims[2], dims[4]), dims[:2] + [dims[2] + 1, dims[3], dims[4] + 1] + dims[5:]
+    return (net, dims) if dims == want else None
 
 
 def split(d: Dims, logits, masks):
@@ -185,17 +209,24 @@ def act(net, grid, scalars, masks):
     return actions[0].tolist(), float(logp[0]), float(value[0])
 
 
-def ppo_update(net, opt, batch, epochs=4, minibatch=256, clip=0.2, vf_coef=0.5, ent_coef=0.01, max_grad=0.5):
-    """Standard clipped PPO on one batch of collected decisions."""
+def ppo_update(net, opt, batch, epochs=4, minibatch=256, clip=0.2, vf_coef=0.5, ent_coef=0.01, max_grad=0.5, target_kl=0.02):
+    """Standard clipped PPO on one batch of collected decisions. Stops early once an epoch's average approximate KL
+    passes 1.5x target_kl (0 = never), so one batch can't move the policy far (2026-11-08: slides after rollbacks)."""
     n = batch["actions"].shape[0]
     adv = batch["adv"]
     adv = (adv - adv.mean()) / (adv.std() + 1e-8)
     stats = []
+    kls = []
+    done_epochs = 0
     for _ in range(epochs):
+        epoch_kl = []
         for idx in torch.randperm(n).split(minibatch):
             masks = {k: batch["masks"][k][idx] for k in batch["masks"]}
             logp, ent, value = evaluate(net, batch["grid"][idx].float(), batch["scalars"][idx], masks, batch["actions"][idx])
-            ratio = (logp - batch["logp"][idx]).exp()
+            log_ratio = logp - batch["logp"][idx]
+            ratio = log_ratio.exp()
+            with torch.no_grad():
+                epoch_kl.append(((ratio - 1) - log_ratio).mean().item())
             a = adv[idx]
             policy_loss = -torch.min(ratio * a, ratio.clamp(1 - clip, 1 + clip) * a).mean()
             value_loss = F.mse_loss(value, batch["returns"][idx])
@@ -205,8 +236,12 @@ def ppo_update(net, opt, batch, epochs=4, minibatch=256, clip=0.2, vf_coef=0.5, 
             nn.utils.clip_grad_norm_(net.parameters(), max_grad)
             opt.step()
             stats.append((policy_loss.item(), value_loss.item(), ent.mean().item()))
+        done_epochs += 1
+        kls.append(float(np.mean(epoch_kl)))
+        if target_kl and kls[-1] > 1.5 * target_kl:
+            break
     s = np.array(stats).mean(0)
-    return {"policy_loss": s[0], "value_loss": s[1], "entropy": s[2]}
+    return {"policy_loss": s[0], "value_loss": s[1], "entropy": s[2], "kl": kls[-1], "epochs": done_epochs}
 
 
 def gae(rewards, values, dones, last_value, gamma=0.995, lam=0.95):
