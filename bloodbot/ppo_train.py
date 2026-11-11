@@ -27,7 +27,8 @@ import numpy as np
 import torch
 
 from bloodbot import export_ppo
-from bloodbot.ppo import Dims, Net, TARGETED, act, gae, ppo_update, widen, add_closeup, add_route, upgrade_dims
+from bloodbot.sil import Episode, Library, sil_update
+from bloodbot.ppo import Dims, Net, TARGETED, act, gae, ppo_update, widen, add_closeup, add_route, upgrade_dims, complete_state
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "runs" / os.environ.get("BLOODBOT_RUN", "ppo")
@@ -41,6 +42,7 @@ EASY_RUNGS = {"frozenForest": [0.15]}
 
 def levels(rung):
     return EASY_RUNGS.get(LADDER[rung][0], []) + DIFFICULTY
+FALLBACK_WINDOW = 20  # was 40 until 2026-11-10 (too slow: a slide takes ~20 min); normal games judged for the automatic fall-back to the best brain
 BEST_WINDOW = 20  # games judged together when deciding whether to keep the best brain
 FRAME_EVERY = 8  # save every 8th observation of recorded games (frames.npz, for bloodbot.attention)
 LOG_COLUMNS = ["game", "generation", "member", "map", "difficulty", "outcome", "wave", "winWave", "coreHealth",
@@ -119,6 +121,12 @@ class Trainer:
         self.stop = False
         self.games_this_run = 0
         self.started = time.time()
+        # Self-imitation library and automatic fall-back (2026-11-10, user's OK).
+        self.library = Library(OUT / "sil", args.sil_games, args.gamma) if args.sil_coef > 0 else None
+        self.rng = np.random.default_rng()
+        self.progress = deque(maxlen=FALLBACK_WINDOW)  # wave / winWave of recent normal games at this level
+        self.since_fallback = 0
+        self.fallback_pending = None
         self.rival = None      # the frozen brain, in outlast mode
         self.outlast_games = 0
         self.outlast_scores = {False: deque(maxlen=OUTLAST_WINDOW), True: deque(maxlen=OUTLAST_WINDOW)}  # rival? -> scores
@@ -143,6 +151,10 @@ class Trainer:
 
     def setup(self, dims: Dims):
         self.dims = dims
+        self.mask_sizes = {"type": dims.T, "block": dims.NB, "cell": dims.G * dims.G, "mine": dims.ARGS,
+                           "deliver": dims.ARGS, "cells": len(TARGETED) * dims.G * dims.G}
+        if self.library:
+            print(f"self-imitation: {len(self.library.games)} stored games", flush=True)
         self.net = Net(dims)
         self.opt = torch.optim.Adam(self.net.parameters(), lr=self.args.lr)
         ckpt = OUT / "checkpoint.pt"
@@ -169,10 +181,16 @@ class Trainer:
                 self.net.load_state_dict(widen(data["net"], self.net))
                 print(f"widened the brain: {data['net']['d1.weight'].shape[0]} -> {self.net.d1.weight.shape[0]} neurons per layer")
             else:
-                self.net.load_state_dict(data["net"])
-                if "opt" in data:
+                sd, added = complete_state(data["net"], self.net)
+                self.net.load_state_dict(sd)
+                if added:
+                    print(f"brain upgraded: added {', '.join(added)}; fresh optimizer", flush=True)
+                elif "opt" in data:
                     self.opt.load_state_dict(data["opt"])
             self.state = data["state"]
+            # The fall-back's game count carries across restarts (2026-11-10, user), so short runs can't dodge it.
+            self.progress.extend(self.state.get("fallbackProgress", []))
+            self.since_fallback = self.state.get("sinceFallback", 0)
             # Games played after the last checkpoint are already in log.csv; keep numbering after them so a restart
             # never reuses a game number (which would overwrite that game's replay).
             log = OUT / "log.csv"
@@ -200,7 +218,7 @@ class Trainer:
         if self.args.outlast:
             data = torch.load(OUT / "rival.pt", map_location="cpu", weights_only=False)
             self.rival = Net(dims)
-            self.rival.load_state_dict(data["net"] if data["dims"] == dims.as_list() else upgrade_dims(data["net"], data["dims"], dims.as_list())[0])
+            self.rival.load_state_dict(complete_state(data["net"] if data["dims"] == dims.as_list() else upgrade_dims(data["net"], data["dims"], dims.as_list())[0], self.rival)[0])
             print(f"outlast on {self.args.outlast}: rival from game {data['state']['games']}", flush=True)
 
     def save(self):
@@ -231,6 +249,9 @@ class Trainer:
         elif random.random() < self.args.broke:
             game["broke"] = True
         return game
+
+    def level_key(self):
+        return f"{LADDER[self.state['rung']][0]}_{round(levels(self.state['rung'])[self.state['level']] * 100)}"
 
     def practice_dir(self, map_name=None, difficulty=None):
         name = map_name or LADDER[self.state["rung"]][0]
@@ -312,9 +333,12 @@ class Trainer:
                     s["rung"] += 1
                     s["level"] = 0
                 self.window = []
+                self.progress.clear()  # the fall-back compares games at one level only
+                s["fallbackProgress"], s["sinceFallback"] = [], 0
             else:
                 self.window = (self.window + [(won, result["wave"] / max(1, result["winWave"]))])[-BEST_WINDOW:]
                 self.keep_if_best(game)
+                self.check_fallback(game, result["wave"] / max(1, result["winWave"]))
         self.games_this_run += 1
         print(f"game {game}: {'RIVAL, ' if rival else ''}{'PRACTICE from wave 8, ' if practice else ''}{'BROKE START, ' if broke else ''}{result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
               f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
@@ -338,13 +362,44 @@ class Trainer:
         best = s.get("best")
         if best and best["rung"] == s["rung"] and best["level"] == s["level"] and key <= best["key"]:
             return
-        s["best"] = {"rung": s["rung"], "level": s["level"], "key": key, "game": game}
+        s["best"] = {"rung": s["rung"], "level": s["level"], "key": key, "game": game,
+                     "avg": sum(f for _, f in self.window) / len(self.window)}
         torch.save({"net": self.net.state_dict(), "state": dict(s), "dims": self.dims.as_list()}, OUT / "best.pt")
         # best.pt follows the current level; this copy stays, so a new level never replaces an old level's champion.
         shutil.copy2(OUT / "best.pt", OUT / f"best_{LADDER[s['rung']][0]}_{round(levels(s['rung'])[s['level']] * 100)}.pt")
         export_ppo.export(OUT / "best.pt", OUT / "brains" / "best.bin")
         print(f"best brain kept: game {game}, last {BEST_WINDOW} games {wins} wins, "
               f"avg wave {sum(f for _, f in self.window) / len(self.window) * LADDER[s['rung']][1]:.1f}", flush=True)
+
+    def check_fallback(self, game, progress):
+        """Fall-back rule (2026-11-10, user's OK): if the last FALLBACK_WINDOW normal games at this level average under
+        --fallback x the best brain's average progress, go back to the best brain at the next update."""
+        self.progress.append(progress)
+        self.since_fallback += 1
+        self.state["fallbackProgress"] = list(self.progress)
+        self.state["sinceFallback"] = self.since_fallback
+        best, s = self.state.get("best"), self.state
+        if (not self.args.fallback or not best or best["rung"] != s["rung"] or best["level"] != s["level"]
+                or len(self.progress) < FALLBACK_WINDOW or self.since_fallback < FALLBACK_WINDOW
+                or not (OUT / "best.pt").exists()):
+            return
+        best_avg = best.get("avg", best["key"] - int(best["key"]))
+        now = sum(self.progress) / len(self.progress)
+        if now < self.args.fallback * best_avg:
+            self.fallback_pending = (game, now, best_avg, best["game"])
+
+    def offer_episode(self, ep, result, rival):
+        """Hand a finished normal game at the current level to the self-imitation library."""
+        if (not self.library or ep is None or not len(ep) or rival or result.get("practice") or result.get("broke")
+                or result["map"] != LADDER[self.state["rung"]][0]
+                or abs(result["difficulty"] - levels(self.state["rung"])[self.state["level"]]) > 1e-6):
+            return
+        won = result["outcome"] == "win"
+        meta = {"game": self.state["games"] + 1, "gamma": self.args.gamma, "level": self.level_key(), "won": won, "wave": result["wave"],
+                "score": (1.0 if won else 0.0) + result["wave"] / max(1, result["winWave"])}
+        if self.library.offer(ep.finish(self.args.gamma), meta):
+            print(f"self-imitation: kept game {meta['game']} (wave {meta['wave']}{', WIN' if won else ''}); "
+                  f"{len(self.library.level_games(meta['level']))} games at this level", flush=True)
 
     # ---- one game server ----
 
@@ -358,21 +413,26 @@ class Trainer:
         last = None  # the previous decision, waiting for its reward
         frames = []  # every FRAME_EVERY-th observation + action, saved with the replay (for the attention heatmap)
         decisions = 0
+        ep = None if rival else Episode()
         while True:
             kind = recv_int(sock)
             reward = recv_float(sock)
             if last is not None:
                 last["reward"] = reward
+                if ep is not None:
+                    ep.set_reward(reward)
             if kind == 2:  # game over
                 result = json.loads(recv_utf(sock))
                 if last is not None:
                     last["done"] = True
                 last = None
                 with self.lock:
+                    self.offer_episode(ep, result, rival)  # before record_result: it may move the level up
                     save = self.record_result(result, rival)
                     stop = self.stop
                     nxt = {} if stop else self.next_game()
                 rival = nxt.pop("rival", False)
+                ep = None if rival else Episode()
                 if save:
                     nxt["saveDir"] = save
                     if frames:
@@ -413,6 +473,8 @@ class Trainer:
                 else:
                     action, logp, value = act(self.net, g, sc, masks)
                     last = {"obs": obs, "action": action, "logp": logp, "value": value, "reward": 0.0, "done": False}
+                    if ep is not None:
+                        ep.add(obs, action)
                     self.buffers.setdefault(worker, []).append(last)
                     self.steps += 1
             if decisions % FRAME_EVERY == 0:
@@ -440,8 +502,45 @@ class Trainer:
         return not any(w.is_alive() for w in workers)
 
     def update(self):
+        if self.fallback_pending:
+            game, now, best_avg, best_game = self.fallback_pending
+            data = torch.load(OUT / "best.pt", weights_only=False)
+            if "loc.weight" in data["net"]:
+                self.net.load_state_dict(data["net"])
+            else:  # a best brain from before the placement map: restore its trunk, keep the current map and value net
+                self.net.load_state_dict({k: v for k, v in data["net"].items() if not k.startswith("value.")}, strict=False)
+            self.opt = torch.optim.Adam(self.net.parameters(), lr=self.args.lr)
+            self.fallback_pending, self.since_fallback = None, 0
+            self.progress.clear()
+            self.state["fallbackProgress"], self.state["sinceFallback"] = [], 0
+            self.buffers, self.pending, self.steps = {}, {}, 0  # collected by the old brain: not learned from
+            self.state["fallbacks"] = self.state.get("fallbacks", 0) + 1
+            self.save()
+            print(f"FALL BACK at game {game}: last {FALLBACK_WINDOW} games {now:.2f} of the way vs best {best_avg:.2f} "
+                  f"-> best brain (game {best_game}) restored", flush=True)
+            return
         grids, scalars, actions, logps, advs, rets = [], [], [], [], [], []
         masks = {k: [] for k in ("type", "block", "cell", "mine", "deliver", "cells")}
+        # Reward scaling (2026-11-10, deep-research report): rewards are divided by the running std of the discounted
+        # return, so the value net learns returns of roughly unit size whatever gamma or shaping does to their scale.
+        rms = self.state.setdefault("retRms", {"mean": 0.0, "var": 1.0, "count": 1e-4})
+        running = self.state.setdefault("retRunning", {})
+        seen = []
+        for worker, buf in self.buffers.items():
+            r = running.get(str(worker), 0.0)
+            for x in buf:
+                r = r * self.args.gamma + x["reward"]
+                seen.append(r)
+                if x["done"]:
+                    r = 0.0
+            running[str(worker)] = r
+        if seen:
+            bm, bv, bc = float(np.mean(seen)), float(np.var(seen)), len(seen)
+            delta, tot = bm - rms["mean"], rms["count"] + bc
+            rms["var"] = (rms["var"] * rms["count"] + bv * bc + delta ** 2 * rms["count"] * bc / tot) / tot
+            rms["mean"] += delta * bc / tot
+            rms["count"] = tot
+        self.ret_std = max(float(np.sqrt(rms["var"])), 1e-3)
         for worker, buf in self.buffers.items():
             if not buf:
                 continue
@@ -449,9 +548,9 @@ class Trainer:
             if worker in self.pending and not buf[-1]["done"]:
                 o = self.pending[worker]
                 with torch.no_grad():
-                    _, v = self.net(torch.from_numpy(o["grid"])[None], torch.from_numpy(o["scalars"])[None])
+                    _, v, _ = self.net(torch.from_numpy(o["grid"])[None], torch.from_numpy(o["scalars"])[None])
                 last_value = float(v[0])
-            adv, ret = gae([x["reward"] for x in buf], [x["value"] for x in buf], [x["done"] for x in buf], last_value,
+            adv, ret = gae([x["reward"] / self.ret_std for x in buf], [x["value"] for x in buf], [x["done"] for x in buf], last_value,
                            self.args.gamma, self.args.lam)
             for x, a, r in zip(buf, adv, ret):
                 grids.append(x["obs"]["grid"].astype(np.float16))
@@ -469,13 +568,20 @@ class Trainer:
         t = time.time()
         stats = ppo_update(self.net, self.opt, batch, epochs=self.args.epochs, ent_coef=self.args.ent_coef,
                            target_kl=self.args.target_kl)
+        sil = None
+        if self.library:
+            sil = sil_update(self.net, self.opt, self.library, self.level_key(), self.dims, self.mask_sizes,
+                             max(float(batch["returns"].std()), 1e-3), self.rng, batches=self.args.sil_batches,
+                             coef=self.args.sil_coef, target_kl=self.args.target_kl, ret_div=self.ret_std)
         self.state["updates"] += 1
         self.buffers = {}
         self.pending = {}
         self.steps = 0
         self.save()
         print(f"update {self.state['updates']}: {len(actions)} decisions, policy {stats['policy_loss']:.3f} "
-              f"value {stats['value_loss']:.3f} entropy {stats['entropy']:.2f} kl {stats['kl']:.4f} epochs {stats['epochs']} ({time.time() - t:.1f}s)", flush=True)
+              f"value {stats['value_loss']:.3f} entropy {stats['entropy']:.2f} kl {stats['kl']:.4f} epochs {stats['epochs']} ret-std {self.ret_std:.2f} ({time.time() - t:.1f}s)"
+              + (f" | sil {sil['games']} games, {sil['steps']} steps ({sil['skipped']} skipped), {sil['pos']:.0%} moves beat expectation, adv {sil['adv']:.3f}, total kl {sil['kl']:.6f}" if sil else ""),
+              flush=True)
 
 
 def main():
@@ -484,12 +590,17 @@ def main():
     p.add_argument("--speed", type=int, default=40, help="game speed cap, x real time (max 40)")
     p.add_argument("--games", type=int, default=0, help="stop after this many games (0 = no limit)")
     p.add_argument("--minutes", type=float, default=0, help="stop after this many minutes (0 = no limit)")
-    p.add_argument("--steps", type=int, default=2048, help="decisions per learning update")
-    p.add_argument("--epochs", type=int, default=4)
-    p.add_argument("--target-kl", type=float, default=0.02, help="stop an update's epochs early past 1.5x this KL (0 = off; 2026-11-08)")
+    p.add_argument("--steps", type=int, default=6144, help="decisions per learning update (2048 until 2026-11-10)")
+    p.add_argument("--epochs", type=int, default=2, help="4 until 2026-11-10 (more epochs = earlier collapse, Moalla 2024)")
+    p.add_argument("--sil-coef", type=float, default=1.0, help="self-imitation strength (0 = off; 0.5 until 2026-11-10 evening: no measurable effect)")
+    p.add_argument("--sil-games", type=int, default=12, help="best normal games kept per level for self-imitation")
+    p.add_argument("--sil-batches", type=int, default=8, help="self-imitation steps after each PPO update")
+    p.add_argument("--fallback", type=float, default=0.75,
+                   help="restore the best brain when the last FALLBACK_WINDOW (20) games average under this x its progress (0 = off)")
+    p.add_argument("--target-kl", type=float, default=0.01, help="0.02 until 2026-11-10; stop an update's epochs early past 1.5x this KL (0 = off; 2026-11-08)")
     p.add_argument("--lr", type=float, default=3e-4)
     p.add_argument("--ent-coef", type=float, default=0.01, help="exploration bonus (higher = stays random longer)")
-    p.add_argument("--gamma", type=float, default=0.995)
+    p.add_argument("--gamma", type=float, default=0.999, help="0.995 until 2026-11-10: half-life ~140 decisions (~1 wave) hid late payoffs; 0.999 = ~700 (~5 waves)")
     p.add_argument("--lam", type=float, default=0.95)
     p.add_argument("--bonuses", action=argparse.BooleanOptionalAction, default=True,
                    help="one-time rewards for first block built and first copper (the user's rule)")

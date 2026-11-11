@@ -46,17 +46,87 @@ class Net(nn.Module):
         self.d1 = nn.Linear(flat + d.S, hidden)
         self.d2 = nn.Linear(hidden, hidden)
         self.out = nn.Linear(hidden, d.out)
-        self.value = nn.Linear(hidden, 1)
         nn.init.orthogonal_(self.out.weight, 0.01)  # start near-uniform over choices
         nn.init.zeros_(self.out.bias)
+        # Per-cell placement map (2026-11-10, deep-research report): the old cell choice was row score + column score,
+        # which can't single out cells on a thin or curved enemy path. Now a small fully-convolutional branch scores
+        # every map cell, conditioned (FiLM) on the chosen action type, block and the game state. The old row/column
+        # outputs stay in `out` (unused) so brain files keep their shape.
+        self.s1 = nn.Conv2d(d.C, 32, 3, 1, 1)
+        self.s2 = nn.Conv2d(32, 32, 3, 2, 1)
+        self.s3 = nn.Conv2d(32, 32, 3, 1, 1)
+        self.s_up = nn.Conv2d(64, 32, 3, 1, 1)
+        self.emb_type = nn.Embedding(d.T, 32)
+        self.emb_block = nn.Embedding(d.NB, 32)
+        self.cond_h = nn.Linear(hidden, 32)
+        self.film = nn.Linear(32, 64)
+        self.loc = nn.Conv2d(32, 1, 1)
+        nn.init.zeros_(self.film.weight)
+        nn.init.zeros_(self.film.bias)
+        nn.init.normal_(self.loc.weight, std=0.01)
+        nn.init.zeros_(self.loc.bias)
+        # Separate value network (2026-11-10, deep-research report: a shared trunk lets value-loss spikes disturb the
+        # policy under sparse rewards). Same shape as the policy trunk; it predicts normalized returns.
+        self.v_c1 = nn.Conv2d(d.C, 12, 3, 2, 1)
+        self.v_c2 = nn.Conv2d(12, 16, 3, 2, 1)
+        self.v_c3 = nn.Conv2d(16, 16, 3, 2, 1)
+        self.v_d1 = nn.Linear(flat + d.S, hidden)
+        self.v_d2 = nn.Linear(hidden, hidden)
+        self.vhead = nn.Linear(hidden, 1)
+        nn.init.zeros_(self.vhead.weight)
+        nn.init.zeros_(self.vhead.bias)
 
-    def forward(self, grid, scalars):
+    def trunk(self, grid, scalars):
         x = torch.tanh(self.c1(grid))
         x = torch.tanh(self.c2(x))
         x = torch.tanh(self.c3(x)).flatten(1)
         h = torch.tanh(self.d1(torch.cat([x, scalars], 1)))
-        h = torch.tanh(self.d2(h))
-        return self.out(h), self.value(h).squeeze(1)
+        return torch.tanh(self.d2(h))
+
+    def value_of(self, grid, scalars):
+        x = torch.tanh(self.v_c1(grid))
+        x = torch.tanh(self.v_c2(x))
+        x = torch.tanh(self.v_c3(x)).flatten(1)
+        h = torch.tanh(self.v_d1(torch.cat([x, scalars], 1)))
+        h = torch.tanh(self.v_d2(h))
+        return self.vhead(h).squeeze(1)
+
+    def forward(self, grid, scalars):
+        h = self.trunk(grid, scalars)
+        return self.out(h), self.value_of(grid, scalars), h
+
+    def location(self, grid, h, types, blocks):
+        """[B, G*G] logits for the map cell, given the chosen type and block (row-major: cell = row * G + col)."""
+        a = F.relu(self.s1(grid))
+        b = F.relu(self.s2(a))
+        b = F.relu(self.s3(b))
+        up = F.interpolate(b, size=a.shape[-2:], mode="nearest")
+        x = F.relu(self.s_up(torch.cat([a, up], 1)))
+        c = self.emb_type(types) + self.emb_block(blocks.clamp(0, self.d.NB - 1)) + self.cond_h(h)
+        gamma, beta = self.film(c).chunk(2, 1)
+        x = x * (1 + gamma[:, :, None, None]) + beta[:, :, None, None]
+        return self.loc(x).flatten(1)
+
+
+def complete_state(sd: dict, net: "Net") -> dict:
+    """Bring an older state dict up to the current Net (2026-11-10): new placement-map and value-network weights
+    come from `net` (fresh), and the value trunk starts as a copy of the policy trunk. The old shared value head is
+    dropped. Returns (state dict, list of what was added)."""
+    out, added = dict(sd), []
+    fresh = net.state_dict()
+    if "v_c1.weight" not in sd:
+        for src, dst in (("c1", "v_c1"), ("c2", "v_c2"), ("c3", "v_c3"), ("d1", "v_d1"), ("d2", "v_d2")):
+            for k in ("weight", "bias"):
+                out[f"{dst}.{k}"] = sd[f"{src}.{k}"].clone()
+        added.append("separate value network")
+    for k, v in fresh.items():
+        if k not in out:
+            out[k] = v.clone()
+            if k == "loc.weight":
+                added.append("per-cell placement map")
+    out.pop("value.weight", None)
+    out.pop("value.bias", None)
+    return out, added
 
 
 @torch.no_grad()
@@ -135,14 +205,13 @@ def split(d: Dims, logits, masks):
         return part
     t, b, lx, ly, fx, fy, rot, arg = (take(d.T), take(d.NB), take(d.G), take(d.G), take(d.FINE), take(d.FINE),
                                      take(d.ROT), take(d.ARGS))
-    cell = (ly[:, :, None] + lx[:, None, :]).reshape(logits.shape[0], -1)  # cell index = row * G + col
     neg = -1e9
 
     def mask(x, m):
         m = m.clone()
         m[~m.any(1)] = True  # nothing possible: leave unmasked (the head is irrelevant then anyway)
         return x.masked_fill(~m, neg)
-    return {"type": mask(t, masks["type"]), "block": mask(b, masks["block"]), "cell": mask(cell, masks["cell"]), "cell_raw": cell,
+    return {"type": mask(t, masks["type"]), "block": mask(b, masks["block"]), "mask": mask,
             "fx": fx, "fy": fy, "rot": rot, "arg_mine": mask(arg, masks["mine"]), "arg_deliver": mask(arg, masks["deliver"]),
             "arg": arg}
 
@@ -157,9 +226,10 @@ def arg_logits(heads, types):
 
 
 def cell_logits(heads, masks, types):
-    """The cell head's mask depends on the action type (2026-11-06). Replays saved before this have no "cells"."""
+    """The cell head's mask depends on the action type (2026-11-06). Replays saved before this have no "cells".
+    heads["cell_raw"] holds the placement map's logits for the chosen type and block."""
     if "cells" not in masks:
-        return heads["cell"]
+        return heads["mask"](heads["cell_raw"], masks["cell"])
     m = masks["cell"].clone()
     for i, t in enumerate(TARGETED):
         rows = types == t
@@ -176,9 +246,10 @@ def relevance(types):
 
 def evaluate(net, grid, scalars, masks, actions):
     """Log-probability of stored actions, entropy, and value: what the PPO update needs."""
-    logits, value = net(grid, scalars)
+    logits, value, h = net(grid, scalars)
     heads = split(net.d, logits, masks)
     types = actions[:, 0]
+    heads["cell_raw"] = net.location(grid, h, types, actions[:, 1])
     dists = {"block": heads["block"], "cell": cell_logits(heads, masks, types), "fx": heads["fx"], "fy": heads["fy"],
              "rot": heads["rot"], "arg": arg_logits(heads, types)}
     cols = {"block": 1, "cell": 2, "fx": 3, "fy": 4, "rot": 5, "arg": 6}
@@ -196,13 +267,15 @@ def evaluate(net, grid, scalars, masks, actions):
 @torch.no_grad()
 def act(net, grid, scalars, masks):
     """Sample one action for one observation: (7 ints, logp, value)."""
-    logits, value = net(grid, scalars)
+    logits, value, hid = net(grid, scalars)
     heads = split(net.d, logits, masks)
     t = torch.distributions.Categorical(logits=heads["type"]).sample()
+    b = torch.distributions.Categorical(logits=heads["block"]).sample()
     heads["arg"] = arg_logits(heads, t)
+    heads["cell_raw"] = net.location(grid, hid, t, b)  # placement depends on what is being placed
     heads["cell"] = cell_logits(heads, masks, t)
-    a = [t]
-    for h in HEADS:
+    a = [t, b]
+    for h in HEADS[1:]:
         a.append(torch.distributions.Categorical(logits=heads[h]).sample())
     actions = torch.stack(a, 1)
     logp, _, _ = evaluate(net, grid, scalars, masks, actions)

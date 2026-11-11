@@ -17,3 +17,5 @@ runs/**/brains/
 runs/**/*.pt
 runs/**/practice/
 server/practice/
+runs/**/sil/
+runs/**/sil-cleared-*/
