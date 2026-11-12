@@ -19,6 +19,7 @@ import mindustry.gen.Teamc;
 import mindustry.gen.Unit;
 import mindustry.type.Category;
 import mindustry.type.Item;
+import mindustry.type.ItemStack;
 import mindustry.world.Block;
 import mindustry.world.Build;
 import mindustry.world.Tile;
@@ -515,7 +516,7 @@ public class Agent{
         boolean shipReady = ship != null && ship.ready();
 
         ok[WAIT] = true;
-        for(int i = 0; i < cat.size && !ok[BUILD]; i++) ok[BUILD] = allowed[i] && core.items.has(cat.get(i).requirements);
+        for(int i = 0; i < cat.size && !ok[BUILD]; i++) ok[BUILD] = allowed[i] && obtainable(cat.get(i));
         ok[REMOVE] = removable || !Team.derelict.data().buildings.isEmpty();
         ok[REBUILD] = !data.plans.isEmpty();
         ok[SUPPLY_ITEMS] = producer && itemConsumer;
@@ -567,11 +568,29 @@ public class Agent{
         execute(sampleAction(out));
     }
 
+    /**
+     * Build-before-you-can-afford-it (user OK, 2026-11-12): a block can be chosen once the core has held every item
+     * type it needs at some point this game, whatever the amounts now, the way a human can place a duo with 0 copper
+     * and let it finish as copper arrives. Before, a block needed its full cost in the core right now; cheap conveyors
+     * and build lines spent copper as it came in (under 10 copper ~1.6 min into a game), so the 35-copper duo was
+     * masked out and 25 of 27 Frozen Forest replays built 0 duos. The build queue limit (MAX_QUEUE) still applies.
+     */
+    final boolean[] seenItems = new boolean[256];
+
+    boolean obtainable(Block b){
+        CoreBuild core = builder.core();
+        for(ItemStack stack : b.requirements){
+            if(core != null && core.items.has(stack.item)) seenItems[stack.item.id] = true;
+            if(!seenItems[stack.item.id]) return false;
+        }
+        return true;
+    }
+
     /** Masks the outside policy needs: what is possible right now, per head. */
     boolean[] blockMask(){
         Seq<Block> cat = catalog();
         boolean[] m = new boolean[cat.size];
-        for(int i = 0; i < cat.size; i++) m[i] = allowed[i] && builder.core().items.has(cat.get(i).requirements);
+        for(int i = 0; i < cat.size; i++) m[i] = allowed[i] && obtainable(cat.get(i));
         return m;
     }
 
@@ -629,7 +648,7 @@ public class Agent{
         int o = 0;
         boolean[] possible = possibleTypes();
         int type = sample(out, o, TYPES, i -> possible[i]); o += TYPES;
-        int blockIndex = sample(out, o, cat.size, i -> allowed[i] && builder.core().items.has(cat.get(i).requirements)); o += cat.size;
+        int blockIndex = sample(out, o, cat.size, i -> allowed[i] && obtainable(cat.get(i))); o += cat.size;
         int cellIndex = sampleCell(out, o, o + Vision.G, cellsFor(type)); o += 2 * Vision.G;
         int cx = cellIndex % Vision.G, cy = cellIndex / Vision.G;
         int fx = sample(out, o, FINE, null); o += FINE;
