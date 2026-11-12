@@ -27,7 +27,7 @@ import numpy as np
 import torch
 
 from bloodbot import export_ppo
-from bloodbot.sil import Episode, Library, sil_update
+from bloodbot.sil import Episode, Library, rank_score, sil_update
 from bloodbot.ppo import Dims, Net, TARGETED, act, gae, ppo_update, widen, add_closeup, add_route, upgrade_dims, complete_state
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -396,9 +396,10 @@ class Trainer:
             return
         won = result["outcome"] == "win"
         meta = {"game": self.state["games"] + 1, "gamma": self.args.gamma, "level": self.level_key(), "won": won, "wave": result["wave"],
-                "score": (1.0 if won else 0.0) + result["wave"] / max(1, result["winWave"])}
+                "hitTurrets": result.get("hitTurrets", 0),
+                "score": rank_score(won, result.get("hitTurrets", 0), result["wave"] / max(1, result["winWave"]))}
         if self.library.offer(ep.finish(self.args.gamma), meta):
-            print(f"self-imitation: kept game {meta['game']} (wave {meta['wave']}{', WIN' if won else ''}); "
+            print(f"self-imitation: kept game {meta['game']} (wave {meta['wave']}, {meta['hitTurrets']} turrets hitting{', WIN' if won else ''}); "
                   f"{len(self.library.level_games(meta['level']))} games at this level", flush=True)
 
     # ---- one game server ----

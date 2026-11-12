@@ -131,7 +131,7 @@ public class Agent{
      * Ship rule (the user's, 2026-11-06; raised from -25 the same day): -100 for each enemy the ship's gun finishes off, so turrets do the defending. It stays
      * below the cost of core damage, so shooting still beats letting the core die.
      */
-    static final float SHIP_KILL_PENALTY = 100f;
+    static final float SHIP_KILL_PENALTY = 25f; // 100 -> 25 on 2026-11-11 (user OK): with +1000 per wave survived, -100 a kill charged the only working defence (~-1700 in wave-8+ games)
     int shipKills;
 
     void shipKilled(){

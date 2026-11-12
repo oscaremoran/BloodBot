@@ -59,6 +59,13 @@ class Episode:
                 "actions": np.stack(self.actions), "returns": ret}
 
 
+def rank_score(won, hit_turrets, wave_frac):
+    """Library ranking (user's call, 2026-11-11): wins first, then bot-built turrets that hit an enemy, then wave
+    reached (wave_frac = wave / winWave, at most 1). Before, it kept the furthest waves, which were all ship-only games
+    with 0 fed turrets, so it taught the plateau."""
+    return 100.0 * won + hit_turrets + wave_frac
+
+
 class Library:
     """The best normal games per level, kept in memory and in runs/<run>/sil/."""
 
@@ -83,6 +90,10 @@ class Library:
                         out[t] = run
                     g["returns"] = out.astype(np.float32)
                     g["meta"]["gamma"] = gamma
+                m = g["meta"]
+                if "hitTurrets" not in m:  # stored before 2026-11-11: re-rank as wins, then turret hits (unknown = 0), then wave
+                    m["hitTurrets"] = 0
+                    m["score"] = rank_score(m["won"], 0, m["score"] - (1.0 if m["won"] else 0.0))
                 g["file"] = f
                 self.games.append(g)
             except Exception as e:  # a half-written file from a killed run
