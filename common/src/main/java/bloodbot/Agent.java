@@ -366,16 +366,26 @@ public class Agent{
         enemyCoresStart = enemyCores();
     }
 
-    /** Core health at the last check, for the core-damage penalty (the user's rule, 2026-10-31): -10 per 1% lost. */
-    float lastCoreHealth = 1f;
+    /** Lowest core health so far, for the core-damage penalty (the user's rule, 2026-10-31): -10 per 1% lost.
+     * Since 2026-11-11 (user OK) only new lows are charged, so a core that heals and is hit again isn't charged twice and
+     * the total stays at most 1000 however long the game runs. Before, score fell with every wave survived
+     * (corr(fitness, wave) = -0.61 over 655 Frozen Forest games), so PPO learned to die early. */
+    float lowestCoreHealth = 1f;
     static final float CORE_DAMAGE_PENALTY = 1000f;
+    /** +1000 each time a new wave starts with the core alive (user OK, 2026-11-11): more than the ~750 points of penalties a wave added. */
+    static final float WAVE_SURVIVED_BONUS = 1000f;
+    /** -10000 when the core is lost (user OK, 2026-11-11): more than any game's penalties (worst ~-5300), so dying is never the cheap way out. */
+    static final float CORE_LOSS_PENALTY = 10000f;
+    int lastWave = -1;
 
     void update(){
         builder.update();
         if(Vars.state.updateId % 10 == 7 && builder.core() != null){
             float hp = builder.core().health / builder.core().maxHealth;
-            if(hp < lastCoreHealth) addPoints(-CORE_DAMAGE_PENALTY * (lastCoreHealth - hp));
-            lastCoreHealth = hp;
+            if(hp < lowestCoreHealth){ addPoints(-CORE_DAMAGE_PENALTY * (lowestCoreHealth - hp)); lowestCoreHealth = hp; }
+            int wave = Vars.state.wave;
+            if(lastWave < 0) lastWave = wave; // practice games start at wave 8: no pay for the starting wave
+            else if(wave > lastWave){ addPoints(WAVE_SURVIVED_BONUS * (wave - lastWave)); lastWave = wave; }
         }
         if(Vars.state.updateId % 60 == 30 && builder.core() != null){
             checkTurretAmmo();

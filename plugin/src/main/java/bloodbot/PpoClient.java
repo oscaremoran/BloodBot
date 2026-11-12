@@ -193,6 +193,7 @@ public class PpoClient implements Agent.Policy{
         float capTicks = CAP_SECONDS * 60;
         int unused = agent.penalizeUnused();
         if(won) agent.addPoints(WIN_BONUS);
+        if(plugin.winner != null && !won) agent.addPoints(-Agent.CORE_LOSS_PENALTY);
         float fitness = agent.fitness(won, plugin.ticks, capTicks) + agent.rulePointsTotal;
         float reward = stepReward() + (won ? (agent.fitness(true, plugin.ticks, capTicks) - agent.potential(plugin.ticks, capTicks)) / 100f : 0f);
 
