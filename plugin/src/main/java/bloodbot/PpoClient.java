@@ -206,10 +206,10 @@ public class PpoClient implements Agent.Policy{
         lastResult = String.format(
             "{\"map\":\"%s\",\"outcome\":\"%s\",\"gameSeconds\":%d,\"realSeconds\":%.1f,\"wave\":%d,\"winWave\":%d,\"coreHealth\":%.3f," +
             "\"fitness\":%.2f,\"blocksBuilt\":%d,\"difficulty\":%.2f,\"actions\":\"%s\",\"worker\":%d," +
-            "\"drillToConveyor\":%b,\"conveyorToCore\":%b,\"conveyorToTurret\":%b,\"routerToTurret\":%b,\"fedTurrets\":%d,\"hitTurrets\":%d,\"maceKills\":%d,\"maceDamage\":%.0f,\"wallSoak\":%.0f,\"routerFed\":%d,\"waveTurrets\":%d,\"routeTurrets\":%d,\"shipKills\":%d,\"wasted\":%d,\"mined\":%d,\"copperFed\":%d,\"mineOrders\":%d,\"drillsPaid\":%d,\"lines\":%d,\"linePlans\":%d,\"unused\":%d,\"practice\":%b,\"broke\":%b,\"practiceSave\":\"%s\"}",
+            "\"drillToConveyor\":%b,\"conveyorToCore\":%b,\"conveyorToTurret\":%b,\"routerToTurret\":%b,\"fedTurrets\":%d,\"hitTurrets\":%d,\"maceKills\":%d,\"maceDamage\":%.0f,\"wallSoak\":%.0f,\"routerFed\":%d,\"waveTurrets\":%d,\"routeTurrets\":%d,\"shipKills\":%d,\"wasted\":%d,\"mined\":%d,\"copperFed\":%d,\"mineOrders\":%d,\"drillsPaid\":%d,\"lines\":%d,\"linePlans\":%d,\"unused\":%d,\"stalledPlans\":%d,\"evictedPlans\":%d,\"evictedItems\":%d,\"practice\":%b,\"broke\":%b,\"practiceSave\":\"%s\"}",
             mapName, outcome, plugin.ticks / 60, (Time.nanos() - realStart) / 1e9, Vars.state.wave, Vars.state.rules.winWave,
             coreHealth, fitness, agent.builder.built, difficulty, actions, worker,
-            agent.drillToConveyor, agent.conveyorToCore, agent.conveyorToTurret, agent.routerToTurret, agent.fedTurrets.size, agent.hitTurrets.size, agent.maceKills, agent.maceDamage, agent.wallSoakPoints, agent.routerFedTurrets.size, agent.waveTurrets, agent.routeTurretsPaid, agent.shipKills, agent.wasted, agent.mined, agent.copperFed, agent.mineOrders, agent.paidDrills.size, agent.linesBuilt, agent.linePlans, unused,
+            agent.drillToConveyor, agent.conveyorToCore, agent.conveyorToTurret, agent.routerToTurret, agent.fedTurrets.size, agent.hitTurrets.size, agent.maceKills, agent.maceDamage, agent.wallSoakPoints, agent.routerFedTurrets.size, agent.waveTurrets, agent.routeTurretsPaid, agent.shipKills, agent.wasted, agent.mined, agent.copperFed, agent.mineOrders, agent.paidDrills.size, agent.linesBuilt, agent.linePlans, unused, agent.builder.stalled, agent.builder.evicted, agent.builder.evictedItems,
             practice != null, broke, practiceSaved == null ? "" : practiceSaved);
         lastRecorder = recorder;
         lastBuilder = agent.builder;

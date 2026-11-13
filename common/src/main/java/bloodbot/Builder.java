@@ -22,6 +22,10 @@ import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
  */
 public class Builder{
     static final int ACTIVE_PLANS = 3, RESPAWN_TICKS = 180;
+    /** A plan the ship is actively building (in range, its current plan) that makes no progress for this long leaves the queue (user OK, 2026-11-12):
+     * the queue was full ~73% of every game (90% after build-before-afford), which blocks building and left the
+     * bot waiting ~75% of its decisions. Plans still waiting their turn behind ACTIVE_PLANS are never timed. */
+    static final int STALL_TICKS = 30 * 60;
 
     /** Something to build (or remove). {@code then} runs once it exists, e.g. to link power nodes. */
     record Plan(Block block, int x, int y, int rotation, Object config, boolean breaking, PlacedAction then){
@@ -36,6 +40,9 @@ public class Builder{
     final Team team;
     final Queue<Plan> queue = new Queue<>();
     final ObjectMap<Plan, BuildPlan> issued = new ObjectMap<>();
+    /** Per plan: last construction progress seen, and frames spent actively building it since it last progressed (stall timer). */
+    final ObjectMap<Plan, float[]> progress = new ObjectMap<>();
+    int frames, stalled, evicted, evictedItems;
     int built, removed;
     Building lastBuilt;
     /** Positions of every block this builder finished this game (for the unused-block rule). */
@@ -77,6 +84,7 @@ public class Builder{
             if(done(p, tile)){
                 queue.removeIndex(i--);
                 issued.remove(p);
+                forget(p);
                 if(p.breaking){
                     removed++;
                 }else{
@@ -89,6 +97,32 @@ public class Builder{
                 queue.removeIndex(i--);
                 BuildPlan bp = issued.remove(p);
                 if(bp != null) ship.plans.remove(bp, true);
+                forget(p);
+            }
+        }
+
+        // Drop active plans that have made no progress for STALL_TICKS (no items for them, or unreachable).
+        frames++;
+        for(int i = 0; i < queue.size; i++){
+            Plan p = queue.get(i);
+            float[] st = progress.get(p);
+            if(st == null) progress.put(p, st = new float[]{-1f, 0f});
+            // Only time a plan while the ship is in range actively building exactly this plan (user, 2026-11-12: plans
+            // must not drop while the ship is fighting, delivering, flying or the plan is waiting its turn; the first
+            // version dropped ~1 plan per block built, 126 in a game where the ship made 31 kills).
+            BuildPlan current = issued.get(p);
+            if(i >= ACTIVE_PLANS || current == null || !ship.activelyBuilding() || ship.buildPlan() != current) continue; // paused, not reset: the builder rotates past plans it can't pay for
+            Tile tile = Vars.world.tile(p.x, p.y);
+            float now = tile != null && tile.build instanceof ConstructBuild cb ? cb.progress : 0f;
+            if(now != st[0]){
+                st[0] = now;
+                st[1] = 0f;
+            }else if(++st[1] > STALL_TICKS){
+                queue.removeIndex(i--);
+                BuildPlan bp = issued.remove(p);
+                if(bp != null) ship.plans.remove(bp, true);
+                forget(p);
+                stalled++;
             }
         }
 
@@ -119,8 +153,79 @@ public class Builder{
         return Build.validPlace(p.block, team, p.x, p.y, p.rotation);
     }
 
+    /** Construction (or deconstruction) of this plan has begun on its tile. */
+    boolean started(Plan p){
+        Tile tile = Vars.world.tile(p.x, p.y);
+        return tile != null && tile.build instanceof ConstructBuild;
+    }
+
+    /**
+     * List items (user, 2026-11-12): one bot action is one item, however many blocks it plans. A build line (or a rebuild
+     * of several ghosts) is a single item, like one drag in the game; a single placement or removal is one item.
+     * Before, every block counted, so a 24-block line overfilled the list and the next placement evicted it
+     * (game 7689: 2,070 line blocks planned, 2,641 plans evicted, 316 blocks built).
+     */
+    final ObjectMap<Plan, Integer> groupOf = new ObjectMap<>();
+    int nextGroup, openGroup = -1;
+
+    void beginGroup(){ openGroup = nextGroup++; }
+
+    void endGroup(){ openGroup = -1; }
+
+    /** Number of list items (distinct groups) in the queue. */
+    int items(){
+        IntSet seen = new IntSet();
+        for(Plan p : queue) seen.add(groupOf.get(p, -1));
+        return seen.size;
+    }
+
+    /** Groups with at least one started plan stay; the others can be evicted whole. */
+    IntSet startedGroups(){
+        IntSet started = new IntSet();
+        for(Plan p : queue) if(started(p)) started.add(groupOf.get(p, -1));
+        return started;
+    }
+
+    boolean hasUnstarted(){
+        IntSet started = startedGroups();
+        for(Plan p : queue) if(!started.contains(groupOf.get(p, -1))) return true;
+        return false;
+    }
+
+    /** Drop the oldest items none of whose plans has started until at most {@code size} items remain (user OK, 2026-11-12:
+     * with core copper at 0 the queue filled ~2 min into each game and stayed full, so ~80% of decisions had only "wait"
+     * legal). Every dropped plan counts in {@code evicted}. */
+    void makeRoom(int size){
+        IntSet started = startedGroups();
+        while(items() > size){
+            int victim = Integer.MIN_VALUE;
+            for(Plan p : queue){
+                int g = groupOf.get(p, -1);
+                if(!started.contains(g)){ victim = g; break; }
+            }
+            if(victim == Integer.MIN_VALUE) return;
+            evictedItems++;
+            for(int i = 0; i < queue.size; ){
+                Plan p = queue.get(i);
+                if(groupOf.get(p, -1) != victim){ i++; continue; }
+                queue.removeIndex(i);
+                forget(p);
+                BuildPlan bp = issued.remove(p);
+                if(bp != null && ShipAI.alive(ship)) ship.plans.remove(bp, true);
+                evicted++;
+            }
+        }
+    }
+
+    /** Bookkeeping for a plan that left the queue. */
+    void forget(Plan p){
+        progress.remove(p);
+        groupOf.remove(p);
+    }
+
     void enqueue(Plan p){
         queue.addLast(p);
+        groupOf.put(p, openGroup >= 0 ? openGroup : nextGroup++);
     }
 
     /** True if a queued plan already claims this tile (any tile of its footprint). */

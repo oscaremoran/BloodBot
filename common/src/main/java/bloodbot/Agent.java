@@ -81,7 +81,11 @@ public class Agent{
     static final Category[] CATEGORIES = {Category.turret, Category.production, Category.distribution, Category.liquid,
         Category.power, Category.defense, Category.crafting, Category.units, Category.effect, Category.logic};
 
-    static final int DECIDE_TICKS = 60, MAX_QUEUE = 6, MAX_SUPPLY_QUEUE = 60, HIDDEN = 64;
+    /** -5 per list item thrown out unbuilt to make room (user OK, 2026-11-12), the same as a remove: planning stays free, but
+     *  plans that never get built cost. Games 7700-7702 drew ~200 lines each and threw out 1,400-2,100 blocks unbuilt. */
+    static final float EVICT_PENALTY = 5f;
+    // MAX_QUEUE 6 -> 12 on 2026-11-12 (user OK): the queue was full most of every game, which blocks building.
+    static final int DECIDE_TICKS = 60, MAX_QUEUE = 12, MAX_SUPPLY_QUEUE = 60, HIDDEN = 64;
 
     /** Every block the bot could ever build, in a fixed order so brains stay compatible across maps. */
     static Seq<Block> catalog;
@@ -402,7 +406,7 @@ public class Agent{
         if(Vars.state.updateId % 10 == 0) checkCopperFed();
         ShipAI miner = builder.shipAI();
         if(miner != null && miner.minedIn > 0){
-            if(mineOrderPending){ mineOrderPending = false; mineOrders++; if(MINE_ORDER_REWARD) addPoints(MINE_ORDER_BONUS); }
+            if(mineOrderPending){ mineOrderPending = false; mineOrders++; if(MINE_ORDER_REWARD || mineOrderBroke) addPoints(MINE_ORDER_BONUS); }
             mined += miner.minedIn;
             addPoints(miner.minedIn / MINED_PER_POINT);
             miner.minedIn = 0;
@@ -428,7 +432,7 @@ public class Agent{
         f[i++] = Math.min(1f, (float)(Vars.state.tick / (60 * 60 * 45)));
         f[i++] = rules.attackMode ? 1 : 0;
         f[i++] = rules.waves ? 1 : 0;
-        f[i++] = Math.min(1f, builder.queue.size / (float)MAX_QUEUE);
+        f[i++] = Math.min(1f, builder.items() / (float)MAX_QUEUE);
 
         TeamData data = team.data();
         for(Category c : CATEGORIES) f[i++] = (float)Math.log1p(ownBuildings().count(b -> b.block.category == c)) / 4f;
@@ -536,7 +540,11 @@ public class Agent{
         // A full build list only stops single placements; the bot keeps deciding, so with no copper it can still mine and supply
         // (2026-11-06). Supply lines have their own, higher limit so the list can't grow without end.
         ok[BUILD_LINE] = ok[BUILD];
-        if(builder.queue.size >= MAX_QUEUE) ok[BUILD] = ok[BUILD_LINE] = ok[REMOVE] = ok[REBUILD] = false;
+        // A full list no longer blocks building (user OK, 2026-11-12): the new plan pushes out the oldest one not yet
+        // started (Builder.makeRoom), like a player cancelling stale plans. Only blocked if every queued plan is under way.
+        if(builder.items() >= MAX_QUEUE && !builder.hasUnstarted()) ok[BUILD] = ok[BUILD_LINE] = ok[REMOVE] = false;
+        // Rebuild never evicts (user, 2026-11-12): it was 35-65% of decisions and pushed out 700-940 plans a game.
+        if(builder.items() >= MAX_QUEUE) ok[REBUILD] = false;
         if(builder.queue.size >= MAX_SUPPLY_QUEUE) ok[SUPPLY_ITEMS] = ok[SUPPLY_POWER] = ok[SUPPLY_LIQUID] = false;
         for(int i = 0; i < TARGETED.length; i++) if(!any(targetCells[i])) ok[TARGETED[i]] = false;
         return ok;
@@ -573,7 +581,7 @@ public class Agent{
      * type it needs at some point this game, whatever the amounts now, the way a human can place a duo with 0 copper
      * and let it finish as copper arrives. Before, a block needed its full cost in the core right now; cheap conveyors
      * and build lines spent copper as it came in (under 10 copper ~1.6 min into a game), so the 35-copper duo was
-     * masked out and 25 of 27 Frozen Forest replays built 0 duos. The build queue limit (MAX_QUEUE) still applies.
+     * masked out and 25 of 27 Frozen Forest replays built 0 duos. The build queue limit (MAX_QUEUE) still applies, and stalled plans leave the queue (Builder.STALL_TICKS).
      */
     final boolean[] seenItems = new boolean[256];
 
@@ -679,11 +687,16 @@ public class Agent{
         if(tile == null) return;
         ShipAI ship = builder.shipAI();
 
+        if(type == BUILD || type == BUILD_LINE || type == REMOVE){
+            int before = builder.evictedItems;
+            builder.makeRoom(MAX_QUEUE - 1);
+            addPoints(-EVICT_PENALTY * (builder.evictedItems - before));
+        }
         switch(type){
             case BUILD -> { if(blockIndex >= 0 && blockIndex < cat.size) build(cat.get(blockIndex), tile, rotation, arg); }
-            case BUILD_LINE -> { if(blockIndex >= 0 && blockIndex < cat.size) buildLine(cat.get(blockIndex), tile, rotation, arg); }
+            case BUILD_LINE -> { if(blockIndex >= 0 && blockIndex < cat.size){ builder.beginGroup(); try{ buildLine(cat.get(blockIndex), tile, rotation, arg); }finally{ builder.endGroup(); } } }
             case REMOVE -> remove(tile);
-            case REBUILD -> rebuild(tile);
+            case REBUILD -> { builder.beginGroup(); try{ rebuild(tile); }finally{ builder.endGroup(); } }
             case SUPPLY_ITEMS -> supply(tile, 0);
             case SUPPLY_POWER -> supply(tile, 1);
             case SUPPLY_LIQUID -> supply(tile, 2);
@@ -694,7 +707,11 @@ public class Agent{
             case SHIP_MINE -> { if(ship != null){
                 boolean was = ship.task == ShipAI.Task.MINE;
                 ship.mine(ORES[arg % ORES.length]);
-                if(!was && ship.task == ShipAI.Task.MINE) mineOrderPending = true;
+                if(!was && ship.task == ShipAI.Task.MINE){
+                    mineOrderPending = true;
+                    CoreBuild core = builder.core();
+                    mineOrderBroke = ORES[arg % ORES.length] == Items.copper && core != null && core.items.get(Items.copper) < BROKE_COPPER;
+                }
             } }
             case SHIP_FIGHT -> { if(ship != null) ship.fight(tile); }
             case SHIP_DELIVER -> { if(ship != null){ Building b = deliveryTarget(tile, ITEMS[arg]); if(b != null) ship.deliver(ITEMS[arg], b); else wasted++; } }
@@ -1003,7 +1020,11 @@ public class Agent{
     static final float MINE_ORDER_BONUS = 50f, DRILL_BONUS = 50f;
     /** Off from 2026-11-08 (user OK): mine orders went 1.6 -> 8.7 a game and deaths by wave 4 15% -> 54%; the ship can't build while mining. Still counted. */
     static final boolean MINE_ORDER_REWARD = false;
-    boolean mineOrderPending;
+    /** Broke exception (user OK, 2026-11-12): the +50 is paid for an order to mine COPPER given while the core holds under
+     *  BROKE_COPPER copper. Since build-before-afford the ship can't build anyway when copper is 0 (ShipAI.canAfford), and
+     *  core copper was a median 0 in game 7593 with 12 plans (3 duos by the core) waiting for it. */
+    static final int BROKE_COPPER = 35;
+    boolean mineOrderPending, mineOrderBroke;
     int mineOrders;
     final IntSet paidDrills = new IntSet();
 

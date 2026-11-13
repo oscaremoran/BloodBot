@@ -282,6 +282,14 @@ def act(net, grid, scalars, masks):
     return actions[0].tolist(), float(logp[0]), float(value[0])
 
 
+def split_params(net):
+    """(policy parameters, value-net parameters): the value net (v_*, vhead) is separate since 2026-11-10."""
+    pol, val = [], []
+    for name, p in net.named_parameters():
+        (val if name.startswith("v_") or name.startswith("vhead") else pol).append(p)
+    return pol, val
+
+
 def ppo_update(net, opt, batch, epochs=4, minibatch=256, clip=0.2, vf_coef=0.5, ent_coef=0.01, max_grad=0.5, target_kl=0.02):
     """Standard clipped PPO on one batch of collected decisions. Stops early once an epoch's average approximate KL
     passes 1.5x target_kl (0 = never), so one batch can't move the policy far (2026-11-08: slides after rollbacks)."""
@@ -306,7 +314,11 @@ def ppo_update(net, opt, batch, epochs=4, minibatch=256, clip=0.2, vf_coef=0.5, 
             loss = policy_loss + vf_coef * value_loss - ent_coef * ent.mean()
             opt.zero_grad()
             loss.backward()
-            nn.utils.clip_grad_norm_(net.parameters(), max_grad)
+            # Separate clips (user OK, 2026-11-12): the value net's gradient was ~9x the policy's (6.5 vs 0.7 on stored
+            # games), so one shared clip shrank every policy step ~13x; simulated KL per update 0.004 -> 0.009.
+            policy_params, value_params = split_params(net)
+            nn.utils.clip_grad_norm_(policy_params, max_grad)
+            nn.utils.clip_grad_norm_(value_params, max_grad)
             opt.step()
             stats.append((policy_loss.item(), value_loss.item(), ent.mean().item()))
         done_epochs += 1
