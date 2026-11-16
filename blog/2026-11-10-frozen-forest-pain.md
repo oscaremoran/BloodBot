@@ -11,7 +11,7 @@ DISCLAIMER: I AM NOT RESPONSIBLE FOR PEOPLE'S REACTIONS AFTER LOOKING AT THE FOL
 
 *Crazy Math*
 
-About 200 tiles on the enemy path * 1/243^15 for turrets to be placed there (by the way that's one over two hundred forty-three to the *fifteenth*) * another 1/243^15 for conveyors to be connected to the turrets * 1/243^10 for drills to be set up and connected. That's pretty tough. If you actually write it out:
+About 200 tiles on the enemy path * 1/243^15 (the 243 is for the number of blocks in the game) for turrets to be placed there (by the way that's one over two hundred forty-three to the *fifteenth*.) * another 1/243^15 for conveyors to be connected to the turrets * 1/243^10 for drills to be set up and connected. That's pretty tough. If you actually write it out:
 
 200 * 1/243^15 * 1/243^15 * 1/243^10 ≈ 1 / 1,​328,​069,​944,​379,​373,​846,​693,​906,​610,​178,​898,​134,​146,​162,​263,​266,​972,​479,​872,​874,​808,​695,​462,​454,​506,​510,​914,​971,​923,​495,​220,​006. Yikes. If you want to see the decimal, I've put the first million digits here. No, it's not all zeroes. 
 
