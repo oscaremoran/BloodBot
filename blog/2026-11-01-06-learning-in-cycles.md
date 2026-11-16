@@ -6,4 +6,4 @@ Then I did some looking into the code, and it turned out there was a line of cod
 
 The cursed line of code: `if(builder.core() == null || Vars.state.updateId % DECIDE_TICKS != 0 || builder.queue.size >= MAX_QUEUE) return;` That basically means: whenever the bot had 6 or more builds waiting (MAX_QUEUE = 6), it stopped making decisions at all. With no copper, those builds could never finish, so it couldn't order mining to get copper either, and it froze, which led to it being frozen 35% of the time, which led to it wasting minutes and minutes on nothing, which led to me getting very frustrated. (By the way, making this change by itself helped me be sure that this was what caused it. If I had deleted it then immediately made another change, I wouldn't have known whether the line had actually been causing it or not.) Then the next day, I ran the bot for another hour, and within 10 minutes, it cleared Ground Zero at 100% Strength. I couldn't believe it. On to Frozen Forest!
 
-![The final game's final screenshot:](images/evolution-1940.png)
+![The final game's final screenshot:](images/ground-zero-100-win-4477.png)
