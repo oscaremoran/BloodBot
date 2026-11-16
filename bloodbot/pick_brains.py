@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parent.parent
 def upgrade_bin(raw: bytes) -> bytes:
     """Old brain files -> the current layout: enemy route (46 -> 48 map layers, 2026-11-06), then the "build line"
     action type (69 -> 70 scalars, one more output, 2026-11-08). New parts get zero weights (see ppo.add_type)."""
-    return add_type_bin(add_route_bin(raw))
+    return add_copy_bin(add_type_bin(add_route_bin(raw)))
 
 
 OLD_SCALARS, OLD_TYPES = 69, 18
@@ -46,6 +46,39 @@ def add_type_bin(raw: bytes) -> bytes:
     ow = ow[:OLD_TYPES] + [[0.0] * h] + ow[OLD_TYPES:]
     ob = ob[:OLD_TYPES] + [sum(ob[:OLD_TYPES]) / OLD_TYPES] + ob[OLD_TYPES:]
     shape[5], shape[7] = sc + 1, out + 1
+    params = head + [x for row in d1 for x in row] + rest + [x for row in ow for x in row] + ob
+    return struct.pack(f">{1 + n}i", n, *shape) + struct.pack(f">{len(params)}f", *params)
+
+
+COPY_SCALARS, COPY_TYPES, CLIP = 70, 19, 11
+
+
+def add_copy_bin(raw: bytes) -> bytes:
+    """Copy and paste (2026-11-15): two more action types and 11 clipboard inputs, all with zero weights (see
+    ppo.add_copy_paste). 70 -> 83 scalars, two more outputs."""
+    (n,) = struct.unpack(">i", raw[:4])
+    shape = list(struct.unpack(f">{n}i", raw[4:4 + 4 * n]))
+    if shape[5] != COPY_SCALARS:
+        return raw
+    c, g, k1, k2, k3, sc, h, out = shape
+    off = 4 + 4 * n
+    p = list(struct.unpack(f">{(len(raw) - off) // 4}f", raw[off:]))
+    i = k1 * c * 9 + k1 + k2 * k1 * 9 + k2 + k3 * k2 * 9 + k3
+    inp = k3 * (g // 8) ** 2 + sc
+    e = inp - 1 - COPY_TYPES  # where the last-action slots start
+    head = p[:i]
+    d1 = [p[i + r * inp:i + (r + 1) * inp] for r in range(h)]
+    d1 = [row[:e] + [0.0] * CLIP + row[e:inp - 1] + [0.0, 0.0] + row[inp - 1:] for row in d1]
+    i += h * inp
+    rest = p[i:i + h + h * h + h]
+    i += h + h * h + h
+    ow = [p[i + r * h:i + (r + 1) * h] for r in range(out)]
+    i += out * h
+    ob = p[i:i + out]
+    mean = sum(ob[:COPY_TYPES]) / COPY_TYPES
+    ow = ow[:COPY_TYPES] + [[0.0] * h, [0.0] * h] + ow[COPY_TYPES:]
+    ob = ob[:COPY_TYPES] + [mean, mean] + ob[COPY_TYPES:]
+    shape[5], shape[7] = sc + 2 + CLIP, out + 2
     params = head + [x for row in d1 for x in row] + rest + [x for row in ow for x in row] + ob
     return struct.pack(f">{1 + n}i", n, *shape) + struct.pack(f">{len(params)}f", *params)
 

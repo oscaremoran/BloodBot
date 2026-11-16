@@ -28,7 +28,7 @@ import torch
 
 from bloodbot import export_ppo
 from bloodbot.sil import Episode, Library, rank_score, sil_update
-from bloodbot.ppo import Dims, Net, TARGETED, act, gae, ppo_update, widen, add_closeup, add_route, upgrade_dims, complete_state
+from bloodbot.ppo import Dims, Net, TARGETED, act, gae, ppo_update, widen, add_closeup, add_route, upgrade_dims, complete_state, load_brain
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "runs" / os.environ.get("BLOODBOT_RUN", "ppo")
@@ -52,6 +52,12 @@ LOG_COLUMNS = ["game", "generation", "member", "map", "difficulty", "outcome", "
 # Practice games ("start" = wave8 in log.csv) never count toward the climb, best brain, best wave or evolution.
 # Saves from games that went on to LOSE were picked 3x as often from 2026-11-02; back to 1 (even) 2026-11-04 with practice at 1/5, after normal games slid again.
 PRACTICE_MIN, PRACTICE_MAX, LOSS_WEIGHT = 5, 40, 1
+# Reverse curriculum (2026-11-15, user's OK; Go-Explore, Salimans & Chen 2018, Florensa et al. 2017): every game saves its
+# base at the start of each wave into practice/<level>/wNN/; practice games start from a saved wave. The furthest wave
+# with saves gets the most starts (each wave back gets half as many), so the bot keeps pushing into waves it has rarely
+# seen; waves it already wins from at least REV_EASY of the time get a quarter of their share, moving practice earlier.
+# Win rates per start wave are kept over the last REV_WINDOW practice games from that wave.
+REV_MIN_SAVES, REV_WINDOW, REV_EASY = 3, 20, 0.5
 
 
 # Outlast (the user's choice, 2026-11-04): the learning brain and a frozen rival each play their own copies of one pre-built
@@ -117,6 +123,7 @@ class Trainer:
         self.buffers = {}      # worker -> list of decisions since the last update
         self.pending = {}      # worker -> observation waiting for an action (for bootstrapping)
         self.waiting = set()   # workers paused for an update
+        self.timing = {}       # worker -> seconds in game / queued / paused / brain (2026-11-15)
         self.steps = 0
         self.stop = False
         self.games_this_run = 0
@@ -154,6 +161,7 @@ class Trainer:
         self.mask_sizes = {"type": dims.T, "block": dims.NB, "cell": dims.G * dims.G, "mine": dims.ARGS,
                            "deliver": dims.ARGS, "cells": len(TARGETED) * dims.G * dims.G}
         if self.library:
+            self.library.upgrade(dims, self.mask_sizes)
             print(f"self-imitation: {len(self.library.games)} stored games", flush=True)
         self.net = Net(dims)
         self.opt = torch.optim.Adam(self.net.parameters(), lr=self.args.lr)
@@ -218,7 +226,7 @@ class Trainer:
         if self.args.outlast:
             data = torch.load(OUT / "rival.pt", map_location="cpu", weights_only=False)
             self.rival = Net(dims)
-            self.rival.load_state_dict(complete_state(data["net"] if data["dims"] == dims.as_list() else upgrade_dims(data["net"], data["dims"], dims.as_list())[0], self.rival)[0])
+            self.rival.load_state_dict(load_brain(data, self.rival))
             print(f"outlast on {self.args.outlast}: rival from game {data['state']['games']}", flush=True)
 
     def save(self):
@@ -242,10 +250,10 @@ class Trainer:
         name, wave = LADDER[self.state["rung"]]
         game = {"map": str(M / f"{name}.msav"), "winWave": wave, "difficulty": levels(self.state["rung"])[self.state["level"]],
                 "bonuses": self.args.bonuses, "allBlocks": False, "anyAmmo": self.any_ammo}
-        pool = sorted(self.practice_dir().glob("game_*.msav"))
-        if len(pool) >= PRACTICE_MIN and random.random() < self.args.practice:
-            weights = [LOSS_WEIGHT if p.stem.endswith("_loss") else 1 for p in pool]
-            game["practice"] = str(random.choices(pool, weights)[0])
+        start = self.pick_start_wave() if random.random() < self.args.practice else None
+        if start is not None:
+            pool = sorted((self.practice_dir() / f"w{start:02d}").glob("game_*.msav"))
+            game["practice"] = str(random.choice(pool))
         elif random.random() < self.args.broke:
             game["broke"] = True
         return game
@@ -258,20 +266,57 @@ class Trainer:
         diff = levels(self.state["rung"])[self.state["level"]] if difficulty is None else difficulty
         return OUT / "practice" / f"{name}_{round(diff * 100)}"
 
+    def wave_pools(self):
+        """{wave: number of saves} for the current level. Saves from before 2026-11-15 (wave 8 only, flat) move to w08."""
+        base = self.practice_dir()
+        flat = list(base.glob("game_*.msav"))
+        if flat:
+            (base / "w08").mkdir(parents=True, exist_ok=True)
+            for f in flat:
+                shutil.move(str(f), base / "w08" / f.name)
+                if f.with_suffix(".json").exists():
+                    shutil.move(str(f.with_suffix(".json")), base / "w08" / f.with_suffix(".json").name)
+        return {int(d.name[1:]): n for d in base.glob("w[0-9][0-9]") if (n := len(list(d.glob("game_*.msav")))) >= REV_MIN_SAVES}
+
+    def rev_rates(self):
+        return self.state.setdefault("revStats", {}).setdefault(self.level_key(), {})
+
+    def pick_start_wave(self):
+        """The reverse curriculum's start wave for a practice game, or None if no wave has enough saves yet."""
+        pools = self.wave_pools()
+        if not pools:
+            return None
+        top, rates = max(pools), self.rev_rates()
+        weights = {}
+        for w in pools:
+            weights[w] = 0.5 ** (top - w)
+            recent = rates.get(str(w), [])
+            if len(recent) >= REV_WINDOW // 2 and sum(recent) / len(recent) >= REV_EASY:
+                weights[w] *= 0.25
+        waves = sorted(weights)
+        return random.choices(waves, [weights[w] for w in waves])[0]
+
     def keep_practice(self, result, game):
-        """A normal game that reached wave 8 saved its base: add it to the pool, dropping the oldest past PRACTICE_MAX."""
-        src = Path(result.get("practiceSave") or "")
-        if result.get("practice") or not src.name or not src.exists() or not src.with_suffix(".json").exists():
-            return
-        dest = self.practice_dir(result["map"], result["difficulty"])
-        dest.mkdir(parents=True, exist_ok=True)
-        name = f"game_{game:05d}_{'win' if result['outcome'] == 'win' else 'loss'}"  # how the saved game ended
-        shutil.move(str(src), dest / f"{name}.msav")
-        shutil.move(str(src.with_suffix(".json")), dest / f"{name}.json")
-        saves = sorted(dest.glob("game_*.msav"))
-        for old in saves[:-PRACTICE_MAX]:
-            old.unlink()
-            old.with_suffix(".json").unlink(missing_ok=True)
+        """Every wave a game reached saved its base: file each under its wave, dropping the oldest past PRACTICE_MAX."""
+        outcome = "win" if result["outcome"] == "win" else "loss"  # how the saved game ended
+        for path in filter(None, (result.get("waveSaves") or "").split(";")):
+            src = Path(path)
+            if not src.exists() or not src.with_suffix(".json").exists():
+                continue
+            wave = int(src.stem.rsplit("-", 1)[1])
+            dest = self.practice_dir(result["map"], result["difficulty"]) / f"w{wave:02d}"
+            dest.mkdir(parents=True, exist_ok=True)
+            name = f"game_{game:05d}_{outcome}"
+            shutil.move(str(src), dest / f"{name}.msav")
+            shutil.move(str(src.with_suffix(".json")), dest / f"{name}.json")
+            for old in sorted(dest.glob("game_*.msav"))[:-PRACTICE_MAX]:
+                old.unlink()
+                old.with_suffix(".json").unlink(missing_ok=True)
+        if result.get("practice") and result.get("startWave"):
+            rates = self.state.setdefault("revStats", {}).setdefault(
+                f"{result['map']}_{round(result['difficulty'] * 100)}", {})
+            key = str(result["startWave"])
+            rates[key] = (rates.get(key, []) + [result["outcome"] == "win"])[-REV_WINDOW:]
 
     def score_outlast(self, result, rival):
         """Waves survived, with core health as the tiebreak; a beaten rival is replaced by the learner."""
@@ -301,7 +346,7 @@ class Trainer:
                                     result["outcome"], result["wave"], result["winWave"], result["coreHealth"],
                                     result["fitness"], result["gameSeconds"], result["realSeconds"],
                                     result["blocksBuilt"], result["actions"],
-                                    "rival" if rival else "wave8" if practice else "broke" if broke else ""])
+                                    "rival" if rival else f"wave{result.get('startWave') or 8}" if practice else "broke" if broke else ""])
         if self.args.outlast:
             self.score_outlast(result, rival)
         self.keep_practice(result, game)
@@ -340,10 +385,11 @@ class Trainer:
                 self.keep_if_best(game)
                 self.check_fallback(game, result["wave"] / max(1, result["winWave"]))
         self.games_this_run += 1
-        print(f"game {game}: {'RIVAL, ' if rival else ''}{'PRACTICE from wave 8, ' if practice else ''}{'BROKE START, ' if broke else ''}{result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
+        start_label = f"PRACTICE from wave {result.get('startWave') or 8}, " if practice else ""
+        print(f"game {game}: {'RIVAL, ' if rival else ''}{start_label}{'BROKE START, ' if broke else ''}{result['map']} {int(result['difficulty'] * 100)}% wave {result['wave']} "
               f"blocks {result['blocksBuilt']} ({result['realSeconds']:.0f}s)"
               + (f" | chain drill>conv {'Y' if result['drillToConveyor'] else 'n'} conv>core {'Y' if result['conveyorToCore'] else 'n'}"
-                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} wave8 turrets {result.get('waveTurrets', '?')} route turrets {result.get('routeTurrets', '?')} ship kills {result.get('shipKills', '?')} wasted {result.get('wasted', '?')} mined {result.get('mined', '?')} copper fed {result.get('copperFed', '?')} mine orders {result.get('mineOrders', '?')} drills paid {result.get('drillsPaid', '?')} lines {result.get('lines', '?')}/{result.get('linePlans', '?')} unused {result['unused']} stalled {result.get('stalledPlans', '?')} evicted {result.get('evictedPlans', '?')} ({result.get('evictedItems', '?')} items)"
+                 f" conv>turret {'Y' if result['conveyorToTurret'] else 'n'} router>turret {'Y' if result.get('routerToTurret') else 'n'} | fed turrets {result['fedTurrets']} hitting {result.get('hitTurrets', '?')} maces killed {result.get('maceKills', '?')} mace dmg {result.get('maceDamage', '?')} wall soak {result.get('wallSoak', '?')} router-fed {result.get('routerFed', '?')} wave8 turrets {result.get('waveTurrets', '?')} route turrets {result.get('routeTurrets', '?')} ship kills {result.get('shipKills', '?')} wasted {result.get('wasted', '?')} mined {result.get('mined', '?')} copper fed {result.get('copperFed', '?')} mine orders {result.get('mineOrders', '?')} drills paid {result.get('drillsPaid', '?')} lines {result.get('lines', '?')}/{result.get('linePlans', '?')} copies {result.get('copies', '?')} pastes {result.get('pastes', '?')}/{result.get('pastePlans', '?')} unused {result['unused']} stalled {result.get('stalledPlans', '?')} evicted {result.get('evictedPlans', '?')} ({result.get('evictedItems', '?')} items)"
                  if 'drillToConveyor' in result else ""), flush=True)
         if self.args.games and self.games_this_run >= self.args.games:
             self.stop = True
@@ -415,6 +461,10 @@ class Trainer:
         frames = []  # every FRAME_EVERY-th observation + action, saved with the replay (for the attention heatmap)
         decisions = 0
         ep = None if rival else Episode()
+        # Where each server's time goes (2026-11-15, #3): in the game, queued for the trainer's lock, paused for an
+        # update, or waiting on the brain to pick a move. Summed per worker, printed with each update.
+        tm = self.timing.setdefault(worker, {"game": 0.0, "queue": 0.0, "pause": 0.0, "model": 0.0, "n": 0})
+        t_sent = time.perf_counter()
         while True:
             kind = recv_int(sock)
             reward = recv_float(sock)
@@ -456,8 +506,12 @@ class Trainer:
                    "mine": b[d.T + nb + d.G * d.G:d.T + nb + d.G * d.G + d.ARGS],
                    "deliver": b[d.T + nb + d.G * d.G + d.ARGS:d.T + nb + d.G * d.G + 2 * d.ARGS],
                    "cells": b[d.T + nb + d.G * d.G + 2 * d.ARGS:].reshape(len(TARGETED), d.G * d.G)}
+            t_obs = time.perf_counter()
+            tm["game"] += t_obs - t_sent
 
             with self.lock:
+                t_locked = time.perf_counter()
+                tm["queue"] += t_locked - t_obs
                 # Enough decisions collected: pause here until the learning update is done.
                 if self.steps >= self.args.steps:
                     self.pending[worker] = obs
@@ -465,6 +519,8 @@ class Trainer:
                     self.update_ready.notify_all()
                     while worker in self.waiting:
                         self.update_ready.wait()
+                t_model = time.perf_counter()
+                tm["pause"] += t_model - t_locked
                 g = torch.from_numpy(obs["grid"])[None]
                 sc = torch.from_numpy(obs["scalars"])[None]
                 masks = {k: torch.from_numpy(obs[k])[None] for k in ("type", "block", "cell", "mine", "deliver", "cells")}
@@ -478,12 +534,15 @@ class Trainer:
                         ep.add(obs, action)
                     self.buffers.setdefault(worker, []).append(last)
                     self.steps += 1
+                tm["model"] += time.perf_counter() - t_model
+                tm["n"] += 1
             if decisions % FRAME_EVERY == 0:
                 frames.append({"grid": obs["grid"].astype(np.float16), "scalars": obs["scalars"],
                                **{k: obs[k] for k in ("type", "block", "cell", "mine", "deliver")},
                                "action": np.array(action, np.int16)})
             decisions += 1
             sock.sendall(struct.pack(">8i", 1, *action))
+            t_sent = time.perf_counter()
 
     # ---- learning ----
 
@@ -506,7 +565,9 @@ class Trainer:
         if self.fallback_pending:
             game, now, best_avg, best_game = self.fallback_pending
             data = torch.load(OUT / "best.pt", weights_only=False)
-            if "loc.weight" in data["net"]:
+            if data.get("dims") and data["dims"] != self.dims.as_list():  # saved before a new action type (2026-11-15)
+                self.net.load_state_dict(load_brain(data, self.net))
+            elif "loc.weight" in data["net"]:
                 self.net.load_state_dict(data["net"])
             else:  # a best brain from before the placement map: restore its trunk, keep the current map and value net
                 self.net.load_state_dict({k: v for k, v in data["net"].items() if not k.startswith("value.")}, strict=False)
@@ -583,6 +644,15 @@ class Trainer:
               f"value {stats['value_loss']:.3f} entropy {stats['entropy']:.2f} kl {stats['kl']:.4f} epochs {stats['epochs']} ret-std {self.ret_std:.2f} ({time.time() - t:.1f}s)"
               + (f" | sil {sil['games']} games, {sil['steps']} steps ({sil['skipped']} skipped), {sil['pos']:.0%} moves beat expectation, adv {sil['adv']:.3f}, total kl {sil['kl']:.6f}" if sil else ""),
               flush=True)
+        if self.timing:
+            tot = {k: sum(t[k] for t in self.timing.values()) for k in ("game", "queue", "pause", "model", "n")}
+            wall = sum(tot[k] for k in ("game", "queue", "pause", "model")) or 1.0
+            print(f"timing (all servers, since last update): game {tot['game'] / wall:.0%} | queued for trainer {tot['queue'] / wall:.0%}"
+                  f" | paused for update {tot['pause'] / wall:.0%} | brain picking {tot['model'] / wall:.0%}"
+                  f" | {1000 * tot['model'] / max(1, tot['n']):.1f} ms per move, {1000 * tot['queue'] / max(1, tot['n']):.1f} ms queued", flush=True)
+            for t in self.timing.values():
+                for k in t:
+                    t[k] = 0
 
 
 def main():

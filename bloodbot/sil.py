@@ -99,6 +99,37 @@ class Library:
             except Exception as e:  # a half-written file from a killed run
                 print(f"self-imitation: skipped {f.name} ({e})", flush=True)
 
+    def upgrade(self, dims, mask_sizes):
+        """Games stored before copy/paste (2026-11-15) lack 2 action types, the clipboard inputs and the copy target
+        cells: pad them with zeros / False so they decode at the new sizes. Moves are unchanged."""
+        from bloodbot.ppo import CLIP
+        G2 = dims.G * dims.G
+        old_sizes = dict(mask_sizes, type=mask_sizes["type"] - 2, cells=mask_sizes["cells"] - G2)
+        t_old = dims.T - 2
+        n = 0
+        for g in self.games:
+            sc = g["scalars"]
+            if sc.shape[1] != dims.S - 2 - CLIP:
+                continue
+            e = sc.shape[1] - 1 - t_old  # where the last-action slots start
+            z = lambda k: np.zeros((len(sc), k), sc.dtype)
+            g["scalars"] = np.concatenate([sc[:, :e], z(CLIP), sc[:, e:e + t_old], z(2), sc[:, -1:]], 1)
+            total = sum(old_sizes.values())
+            rows = []
+            for packed in g["masks"]:
+                bits = np.unpackbits(packed)[:total].astype(bool)
+                parts, o = [], 0
+                for k in MASK_KEYS:
+                    part = bits[o:o + old_sizes[k]]
+                    o += old_sizes[k]
+                    pad = mask_sizes[k] - old_sizes[k]
+                    parts.append(np.concatenate([part, np.zeros(pad, bool)]) if pad else part)
+                rows.append(np.packbits(np.concatenate(parts)))
+            g["masks"] = np.stack(rows)
+            n += 1
+        if n:
+            print(f"self-imitation: upgraded {n} stored games for copy/paste", flush=True)
+
     def level_games(self, level):
         return [g for g in self.games if g["meta"]["level"] == level]
 

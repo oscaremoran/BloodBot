@@ -12,15 +12,18 @@ import torch.nn.functional as F
 # Action types, in the game's order (Agent.TYPE_NAMES).
 TYPE_NAMES = ["wait", "build", "remove", "rebuild", "supply items", "supply power", "supply liquid", "configure",
               "army move", "army attack", "ship guard", "ship mine", "ship fight", "ship deliver",
-              "logic link", "logic write", "payload pick up", "payload drop", "build line"]
+              "logic link", "logic write", "payload pick up", "payload drop", "build line", "copy", "paste"]
 SHIP_MINE, SHIP_DELIVER = 11, 13
 # Actions that need a target (Agent.TARGETED): the map cell is chosen after the action, among the cells where it can work.
-TARGETED = [2, 4, 5, 6, 7, 13]
+TARGETED = [2, 4, 5, 6, 7, 13, 19]
+# Clipboard inputs (Agent.CLIP, 2026-11-15): blocks per category + "has anything", just before the last-action slots.
+CLIP = 11
 HEADS = ["block", "cell", "fx", "fy", "rot", "arg"]
 _PLACE = {"cell", "fx", "fy"}
 RELEVANT = [set(), set(HEADS), _PLACE, _PLACE, _PLACE, _PLACE, _PLACE, _PLACE | {"rot", "arg"},
             _PLACE | {"arg"}, _PLACE | {"arg"}, set(), {"arg"}, _PLACE, _PLACE | {"arg"},
-            _PLACE, _PLACE | {"rot", "arg"}, _PLACE | {"arg"}, _PLACE | {"arg"}, set(HEADS)]
+            _PLACE, _PLACE | {"rot", "arg"}, _PLACE | {"arg"}, _PLACE | {"arg"}, set(HEADS),
+            _PLACE | {"arg"}, _PLACE | {"rot"}]  # copy: where + rectangle size; paste: where + turn
 
 
 class Dims:
@@ -175,24 +178,61 @@ def add_route(old: dict) -> dict:
 def add_type(old: dict, s_old: int, t_old: int) -> dict:
     """One more action type (2026-11-08: "build line", appended last). Its type output gets zero weights and the
     average type bias; its slot in the last-action input (just before the bias input) gets zero weights, so the
-    brain plays as before apart from now and then trying the new action."""
+    brain plays as before apart from now and then trying the new action. The placement map's type embedding and the
+    value net's input get the same treatment when present (2026-11-15)."""
     sd = {k: v.clone() for k, v in old.items()}
     w, b = old["out.weight"], old["out.bias"]
     sd["out.weight"] = torch.cat([w[:t_old], torch.zeros_like(w[:1]), w[t_old:]], 0)
     sd["out.bias"] = torch.cat([b[:t_old], b[:t_old].mean().reshape(1), b[t_old:]], 0)
-    d1 = old["d1.weight"]
-    col = d1.shape[1] - 1  # the bias input is the last scalar; the new last-action slot goes right before it
-    sd["d1.weight"] = torch.cat([d1[:, :col], torch.zeros_like(d1[:, :1]), d1[:, col:]], 1)
+    for k in ("d1.weight", "v_d1.weight"):
+        if k in old:
+            d1 = old[k]
+            col = d1.shape[1] - 1  # the bias input is the last scalar; the new last-action slot goes right before it
+            sd[k] = torch.cat([d1[:, :col], torch.zeros_like(d1[:, :1]), d1[:, col:]], 1)
+    if "emb_type.weight" in old:
+        e = old["emb_type.weight"]
+        sd["emb_type.weight"] = torch.cat([e, e.mean(0, keepdim=True)], 0)
     return sd
+
+
+@torch.no_grad()
+def add_inputs(old: dict, at_from_end: int, n: int) -> dict:
+    """n new scalar inputs with zero weights, inserted `at_from_end` columns before the end (2026-11-15: clipboard)."""
+    sd = {k: v.clone() for k, v in old.items()}
+    for k in ("d1.weight", "v_d1.weight"):
+        if k in old:
+            d1 = old[k]
+            col = d1.shape[1] - at_from_end
+            sd[k] = torch.cat([d1[:, :col], d1.new_zeros(d1.shape[0], n), d1[:, col:]], 1)
+    return sd
+
+
+def add_copy_paste(old: dict, s_old: int, t_old: int) -> dict:
+    """Copy and paste (2026-11-15): two new action types plus the clipboard inputs, all starting at zero weight."""
+    sd = add_type(add_type(old, s_old, t_old), s_old + 1, t_old + 1)
+    return add_inputs(sd, 1 + t_old + 2, CLIP)  # before the last-action slots and the bias input
 
 
 def upgrade_dims(net: dict, dims: list, want: list):
     """Bring a saved brain (state dict + dims list) up to the game's dims, or return None if it can't be."""
     if dims[0] + 2 == want[0]:
         net, dims = add_route(net), [dims[0] + 2] + dims[1:]
-    if dims[4] + 1 == want[4] and dims[2] + 1 == want[2]:
+    if dims[4] + 1 == want[4] - 2 and dims[2] + 1 == want[2] - 2 - CLIP:
         net, dims = add_type(net, dims[2], dims[4]), dims[:2] + [dims[2] + 1, dims[3], dims[4] + 1] + dims[5:]
+    if dims[4] + 2 == want[4] and dims[2] + 2 + CLIP == want[2]:
+        net, dims = add_copy_paste(net, dims[2], dims[4]), dims[:2] + [dims[2] + 2 + CLIP, dims[3], dims[4] + 2] + dims[5:]
     return (net, dims) if dims == want else None
+
+
+def load_brain(data: dict, net: "Net") -> dict:
+    """A saved {"net", "dims"} brought up to `net`'s dims and layers, ready for load_state_dict."""
+    sd = data["net"]
+    if data["dims"] != net.d.as_list():
+        up = upgrade_dims(sd, data["dims"], net.d.as_list())
+        if up is None:
+            raise SystemExit(f"can't upgrade a brain from dims {data['dims']} to {net.d.as_list()}")
+        sd = up[0]
+    return complete_state(sd, net)[0]
 
 
 def split(d: Dims, logits, masks):

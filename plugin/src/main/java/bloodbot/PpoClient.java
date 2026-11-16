@@ -38,7 +38,11 @@ public class PpoClient implements Agent.Policy{
     Recorder recorder;
     String mapName;
     /** Mace practice: the save this game started from (null = a normal game), and where this game saved its own base. */
-    String practice, practiceSaved;
+    String practice;
+    /** Reverse curriculum (2026-11-15): this game's saves, one per wave reached ("path;path;..."), the highest wave saved
+     *  so far, and the wave a practice game started from (0 = a normal game). */
+    final StringBuilder waveSaves = new StringBuilder();
+    int savedWave, startWave;
     float difficulty, lastPotential;
     /** Broke start (2026-11-07): this game began with the core's copper set to 0, so mining is the only way to get going. */
     boolean broke;
@@ -127,7 +131,7 @@ public class PpoClient implements Agent.Policy{
         }
         mapName = map.file.nameWithoutExtension();
         practice = null;
-        practiceSaved = null;
+        waveSaves.setLength(0);
         Fi save = practiceSave == null ? null : Core.files.absolute(new java.io.File(practiceSave).getAbsolutePath());
         Map saved = save != null && save.exists() && Practice.sidecar(save).exists() ? plugin.findMap(save.path()) : null;
         if(saved != null){
@@ -146,6 +150,8 @@ public class PpoClient implements Agent.Policy{
         agent.policy = this;
         agent.anyAmmo = anyAmmo;
         if(practice != null) Practice.restoreAgent(agent, save);
+        startWave = practice != null ? Vars.state.wave : 0;
+        savedWave = Math.max(1, startWave); // never re-save the wave a practice game started from
         recorder = new Recorder();
         plugin.recorder = recorder;
         lastPotential = 0;
@@ -171,11 +177,14 @@ public class PpoClient implements Agent.Policy{
         recorder.update(plugin.ticks, agent.builder);
 
         boolean over = Vars.state.gameOver || plugin.winner != null;
-        if(!over && practice == null && !broke && practiceSaved == null && Vars.state.wave >= Practice.SAVE_WAVE){
-            Fi f = Core.files.absolute(new java.io.File("practice/worker-" + worker + ".msav").getAbsolutePath());
+        // Reverse curriculum (2026-11-15): save the base as each new wave starts, in normal and practice games alike, so
+        // the trainer can start later games from any wave the bot has reached (Go-Explore's "return, then explore").
+        if(!over && !broke && Vars.state.wave > savedWave && Vars.state.wave >= Practice.MIN_SAVE_WAVE){
+            savedWave = Vars.state.wave;
+            Fi f = Core.files.absolute(new java.io.File("practice/worker-" + worker + "-wave-" + savedWave + ".msav").getAbsolutePath());
             f.parent().mkdirs();
             Practice.save(agent, f);
-            practiceSaved = f.exists() ? f.path() : "";
+            if(f.exists()) waveSaves.append(waveSaves.length() > 0 ? ";" : "").append(f.path());
         }
         if(!over && plugin.ticks < CAP_SECONDS * 60) return;
         loading = true;
@@ -206,11 +215,11 @@ public class PpoClient implements Agent.Policy{
         lastResult = String.format(
             "{\"map\":\"%s\",\"outcome\":\"%s\",\"gameSeconds\":%d,\"realSeconds\":%.1f,\"wave\":%d,\"winWave\":%d,\"coreHealth\":%.3f," +
             "\"fitness\":%.2f,\"blocksBuilt\":%d,\"difficulty\":%.2f,\"actions\":\"%s\",\"worker\":%d," +
-            "\"drillToConveyor\":%b,\"conveyorToCore\":%b,\"conveyorToTurret\":%b,\"routerToTurret\":%b,\"fedTurrets\":%d,\"hitTurrets\":%d,\"maceKills\":%d,\"maceDamage\":%.0f,\"wallSoak\":%.0f,\"routerFed\":%d,\"waveTurrets\":%d,\"routeTurrets\":%d,\"shipKills\":%d,\"wasted\":%d,\"mined\":%d,\"copperFed\":%d,\"mineOrders\":%d,\"drillsPaid\":%d,\"lines\":%d,\"linePlans\":%d,\"unused\":%d,\"stalledPlans\":%d,\"evictedPlans\":%d,\"evictedItems\":%d,\"practice\":%b,\"broke\":%b,\"practiceSave\":\"%s\"}",
+            "\"drillToConveyor\":%b,\"conveyorToCore\":%b,\"conveyorToTurret\":%b,\"routerToTurret\":%b,\"fedTurrets\":%d,\"hitTurrets\":%d,\"maceKills\":%d,\"maceDamage\":%.0f,\"wallSoak\":%.0f,\"routerFed\":%d,\"waveTurrets\":%d,\"routeTurrets\":%d,\"shipKills\":%d,\"wasted\":%d,\"mined\":%d,\"copperFed\":%d,\"mineOrders\":%d,\"drillsPaid\":%d,\"lines\":%d,\"linePlans\":%d,\"copies\":%d,\"pastes\":%d,\"pastePlans\":%d,\"unused\":%d,\"stalledPlans\":%d,\"evictedPlans\":%d,\"evictedItems\":%d,\"practice\":%b,\"broke\":%b,\"startWave\":%d,\"waveSaves\":\"%s\"}",
             mapName, outcome, plugin.ticks / 60, (Time.nanos() - realStart) / 1e9, Vars.state.wave, Vars.state.rules.winWave,
             coreHealth, fitness, agent.builder.built, difficulty, actions, worker,
-            agent.drillToConveyor, agent.conveyorToCore, agent.conveyorToTurret, agent.routerToTurret, agent.fedTurrets.size, agent.hitTurrets.size, agent.maceKills, agent.maceDamage, agent.wallSoakPoints, agent.routerFedTurrets.size, agent.waveTurrets, agent.routeTurretsPaid, agent.shipKills, agent.wasted, agent.mined, agent.copperFed, agent.mineOrders, agent.paidDrills.size, agent.linesBuilt, agent.linePlans, unused, agent.builder.stalled, agent.builder.evicted, agent.builder.evictedItems,
-            practice != null, broke, practiceSaved == null ? "" : practiceSaved);
+            agent.drillToConveyor, agent.conveyorToCore, agent.conveyorToTurret, agent.routerToTurret, agent.fedTurrets.size, agent.hitTurrets.size, agent.maceKills, agent.maceDamage, agent.wallSoakPoints, agent.routerFedTurrets.size, agent.waveTurrets, agent.routeTurretsPaid, agent.shipKills, agent.wasted, agent.mined, agent.copperFed, agent.mineOrders, agent.paidDrills.size, agent.linesBuilt, agent.linePlans, agent.copies, agent.pastes, agent.pastePlans, unused, agent.builder.stalled, agent.builder.evicted, agent.builder.evictedItems,
+            practice != null, broke, startWave, waveSaves);
         lastRecorder = recorder;
         lastBuilder = agent.builder;
         lastTicks = plugin.ticks;

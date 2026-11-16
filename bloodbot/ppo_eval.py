@@ -21,7 +21,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from bloodbot.ppo import Dims, Net, act, TARGETED
+from bloodbot.ppo import Dims, Net, act, TARGETED, load_brain
 from bloodbot.ppo_train import M, ROOT, recv_exact, recv_float, recv_int, recv_utf, send_utf
 
 OUT = ROOT / "runs" / "eval"
@@ -42,10 +42,8 @@ class Eval:
         self.dims = dims
         for b in self.args.brains:
             data = torch.load(b, map_location="cpu", weights_only=False)
-            if data["dims"] != dims.as_list():
-                raise SystemExit(f"{b} was trained with different game sizes")
             net = Net(dims)
-            net.load_state_dict(data["net"])
+            net.load_state_dict(load_brain(data, net))
             net.eval()
             self.nets[b] = net
             print(f"{b}: game {data['state']['games']}, update {data['state']['updates']}", flush=True)

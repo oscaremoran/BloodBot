@@ -21,8 +21,8 @@ import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
  * pay the same rewards a normal game would have from that point on.
  */
 public class Practice{
-    /** state.wave when the save is taken: 7 waves have spawned; maces come two waves later. */
-    static final int SAVE_WAVE = 8;
+    /** Saves start at this state.wave (2026-11-15: every wave from here on, for the reverse curriculum; was wave 8 only). */
+    static final int MIN_SAVE_WAVE = 2;
 
     static void save(Agent agent, Fi msav){
         try{
@@ -74,7 +74,7 @@ public class Practice{
         fill(agent.fedTurrets, j.get("fed"));
         fill(agent.routerFedTurrets, j.get("routerFed"));
         fill(agent.linkedDrills, j.get("linkedDrills"));
-        agent.waveTurretsPaid = true; // the wave 8 bonus is for bases built in this game
+        agent.waveTurretsPaid = Vars.state.wave >= Agent.TURRET_CHECK_WAVE; // the wave 8 bonus is for bases built in this game
         agent.builder.builtPos.each(agent.routeTurrets::add); // so is the route bonus: saved turrets never pay
         agent.drillToConveyor = j.getBool("drillToConveyor", false);
         agent.conveyorToCore = j.getBool("conveyorToCore", false);

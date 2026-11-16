@@ -53,10 +53,10 @@ public class Agent{
     // ---- action types ----
     static final String[] TYPE_NAMES = {"wait", "build", "remove", "rebuild", "supply items", "supply power", "supply liquid",
         "configure", "army move", "army attack", "ship guard", "ship mine", "ship fight", "ship deliver",
-        "logic link", "logic write", "payload pick up", "payload drop", "build line"};
+        "logic link", "logic write", "payload pick up", "payload drop", "build line", "copy", "paste"};
     static final int WAIT = 0, BUILD = 1, REMOVE = 2, REBUILD = 3, SUPPLY_ITEMS = 4, SUPPLY_POWER = 5, SUPPLY_LIQUID = 6,
         CONFIGURE = 7, ARMY_MOVE = 8, ARMY_ATTACK = 9, SHIP_GUARD = 10, SHIP_MINE = 11, SHIP_FIGHT = 12, SHIP_DELIVER = 13,
-        LOGIC_LINK = 14, LOGIC_WRITE = 15, PAYLOAD_PICKUP = 16, PAYLOAD_DROP = 17, BUILD_LINE = 18;
+        LOGIC_LINK = 14, LOGIC_WRITE = 15, PAYLOAD_PICKUP = 16, PAYLOAD_DROP = 17, BUILD_LINE = 18, COPY = 19, PASTE = 20;
 
     /**
      * Real Mindustry logic instructions the bot can append to a processor's program, one per action.
@@ -99,7 +99,10 @@ public class Agent{
         return catalog;
     }
 
-    static int scalars(){ return ITEMS.length + 8 + CATEGORIES.length + 6 + GROUPS + 4 + 3 + TYPES + 1; }
+    /** What the clipboard holds (2026-11-15): blocks per category plus one "has anything" flag, just before the last-action slots. */
+    static final int CLIP = CATEGORIES.length + 1;
+
+    static int scalars(){ return ITEMS.length + 8 + CATEGORIES.length + 6 + GROUPS + 4 + 3 + CLIP + TYPES + 1; }
 
     static int outputs(){ return TYPES + catalog().size + 2 * Vision.G + 2 * FINE + ROTATIONS + ARGS; }
 
@@ -196,9 +199,13 @@ public class Agent{
 
     /** +5 per hit landed by one of the bot's turrets on an enemy, +50 more for a bot-built turret's first hit
      * (the user's rules); called from game events. A turret where enemies never go earns nothing. */
+    static final float TURRET_HIT_POINTS = 25f, TURRET_FIRST_HIT_POINTS = 300f;
+
     void turretHit(Building turret, float x, float y){
-        addPoints(10f * forward(x, y)); // doubled 2026-11-06 (the user): 5 -> 10, first hit 50 -> 100
-        if(builder.builtPos.contains(turret.pos()) && hitTurrets.add(turret.pos())) addPoints(100f);
+        // doubled 2026-11-06 (the user): 5 -> 10, first hit 50 -> 100; raised 2026-11-15 (the user): 10 -> 25, 100 -> 300,
+        // because 38 of 47 recorded no-ammo FF games never planned a duo: turrets paid off too late to be learned.
+        addPoints(TURRET_HIT_POINTS * forward(x, y));
+        if(builder.builtPos.contains(turret.pos()) && hitTurrets.add(turret.pos())) addPoints(TURRET_FIRST_HIT_POINTS);
     }
 
     /** Blocks the bot built that have ever carried items or ammo (the user's unused-block rule, 2026-10-30). */
@@ -458,6 +465,14 @@ public class Agent{
         f[i++] = ship == null ? 0 : builder.ship.health / builder.ship.maxHealth;
         f[i++] = enemyCoresStart == 0 ? 0 : enemyCores() / (float)enemyCoresStart;
         f[i++] = enemyHealthStart <= 0 ? 0 : enemyBuildingHealth() / enemyHealthStart;
+        if(clipboard != null){
+            for(int c = 0; c < CATEGORIES.length; c++){
+                Category cat = CATEGORIES[c];
+                f[i + c] = (float)Math.log1p(clipboard.count(e -> e.block.category == cat)) / 3f;
+            }
+            f[i + CATEGORIES.length] = 1;
+        }
+        i += CLIP;
         f[i + lastType] = 1;
         i += TYPES;
         f[i] = 1; // bias input
@@ -520,7 +535,8 @@ public class Agent{
         boolean shipReady = ship != null && ship.ready();
 
         ok[WAIT] = true;
-        for(int i = 0; i < cat.size && !ok[BUILD]; i++) ok[BUILD] = allowed[i] && obtainable(cat.get(i));
+        refreshUseful();
+        for(int i = 0; i < cat.size && !ok[BUILD]; i++) ok[BUILD] = choosable(i);
         ok[REMOVE] = removable || !Team.derelict.data().buildings.isEmpty();
         ok[REBUILD] = !data.plans.isEmpty();
         ok[SUPPLY_ITEMS] = producer && itemConsumer;
@@ -540,9 +556,11 @@ public class Agent{
         // A full build list only stops single placements; the bot keeps deciding, so with no copper it can still mine and supply
         // (2026-11-06). Supply lines have their own, higher limit so the list can't grow without end.
         ok[BUILD_LINE] = ok[BUILD];
+        ok[COPY] = nonCore;
+        ok[PASTE] = clipboard != null && clipboard.contains(e -> pasteable(e.block));
         // A full list no longer blocks building (user OK, 2026-11-12): the new plan pushes out the oldest one not yet
         // started (Builder.makeRoom), like a player cancelling stale plans. Only blocked if every queued plan is under way.
-        if(builder.items() >= MAX_QUEUE && !builder.hasUnstarted()) ok[BUILD] = ok[BUILD_LINE] = ok[REMOVE] = false;
+        if(builder.items() >= MAX_QUEUE && !builder.hasUnstarted()) ok[BUILD] = ok[BUILD_LINE] = ok[REMOVE] = ok[PASTE] = false;
         // Rebuild never evicts (user, 2026-11-12): it was 35-65% of decisions and pushed out 700-940 plans a game.
         if(builder.items() >= MAX_QUEUE) ok[REBUILD] = false;
         if(builder.queue.size >= MAX_SUPPLY_QUEUE) ok[SUPPLY_ITEMS] = ok[SUPPLY_POWER] = ok[SUPPLY_LIQUID] = false;
@@ -585,6 +603,51 @@ public class Agent{
      */
     final boolean[] seenItems = new boolean[256];
 
+    /**
+     * Blocks that could work right now (user OK, 2026-11-15), the same idea as the other masks ("supply power" needs a power
+     * source): a powered block needs a power source of the bot's own; a crafter needs every input item to have been in the
+     * core; an item turret needs one of its ammo items to have been in the core; an air-only turret needs flying units in
+     * the map's waves (and a ground-only one ground units). Why: in 56 recorded FF 15% games the bot planned 1,104
+     * pyratite mixers and 1,488 scatters (FF waves have no air) and 163 duos.
+     */
+    boolean hasPowerSource;
+    Boolean airWaves, groundWaves;
+
+    void refreshUseful(){
+        hasPowerSource = ownBuildings().contains(b -> b.block.outputsPower && b.block.consPower == null);
+        if(airWaves == null){
+            airWaves = Vars.state.rules.spawns.contains(g -> g.type != null && g.type.flying);
+            groundWaves = Vars.state.rules.spawns.contains(g -> g.type != null && !g.type.flying);
+        }
+    }
+
+    boolean useful(Block b){
+        // consPower, not consumesPower: Block.consumesPower defaults to true for every block (conveyors too), which hid every
+        // copper-only block on 2026-11-15 (games 7807-7818 built 1-7 blocks).
+        if(b.consPower != null && !b.outputsPower && !hasPowerSource) return false;
+        if(b instanceof GenericCrafter){
+            for(Consume c : b.consumers){
+                if(c instanceof ConsumeItems ci) for(ItemStack st : ci.items) if(!seenItems[st.item.id]) return false;
+            }
+        }
+        if(b instanceof mindustry.world.blocks.defense.turrets.Turret t){
+            if(!t.targetGround && Boolean.FALSE.equals(airWaves)) return false;
+            if(!t.targetAir && Boolean.FALSE.equals(groundWaves)) return false;
+            if(b instanceof mindustry.world.blocks.defense.turrets.ItemTurret it){
+                boolean any = false;
+                for(Item item : it.ammoTypes.keys()) if(seenItems[item.id]){ any = true; break; }
+                if(!any) return false;
+            }
+        }
+        return true;
+    }
+
+    /** The block can be chosen: allowed on this map, its items obtainable, and it could work (see useful). */
+    boolean choosable(int i){
+        Block b = catalog().get(i);
+        return allowed[i] && obtainable(b) && useful(b);
+    }
+
     boolean obtainable(Block b){
         CoreBuild core = builder.core();
         for(ItemStack stack : b.requirements){
@@ -598,7 +661,7 @@ public class Agent{
     boolean[] blockMask(){
         Seq<Block> cat = catalog();
         boolean[] m = new boolean[cat.size];
-        for(int i = 0; i < cat.size; i++) m[i] = allowed[i] && obtainable(cat.get(i));
+        for(int i = 0; i < cat.size; i++) m[i] = choosable(i);
         return m;
     }
 
@@ -656,7 +719,7 @@ public class Agent{
         int o = 0;
         boolean[] possible = possibleTypes();
         int type = sample(out, o, TYPES, i -> possible[i]); o += TYPES;
-        int blockIndex = sample(out, o, cat.size, i -> allowed[i] && obtainable(cat.get(i))); o += cat.size;
+        int blockIndex = sample(out, o, cat.size, this::choosable); o += cat.size;
         int cellIndex = sampleCell(out, o, o + Vision.G, cellsFor(type)); o += 2 * Vision.G;
         int cx = cellIndex % Vision.G, cy = cellIndex / Vision.G;
         int fx = sample(out, o, FINE, null); o += FINE;
@@ -687,7 +750,7 @@ public class Agent{
         if(tile == null) return;
         ShipAI ship = builder.shipAI();
 
-        if(type == BUILD || type == BUILD_LINE || type == REMOVE){
+        if(type == BUILD || type == BUILD_LINE || type == REMOVE || type == PASTE){
             int before = builder.evictedItems;
             builder.makeRoom(MAX_QUEUE - 1);
             addPoints(-EVICT_PENALTY * (builder.evictedItems - before));
@@ -719,6 +782,8 @@ public class Agent{
             case LOGIC_WRITE -> logicWrite(tile, rotation, arg);
             case PAYLOAD_PICKUP -> payload(arg % GROUPS, tile, arg < 8 ? mindustry.ai.UnitCommand.loadBlocksCommand : mindustry.ai.UnitCommand.loadUnitsCommand);
             case PAYLOAD_DROP -> payload(arg % GROUPS, tile, mindustry.ai.UnitCommand.unloadPayloadCommand);
+            case COPY -> copy(tile, arg);
+            case PASTE -> { builder.beginGroup(); try{ paste(tile, rotation); }finally{ builder.endGroup(); } }
             default -> {}
         }
     }
@@ -867,6 +932,63 @@ public class Agent{
             builder.enqueue(new Builder.Plan(p.block, p.x, p.y, p.rotation, p.config));
             n++;
         }
+    }
+
+    /**
+     * Copy and paste (user, 2026-11-15): the game's own schematic controls. COPY is one drag-select: a rectangle around
+     * the chosen tile (arg / 4 picks the width, arg % 4 the height) is copied to the clipboard, but only the bot's own
+     * blocks, as the game does. PASTE is one click: the clipboard goes down centred on the chosen tile, turned by the
+     * rotation (the game's rotate key). Like a pasted schematic, every block becomes a plan; tiles where a block can't
+     * go are skipped. A paste is one list item, like a build line. The bot only ever copies what it built itself.
+     * Copy costs the same as a wait (2.5), so it is never a free way to pass a turn.
+     */
+    record Copied(Block block, int dx2, int dy2, int rotation, Object config){}
+
+    static final int[] COPY_SIZES = {3, 5, 8, 12};
+    static final float COPY_COST = 2.5f;
+    Seq<Copied> clipboard;
+    int copies, pastes, pastePlans;
+
+    boolean pasteable(Block b){
+        int i = catalog().indexOf(b);
+        return i >= 0 && choosable(i);
+    }
+
+    void copy(Tile tile, int arg){
+        addPoints(-COPY_COST);
+        int w = COPY_SIZES[(arg / 4) % COPY_SIZES.length], h = COPY_SIZES[arg % 4];
+        int x0 = tile.x - w / 2, y0 = tile.y - h / 2;
+        Seq<Copied> got = new Seq<>();
+        for(Building b : ownBuildings()){
+            if(b instanceof CoreBuild || b.tile.x < x0 || b.tile.x >= x0 + w || b.tile.y < y0 || b.tile.y >= y0 + h) continue;
+            // Offsets are doubled and measured to the block's centre, so 2x2 blocks turn correctly on paste.
+            int even = b.block.size % 2 == 0 ? 1 : 0;
+            Object config = b.config();
+            if(!(config instanceof mindustry.ctype.UnlockableContent || config instanceof Integer)) config = null; // item and unit-plan choices travel; links don't
+            got.add(new Copied(b.block, 2 * (b.tile.x - tile.x) + even, 2 * (b.tile.y - tile.y) + even, b.rotation, config));
+        }
+        if(got.isEmpty()){ wasted++; return; }
+        clipboard = got;
+        copies++;
+    }
+
+    void paste(Tile at, int rotation){
+        if(clipboard == null){ wasted++; return; }
+        int placed = 0;
+        for(Copied e : clipboard){
+            if(!pasteable(e.block)) continue;
+            int dx = e.dx2, dy = e.dy2;
+            for(int r = 0; r < (rotation & 3); r++){ int t = dx; dx = -dy; dy = t; }
+            int even = e.block.size % 2 == 0 ? 1 : 0;
+            int x = at.x + (dx - even) / 2, y = at.y + (dy - even) / 2;
+            int rot = e.block.rotate ? (e.rotation + rotation) & 3 : e.rotation;
+            if(Vars.world.tile(x, y) == null || builder.claimed(x, y) || !Build.validPlace(e.block, team, x, y, rot)) continue;
+            builder.enqueue(new Builder.Plan(e.block, x, y, rot, e.config));
+            placed++;
+        }
+        if(placed == 0){ wasted++; return; }
+        pastes++;
+        pastePlans += placed;
     }
 
     /** Set what a block does: sorter/unloader item, bridge link, unit type, or power node link. */
@@ -1051,7 +1173,7 @@ public class Agent{
     int wasted;
 
     /** Actions that need something to act on. The bot picks the action first, then a map cell where it can work (2026-11-06). */
-    static final int[] TARGETED = {REMOVE, SUPPLY_ITEMS, SUPPLY_POWER, SUPPLY_LIQUID, CONFIGURE, SHIP_DELIVER};
+    static final int[] TARGETED = {REMOVE, SUPPLY_ITEMS, SUPPLY_POWER, SUPPLY_LIQUID, CONFIGURE, SHIP_DELIVER, COPY};
     final boolean[][] targetCells = new boolean[TARGETED.length][Vision.G * Vision.G];
 
     /** Whether this building wants items and has a source in range that it would really take from. */
@@ -1077,6 +1199,7 @@ public class Agent{
             if(needsLiquid(b) && !supplied.contains(b.pos() * 3 + 2)) targetCells[3][c] = true;
             if(configurable(b.block)) targetCells[4][c] = true;
             if(carried.contains(item -> accepts(b, item))) targetCells[5][c] = true;
+            if(!(b instanceof CoreBuild)) targetCells[6][c] = true;
         }
         for(Building b : Team.derelict.data().buildings){
             if(!b.block.privileged) targetCells[0][vision.index(b.tile.x, b.tile.y)] = true;
