@@ -6,11 +6,17 @@ I ran the map for a while now in the past few days and haven't really gotten any
  * You need lots of turrets, probably at least 15 to get a halfway decent score...
 
  All of these factors combined make it really tough for the AI to win the map. If you do the actual math on how hard it is to build 15 turrets on the enemy path:
+
 DISCLAIMER: I AM NOT RESPONSIBLE FOR PEOPLE'S REACTIONS AFTER LOOKING AT THE FOLLOWING EQUATION.
+
 *Crazy Math*
+
 About 200 tiles on the enemy path * 1/243^15 for turrets to be placed there (by the way that's one over two hundred forty-three to the *fifteenth*) * another 1/243^15 for conveyors to be connected to the turrets * 1/243^10 for drills to be set up and connected. That's pretty tough. If you actually write it out:
-200 * 1/243^15 * 1/243^15 * 1/243^10 ≈ 1 / 1,328,069,944,379,373,846,693,906,610,178,898,134,146,162,263,266,972,479,872,874,808,695,462,454,506,510,914,971,923,495,220,006. Yikes. If you want to see the decimal, I've put the first million digits here. No, it's not all zeroes. 
+
+200 * 1/243^15 * 1/243^15 * 1/243^10 ≈ 1 / 1,​328,​069,​944,​379,​373,​846,​693,​906,​610,​178,​898,​134,​146,​162,​263,​266,​972,​479,​872,​874,​808,​695,​462,​454,​506,​510,​914,​971,​923,​495,​220,​006. Yikes. If you want to see the decimal, I've put the first million digits here. No, it's not all zeroes. 
+
 [The first million digits (Be warned)](images/one-million-digits-of-fraction.txt)
+
 *Back to Blog*
 
 This concept is called a ***combinatorial explosion***. It means that a few options multiplied together give you lots and lots of different possible outcomes. I had a bit of fun with this one, but it is kind of ridiculous to see how many options there are. If you picked some other options, you might end up with a bunch of random blocks, a perfect line of walls, a picture using sorters (they can display color)... there are countless (almost) options. Chess programs for bots (Deep Blue) can't just test all the combinations because of the combinatorial explosion. There are so many that you have to use some learning program like this instead. Thanks for reading!
